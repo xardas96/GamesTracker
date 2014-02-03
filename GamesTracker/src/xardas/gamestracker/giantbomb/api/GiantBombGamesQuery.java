@@ -72,13 +72,13 @@ public class GiantBombGamesQuery {
 				}
 				game.setDateLastUpdated(time);
 				String expectedReleaseDay = gameNode.selectSingleNode("expected_release_day").getText();
-				game.setExpectedReleaseDay(Integer.valueOf(expectedReleaseDay));
+				game.setExpectedReleaseDay(expectedReleaseDay.equals("") ? 0 : Integer.valueOf(expectedReleaseDay));
 				String expectedReleaseMonth = gameNode.selectSingleNode("expected_release_month").getText();
-				game.setExpectedReleaseMonth(Integer.valueOf(expectedReleaseMonth));
+				game.setExpectedReleaseMonth(expectedReleaseMonth.equals("") ? 0 : Integer.valueOf(expectedReleaseMonth));
 				String expectedReleaseQuarter = gameNode.selectSingleNode("expected_release_quarter").getText();
 				game.setExpectedReleaseQuarter(expectedReleaseQuarter);
 				String expectedReleaseYear = gameNode.selectSingleNode("expected_release_year").getText();
-				game.setExpectedReleaseYear(Integer.valueOf(expectedReleaseYear));
+				game.setExpectedReleaseYear(expectedReleaseYear.equals("") ? 0 : Integer.valueOf(expectedReleaseYear));
 				String id = gameNode.selectSingleNode("id").getText();
 				game.setId(Long.valueOf(id));
 				Node iconNode = gameNode.selectSingleNode("image/icon_url");
