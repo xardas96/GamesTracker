@@ -6,5 +6,6 @@ public enum FilterEnum {
 	expected_release_quarter, 
 	expected_release_year, 
 	name, 
-	original_release_date
+	original_release_date,
+	platforms
 }

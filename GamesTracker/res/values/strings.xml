@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GamesTracker</string>
+    <string name="app_name">Games Tracker</string>
     <string-array name="side_menu">
         <item>Tracked games</item>
         <item>Out this month</item>
@@ -9,4 +9,5 @@
     </string-array>
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
+    <string name="image">image</string>
 </resources>

@@ -8,6 +8,8 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -103,6 +105,24 @@ public class GiantBombGamesQuery {
 				result.add(game);
 			}
 		}
+		Collections.sort(result, new Comparator<Game>() {
+			@Override
+			public int compare(Game lhs, Game rhs) {
+				if (lhs.getExpectedReleaseYear() == rhs.getExpectedReleaseYear()) {
+					if (lhs.getExpectedReleaseMonth() == rhs.getExpectedReleaseMonth()) {
+						if (lhs.getExpectedReleaseDay() == rhs.getExpectedReleaseDay()) {
+							return lhs.getName().compareTo(rhs.getName());
+						} else {
+							return lhs.getExpectedReleaseDay() - rhs.getExpectedReleaseDay();
+						}
+					} else {
+						return lhs.getExpectedReleaseMonth() - rhs.getExpectedReleaseMonth();
+					}
+				} else {
+					return lhs.getExpectedReleaseYear() - rhs.getExpectedReleaseYear();
+				}
+			}
+		});
 		return result;
 	}
 

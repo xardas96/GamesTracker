@@ -10,7 +10,8 @@
         android:id="@+id/drawerIcon"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent" />
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/image" />
 
     <TextView
         android:id="@+id/drawerText"
