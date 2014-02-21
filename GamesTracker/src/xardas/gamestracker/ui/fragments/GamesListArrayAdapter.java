@@ -16,6 +16,7 @@ import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -28,13 +29,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private List<Game> games;
+	private Context context;
+	private Resources res;
 
 	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games) {
 		super(context, layoutId, textViewResourceId, games);
 		this.games = games;
+		this.context = context;
+		res = context.getResources();
 		Collections.sort(games, new GameComparator());
 	}
 
@@ -48,7 +54,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		final Game game = games.get(position);
 		if (convertView == null) {
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.game_list_item, null);
 			ImgDownload d = new ImgDownload(game.getIconURL(), (ImageView) convertView.findViewById(R.id.coverImageView), game);
 			d.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
@@ -61,6 +67,15 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 			}
 		}
 		ImageButton button = (ImageButton) convertView.findViewById(R.id.addGameButton);
+		if(new GameDAO(context).isTracked(game)) {
+			button.setImageResource(R.drawable.star_delete);
+			button.setBackgroundColor(res.getColor(R.color.red));
+			button.setTag("del");
+		} else {
+			button.setImageResource(R.drawable.star_add);
+			button.setBackgroundColor(res.getColor(R.color.green));
+			button.setTag("add");
+		}
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -70,17 +85,20 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 				if (tag.equals("add")) {
 					GameDAO dao = new GameDAO(getContext());
 					addGameButton.setImageResource(R.drawable.star_delete);
-					addGameButton.setBackgroundColor(getContext().getResources().getColor(R.color.red));
+					addGameButton.setBackgroundColor(res.getColor(R.color.red));
 					addGameButton.setTag("del");
 					dao.addGame(game);
+					String msg = String.format(res.getString(R.string.tracking_game), game.getName());
+					Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 				} else {
 					GameDAO dao = new GameDAO(getContext());
 					addGameButton.setImageResource(R.drawable.star_add);
 					addGameButton.setBackgroundColor(getContext().getResources().getColor(R.color.green));
 					addGameButton.setTag("add");
 					dao.deleteGame(game);
+					String msg = String.format(res.getString(R.string.stopped_tracking_game), game.getName());
+					Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 				}
-
 			}
 		});
 		TextView title = (TextView) convertView.findViewById(R.id.titleTextView);
@@ -91,6 +109,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		StringBuilder relDateBuilder = new StringBuilder();
 		relDateBuilder.append(game.getExpectedReleaseDay() == 0 ? "" : game.getExpectedReleaseDay() + "-");
 		relDateBuilder.append(game.getExpectedReleaseMonth() == 0 ? "" : game.getExpectedReleaseMonth() + "-");
+		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + "-");
 		relDateBuilder.append(game.getExpectedReleaseYear());
 		release.setText(relDateBuilder.toString());
 		return convertView;

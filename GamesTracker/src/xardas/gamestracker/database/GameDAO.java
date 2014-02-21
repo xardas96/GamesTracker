@@ -15,28 +15,30 @@ import android.database.sqlite.SQLiteDatabase;
 public class GameDAO {
 	private SQLiteDatabase database;
 	private SQLiteHelper dbHelper;
-	private String[] allColumns = { SQLiteHelper.COLUMN_ID,
-		SQLiteHelper.COLUMN_NAME,
-		SQLiteHelper.COLUMN_DATE_LAST_UPDATED,
-		SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY ,
-		SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH,
-		SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR ,
-		SQLiteHelper.COLUMN_PLATFORMS,
-		SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER,
-		SQLiteHelper.COLUMN_NOTIFY };
+	private String[] allColumns = { 
+			SQLiteHelper.COLUMN_ID
+			, SQLiteHelper.COLUMN_NAME
+			, SQLiteHelper.COLUMN_DATE_LAST_UPDATED
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER
+			, SQLiteHelper.COLUMN_PLATFORMS
+			, SQLiteHelper.COLUMN_NOTIFY
+		};
 	
 	public GameDAO(Context context) {
 		dbHelper = new SQLiteHelper(context);
 	}
-	
+
 	private void open() {
 		database = dbHelper.getWritableDatabase();
 	}
-	
+
 	private void close() {
 		dbHelper.close();
 	}
-	
+
 	public void addGame(Game game) {
 		open();
 		ContentValues values = new ContentValues();
@@ -66,6 +68,15 @@ public class GameDAO {
 		database.delete(SQLiteHelper.TABLE_GAMES, SQLiteHelper.COLUMN_ID + " = " + id, null);
 		close();
 	}
+	
+	public boolean isTracked(Game game) {
+		open();
+		long id = game.getId();
+		Cursor cursor = database.query(SQLiteHelper.TABLE_GAMES, new String[]{SQLiteHelper.COLUMN_ID}, SQLiteHelper.COLUMN_ID + "=" + id, null, null, null, null);
+		boolean isTracked = cursor.moveToFirst();
+		close();
+		return isTracked;
+	}
 
 	public List<Game> getAllGames() {
 		open();
@@ -90,11 +101,11 @@ public class GameDAO {
 		game.setExpectedReleaseDay(cursor.getInt(3));
 		game.setExpectedReleaseMonth(cursor.getInt(4));
 		game.setExpectedReleaseYear(cursor.getInt(5));
-		String platforms = cursor.getString(6);
+		game.setExpectedReleaseQuarter(cursor.getInt(6));
+		String platforms = cursor.getString(7);
 		String[] split = platforms.split(",");
 		List<String> platformsList = Arrays.asList(split);
 		game.setPlatforms(platformsList);
-		game.setExpectedReleaseQuarter(cursor.getString(7));
 		game.setNotify(cursor.getInt(8) == 1);
 		return game;
 	}

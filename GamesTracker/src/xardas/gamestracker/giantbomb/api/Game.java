@@ -11,8 +11,8 @@ public class Game {
 	private int expectedReleaseDay;
 	private int expectedReleaseMonth;
 	private int expectedReleaseYear;
+	private int expectedReleaseQuarter;
 	private List<String> platforms;
-	private String expectedReleaseQuarter;
 	private String iconURL;
 	private String smallURL;
 	private boolean notify;
@@ -73,11 +73,11 @@ public class Game {
 		this.expectedReleaseYear = expectedReleaseYear;
 	}
 
-	public String getExpectedReleaseQuarter() {
+	public int getExpectedReleaseQuarter() {
 		return expectedReleaseQuarter;
 	}
 
-	public void setExpectedReleaseQuarter(String expectedReleaseQuarter) {
+	public void setExpectedReleaseQuarter(int expectedReleaseQuarter) {
 		this.expectedReleaseQuarter = expectedReleaseQuarter;
 	}
 

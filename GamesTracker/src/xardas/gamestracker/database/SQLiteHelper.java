@@ -27,8 +27,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_EXPECTED_RELEASE_DAY + " integer, "
 			+ COLUMN_EXPECTED_RELEASE_MONTH + " integer, "
 			+ COLUMN_EXPECTED_RELEASE_YEAR + " integer, "
+			+ COLUMN_EXPECTED_RELEASE_QUARTER + " integer, "
 			+ COLUMN_PLATFORMS + " text, "
-			+ COLUMN_EXPECTED_RELEASE_QUARTER + " text, "
 			+ COLUMN_NOTIFY + " integer"
 			+ ");";
 	

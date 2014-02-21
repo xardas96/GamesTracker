@@ -18,7 +18,7 @@
         android:visibility="gone" />
 
     <ListView
-        android:id="@+id/listView1"
+        android:id="@+id/gamesListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
     </ListView>

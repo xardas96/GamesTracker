@@ -2,12 +2,14 @@ package xardas.gamestracker.ui.fragments;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.FilterEnum;
 import xardas.gamestracker.giantbomb.api.Game;
+import xardas.gamestracker.giantbomb.api.GameComparator;
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
 import android.app.Fragment;
@@ -33,9 +35,10 @@ public class GamesListFragment extends Fragment {
 			// TODO
 			dao = new GameDAO(getActivity());
 			List<Game> games = dao.getAllGames();
-			final ListView listview = (ListView) rootView.findViewById(R.id.listView1);
-			final GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.game_list_item, R.id.titleTextView, games);
-			listview.setAdapter(adapter);
+			Collections.sort(games, new GameComparator());
+			ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
+			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.game_list_item, R.id.titleTextView, games);
+			gamesListView.setAdapter(adapter);
 		} else if (position == 1) { // out this month
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
@@ -100,10 +103,9 @@ public class GamesListFragment extends Fragment {
 			for (List<Game> value : values) {
 				result.addAll(value);
 			}
-			ListView listview = (ListView) rootView.findViewById(R.id.listView1);
+			ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
 			ListAdapter adapter = listview.getAdapter();
 			if (adapter == null) {
-
 				adapter = new GamesListArrayAdapter(getActivity(), R.layout.game_list_item, R.id.titleTextView, result);
 				listview.setAdapter(adapter);
 			} else {
@@ -114,10 +116,11 @@ public class GamesListFragment extends Fragment {
 		@Override
 		protected void onPostExecute(Void result) {
 			// TODO
+			progress.setVisibility(View.GONE);
 			if (failed) {
 				Toast.makeText(getActivity(), "nie ma internetów", Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(getActivity(), "gotowe", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "gotowe", Toast.LENGTH_LONG).show();
 			}
 		}
 

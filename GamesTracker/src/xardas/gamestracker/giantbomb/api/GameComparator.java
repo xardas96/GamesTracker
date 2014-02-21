@@ -10,7 +10,11 @@ public class GameComparator implements Comparator<Game> {
 		Date rel1 = lhs.getReleaseDate();
 		Date rel2 = rhs.getReleaseDate();
 		if (rel1.compareTo(rel2) == 0) {
-			return lhs.getName().compareTo(rhs.getName());
+			int quarters = lhs.getExpectedReleaseQuarter() - rhs.getExpectedReleaseQuarter();
+			if (quarters == 0) {
+				return lhs.getName().compareTo(rhs.getName());
+			}
+			return quarters;
 		}
 		return rel1.compareTo(rel2);
 	}

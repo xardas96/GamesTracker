@@ -26,6 +26,19 @@ public class GiantBombGamesQuery {
 	private int offset = 0;
 	private int limit = 25;
 	private int totalResults = 1;
+	private String[] fields = new String[] { 
+			"id"
+			, "date_last_updated"
+			, "expected_release_day"
+			, "date_last_updated"
+			, "original_release_date"
+			, "expected_release_month"
+			, "expected_release_quarter"
+			, "expected_release_year"
+			, "image"
+			, "name"
+			, "platforms"
+		};
 
 	public GiantBombGamesQuery() {
 		filters = new HashMap<String, String>();
@@ -95,7 +108,7 @@ public class GiantBombGamesQuery {
 				String expectedReleaseMonth = gameNode.selectSingleNode("expected_release_month").getText();
 				game.setExpectedReleaseMonth(expectedReleaseMonth.equals("") ? 0 : Integer.valueOf(expectedReleaseMonth));
 				String expectedReleaseQuarter = gameNode.selectSingleNode("expected_release_quarter").getText();
-				game.setExpectedReleaseQuarter(expectedReleaseQuarter);
+				game.setExpectedReleaseQuarter(expectedReleaseQuarter.equals("") ? 0 : Integer.valueOf(expectedReleaseQuarter));
 				String expectedReleaseYear = gameNode.selectSingleNode("expected_release_year").getText();
 				game.setExpectedReleaseYear(expectedReleaseYear.equals("") ? 0 : Integer.valueOf(expectedReleaseYear));
 				String id = gameNode.selectSingleNode("id").getText();
@@ -139,6 +152,13 @@ public class GiantBombGamesQuery {
 		}
 		sb.append("&offset=").append(offset);
 		sb.append("&limit=").append(limit);
+		sb.append("&field_list=");
+		for (String field : fields) {
+			sb.append(field).append(",");
+		}
+		if (fields.length != 0) {
+			sb.setLength(sb.length() - 1);
+		}
 		URL url = new URL(sb.toString());
 		return url;
 	}
