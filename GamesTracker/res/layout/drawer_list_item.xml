@@ -23,4 +23,4 @@
         android:paddingRight="16dp"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:textColor="#fff" />
-</LinearLayout>
+</LinearLayout>

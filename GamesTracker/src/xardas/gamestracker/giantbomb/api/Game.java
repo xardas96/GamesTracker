@@ -1,5 +1,7 @@
 package xardas.gamestracker.giantbomb.api;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class Game {
@@ -9,13 +11,11 @@ public class Game {
 	private int expectedReleaseDay;
 	private int expectedReleaseMonth;
 	private int expectedReleaseYear;
-
 	private List<String> platforms;
-
 	private String expectedReleaseQuarter;
-
 	private String iconURL;
 	private String smallURL;
+	private boolean notify;
 
 	public String getName() {
 		return name;
@@ -95,6 +95,20 @@ public class Game {
 
 	public void setSmallURL(String smallURL) {
 		this.smallURL = smallURL;
+	}
+
+	public boolean isNotify() {
+		return notify;
+	}
+
+	public void setNotify(boolean notify) {
+		this.notify = notify;
+	}
+
+	public Date getReleaseDate() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 31 : expectedReleaseDay);
+		return calendar.getTime();
 	}
 
 	@Override

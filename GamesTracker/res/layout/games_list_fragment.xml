@@ -9,6 +9,14 @@
     android:paddingTop="0dp"
     tools:context=".MainActivity$DummySectionFragment" >
 
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:visibility="gone" />
+
     <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"

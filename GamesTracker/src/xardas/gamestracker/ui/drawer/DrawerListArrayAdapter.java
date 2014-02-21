@@ -31,12 +31,15 @@ public class DrawerListArrayAdapter extends ArrayAdapter<String> {
 			icon.setImageResource(R.drawable.star);
 			break;
 		case 1:
-			icon.setImageResource(R.drawable.calendar_month);
+			icon.setImageResource(R.drawable.calendar_this_month);
 			break;
 		case 2:
-			icon.setImageResource(R.drawable.calendar_year);
+			icon.setImageResource(R.drawable.calendar_next_month);
 			break;
 		case 3:
+			icon.setImageResource(R.drawable.calendar_year);
+			break;
+		case 4:
 			icon.setImageResource(R.drawable.page_search);
 			break;
 		}

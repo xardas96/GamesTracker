@@ -8,8 +8,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -23,12 +21,16 @@ import org.dom4j.Node;
 public class GiantBombGamesQuery {
 	private static final String URL = "http://www.giantbomb.com/api/games/";
 	private String apiKey;
-	private Map<FilterEnum, String> filters;
+	private Map<String, String> filters;
 	private SimpleDateFormat sdf;
+	private int offset = 0;
+	private int limit = 25;
+	private int totalResults = 1;
 
 	public GiantBombGamesQuery() {
-		filters = new HashMap<FilterEnum, String>();
+		filters = new HashMap<String, String>();
 		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+		offset = 0;
 	}
 
 	public GiantBombGamesQuery setApiKey(String apiKey) {
@@ -37,11 +39,30 @@ public class GiantBombGamesQuery {
 	}
 
 	public GiantBombGamesQuery addFilter(FilterEnum field, String value) {
-		filters.put(field, value);
+		filters.put(field.name(), value);
 		return this;
 	}
 
 	public List<Game> execute() throws Exception {
+		List<Game> games = new ArrayList<Game>();
+		Document doc = DocumentHelper.parseText(getResponse());
+		Element root = doc.getRootElement();
+		String statusValue = root.selectSingleNode("status_code").getText();
+		int status = Integer.parseInt(statusValue);
+		if (status == 1) {
+			int results = Integer.valueOf(root.selectSingleNode("number_of_page_results").getText());
+			totalResults = Integer.valueOf(root.selectSingleNode("number_of_total_results").getText());
+			games.addAll(parseResponse(root));
+			offset += results;
+		}
+		return games;
+	}
+
+	public boolean reachedOffset() {
+		return offset >= totalResults;
+	}
+
+	public String getResponse() throws Exception {
 		URL url = buildQuery();
 		InputStream is = url.openStream();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
@@ -50,20 +71,16 @@ public class GiantBombGamesQuery {
 		while ((line = reader.readLine()) != null) {
 			sb.append(line);
 		}
-		Document doc = DocumentHelper.parseText(sb.toString());
-		return parseResponse(doc);
-
+		return sb.toString();
 	}
 
-	private List<Game> parseResponse(Document xmlResponse) {
+	private List<Game> parseResponse(Element root) {
 		List<Game> result = new ArrayList<Game>();
-		Element root = xmlResponse.getRootElement();
-		String statusValue = root.selectSingleNode("status_code").getText();
-		int status = Integer.parseInt(statusValue);
-		if (status == 1) {
-			@SuppressWarnings("unchecked")
-			List<Node> games = root.selectNodes("//game");
-			for (Node gameNode : games) {
+		@SuppressWarnings("unchecked")
+		List<Node> games = root.selectNodes("//game");
+		for (Node gameNode : games) {
+			String originalReleaseDate = gameNode.selectSingleNode("original_release_date").getText();
+			if (originalReleaseDate.equals("")) {
 				Game game = new Game();
 				String dateLastUpdated = gameNode.selectSingleNode("date_last_updated").getText();
 				long time;
@@ -105,24 +122,7 @@ public class GiantBombGamesQuery {
 				result.add(game);
 			}
 		}
-		Collections.sort(result, new Comparator<Game>() {
-			@Override
-			public int compare(Game lhs, Game rhs) {
-				if (lhs.getExpectedReleaseYear() == rhs.getExpectedReleaseYear()) {
-					if (lhs.getExpectedReleaseMonth() == rhs.getExpectedReleaseMonth()) {
-						if (lhs.getExpectedReleaseDay() == rhs.getExpectedReleaseDay()) {
-							return lhs.getName().compareTo(rhs.getName());
-						} else {
-							return lhs.getExpectedReleaseDay() - rhs.getExpectedReleaseDay();
-						}
-					} else {
-						return lhs.getExpectedReleaseMonth() - rhs.getExpectedReleaseMonth();
-					}
-				} else {
-					return lhs.getExpectedReleaseYear() - rhs.getExpectedReleaseYear();
-				}
-			}
-		});
+
 		return result;
 	}
 
@@ -130,13 +130,15 @@ public class GiantBombGamesQuery {
 		StringBuilder sb = new StringBuilder(URL);
 		sb.append("?api_key=").append(apiKey);
 		sb.append("&filter=");
-		for (FilterEnum field : filters.keySet()) {
+		for (String field : filters.keySet()) {
 			String value = filters.get(field);
-			sb.append(field.name()).append(":").append(value).append(",");
+			sb.append(field).append(":").append(value).append(",");
 		}
 		if (!filters.isEmpty()) {
 			sb.setLength(sb.length() - 1);
 		}
+		sb.append("&offset=").append(offset);
+		sb.append("&limit=").append(limit);
 		URL url = new URL(sb.toString());
 		return url;
 	}

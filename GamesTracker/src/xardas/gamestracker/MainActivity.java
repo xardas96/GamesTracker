@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
 	private CharSequence title;
 	private String[] drawerListTitles;
 
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,15 +42,20 @@ public class MainActivity extends Activity {
 		drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		drawerList.setAdapter(new DrawerListArrayAdapter(getApplicationContext(), R.layout.drawer_list_item, drawerListTitles));
 		drawerList.setOnItemClickListener(new OnItemClickListener() {
+			private int selected = -1;
+
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				Fragment fragment = new GamesListFragment();
-				Bundle arguments = new Bundle();
-				arguments.putInt("selection", position);
-				fragment.setArguments(arguments);
-				FragmentManager fragmentManager = getFragmentManager();
-				fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-				setTitle(drawerListTitles[position]);
+				if (selected != position) {
+					selected = position;
+					Fragment fragment = new GamesListFragment();
+					Bundle arguments = new Bundle();
+					arguments.putInt("selection", position);
+					fragment.setArguments(arguments);
+					FragmentManager fragmentManager = getFragmentManager();
+					fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+					setTitle(drawerListTitles[position]);
+				}
 				drawerLayout.closeDrawer(drawerList);
 			}
 		});
