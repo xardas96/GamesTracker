@@ -15,18 +15,8 @@ import android.database.sqlite.SQLiteDatabase;
 public class GameDAO {
 	private SQLiteDatabase database;
 	private SQLiteHelper dbHelper;
-	private String[] allColumns = { 
-			SQLiteHelper.COLUMN_ID
-			, SQLiteHelper.COLUMN_NAME
-			, SQLiteHelper.COLUMN_DATE_LAST_UPDATED
-			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY
-			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH
-			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR
-			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER
-			, SQLiteHelper.COLUMN_PLATFORMS
-			, SQLiteHelper.COLUMN_NOTIFY
-		};
-	
+	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SMALL_URL, SQLiteHelper.COLUMN_NOTIFY };
+
 	public GameDAO(Context context) {
 		dbHelper = new SQLiteHelper(context);
 	}
@@ -48,6 +38,7 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, game.getExpectedReleaseDay());
 		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, game.getExpectedReleaseMonth());
 		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, game.getExpectedReleaseYear());
+		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, game.getExpectedReleaseQuarter());
 		StringBuilder platformsBuilder = new StringBuilder();
 		for (String platform : game.getPlatforms()) {
 			platformsBuilder.append(platform).append(",");
@@ -56,7 +47,8 @@ public class GameDAO {
 			platformsBuilder.setLength(platformsBuilder.length() - 1);
 		}
 		values.put(SQLiteHelper.COLUMN_PLATFORMS, platformsBuilder.toString());
-		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, game.getExpectedReleaseQuarter());
+		values.put(SQLiteHelper.COLUMN_ICON_URL, game.getIconURL());
+		values.put(SQLiteHelper.COLUMN_SMALL_URL, game.getSmallURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		database.insert(SQLiteHelper.TABLE_GAMES, null, values);
 		close();
@@ -68,11 +60,11 @@ public class GameDAO {
 		database.delete(SQLiteHelper.TABLE_GAMES, SQLiteHelper.COLUMN_ID + " = " + id, null);
 		close();
 	}
-	
+
 	public boolean isTracked(Game game) {
 		open();
 		long id = game.getId();
-		Cursor cursor = database.query(SQLiteHelper.TABLE_GAMES, new String[]{SQLiteHelper.COLUMN_ID}, SQLiteHelper.COLUMN_ID + "=" + id, null, null, null, null);
+		Cursor cursor = database.query(SQLiteHelper.TABLE_GAMES, new String[] { SQLiteHelper.COLUMN_ID }, SQLiteHelper.COLUMN_ID + "=" + id, null, null, null, null);
 		boolean isTracked = cursor.moveToFirst();
 		close();
 		return isTracked;
@@ -106,7 +98,9 @@ public class GameDAO {
 		String[] split = platforms.split(",");
 		List<String> platformsList = Arrays.asList(split);
 		game.setPlatforms(platformsList);
-		game.setNotify(cursor.getInt(8) == 1);
+		game.setIconURL(cursor.getString(8));
+		game.setSmallURL(cursor.getString(9));
+		game.setNotify(cursor.getInt(10) == 1);
 		return game;
 	}
 }

@@ -9,7 +9,9 @@ import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
@@ -28,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,18 +39,35 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private Context context;
 	private Resources res;
 
+	private Map<Long, Bitmap> bitmapMap;
+	private Bitmap placeholder;
+
 	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games) {
 		super(context, layoutId, textViewResourceId, games);
 		this.games = games;
 		this.context = context;
 		res = context.getResources();
 		Collections.sort(games, new GameComparator());
+		placeholder = BitmapFactory.decodeResource(res, R.drawable.controller_snes);
+		initBitmapListWithPlaceholders();
+	}
+
+	private void initBitmapListWithPlaceholders() {
+		bitmapMap = new HashMap<Long, Bitmap>();
+		for (int i = 0; i < games.size(); i++) {
+			bitmapMap.put(games.get(i).getId(), placeholder);
+		}
+	}
+
+	private void onBitmapLoaded(long id, Bitmap bmp) {
+		bitmapMap.put(id, bmp);
 	}
 
 	@Override
 	public void addAll(Collection<? extends Game> collection) {
 		super.addAll(collection);
 		Collections.sort(games, new GameComparator());
+		initBitmapListWithPlaceholders();
 	}
 
 	@Override
@@ -56,18 +76,13 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.game_list_item, null);
-			ImgDownload d = new ImgDownload(game.getIconURL(), (ImageView) convertView.findViewById(R.id.coverImageView), game);
-			d.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-		} else {
-			TextView title = (TextView) convertView.findViewById(R.id.titleTextView);
-			String oldName = title.getText().toString();
-			if (!oldName.equals(game.getName())) {
-				ImgDownload d = new ImgDownload(game.getIconURL(), (ImageView) convertView.findViewById(R.id.coverImageView), game);
-				d.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null);
-			}
 		}
+		ImageView cover = (ImageView) convertView.findViewById(R.id.coverImageView);
+		cover.setImageBitmap(bitmapMap.get(game.getId()));
+		ImgDownload d = new ImgDownload(game.getIconURL(), (ImageView) convertView.findViewById(R.id.coverImageView), game);
+		d.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		ImageButton button = (ImageButton) convertView.findViewById(R.id.addGameButton);
-		if(new GameDAO(context).isTracked(game)) {
+		if (new GameDAO(context).isTracked(game)) {
 			button.setImageResource(R.drawable.star_delete);
 			button.setBackgroundColor(res.getColor(R.color.red));
 			button.setTag("del");
@@ -116,16 +131,15 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	}
 
 	@Override
-	public long getItemId(int position) {
-		return position;
+	public Game getItem(int position) {
+		return games.get(position);
 	}
 
-	private class ImgDownload extends AsyncTask {
+	private class ImgDownload extends AsyncTask<Void, Void, Void> {
 		private String requestUrl;
 		private ImageView view;
 		private Bitmap pic;
 		private Game game;
-		private boolean noPic;
 
 		private ImgDownload(String requestUrl, ImageView view, Game game) {
 			this.requestUrl = requestUrl;
@@ -134,12 +148,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		}
 
 		@Override
-		protected void onPreExecute() {
-			view.setImageResource(R.drawable.controller_snes);
-		}
-
-		@Override
-		protected Object doInBackground(Object... objects) {
+		protected Void doInBackground(Void... objects) {
 			File cache = new File(getContext().getCacheDir().getAbsolutePath() + File.separator + game.getId());
 			if (!cache.exists()) {
 				cache.mkdir();
@@ -162,7 +171,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 				download = savedTime < game.getDateLastUpdated();
 			}
 			if (download) {
-				Log.i("FILES", "DLING");
+				Log.i("FILES", "DL");
 				try {
 					URL url = new URL(requestUrl);
 					URLConnection conn = url.openConnection();
@@ -173,8 +182,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 					outStream.flush();
 					outStream.close();
 				} catch (Exception ex) {
-					Log.e(ex.getMessage(), ex.getMessage(), ex);
-					noPic = true;
+					pic = placeholder;
 				}
 			} else {
 				Log.i("FILES", "CACHE");
@@ -184,10 +192,9 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		}
 
 		@Override
-		protected void onPostExecute(Object o) {
-			if (!noPic) {
-				view.setImageBitmap(pic);
-			}
+		protected void onPostExecute(Void o) {
+			onBitmapLoaded(game.getId(), pic);
+			view.setImageBitmap(bitmapMap.get(game.getId()));
 		}
 	}
 }

@@ -14,6 +14,6 @@
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
     <string name="image">image</string>
-    <string name="tracking_game">You\'re now tracking \n%s!</string>
-    <string name="stopped_tracking_game">You\'ve stopped tracking \n%s!</string>
+    <string name="tracking_game">You\'re now tracking \n%s</string>
+    <string name="stopped_tracking_game">You\'ve stopped tracking \n%s</string>
 </resources>
