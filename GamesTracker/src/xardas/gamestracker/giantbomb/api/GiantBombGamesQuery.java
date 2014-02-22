@@ -26,19 +26,7 @@ public class GiantBombGamesQuery {
 	private int offset = 0;
 	private int limit = 25;
 	private int totalResults = 1;
-	private String[] fields = new String[] { 
-			"id"
-			, "date_last_updated"
-			, "expected_release_day"
-			, "date_last_updated"
-			, "original_release_date"
-			, "expected_release_month"
-			, "expected_release_quarter"
-			, "expected_release_year"
-			, "image"
-			, "name"
-			, "platforms"
-		};
+	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms" };
 
 	public GiantBombGamesQuery() {
 		filters = new HashMap<String, String>();

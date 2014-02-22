@@ -16,6 +16,7 @@ import xardas.gamestracker.ui.DrawerSelection;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,19 +29,21 @@ public class GamesListFragment extends Fragment {
 	private GameDAO dao;
 	private int selection;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.games_list_fragment, container, false);
 		selection = getArguments().getInt("selection");
 		Calendar calendar = Calendar.getInstance();
 		if (selection == DrawerSelection.TRACKED.getValue()) {
-			// TODO
 			dao = new GameDAO(getActivity());
 			List<Game> games = dao.getAllGames();
 			Collections.sort(games, new GameComparator());
 			ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
 			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, games, selection);
 			gamesListView.setAdapter(adapter);
+			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
+			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, games);
 		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
@@ -65,6 +68,47 @@ public class GamesListFragment extends Fragment {
 			// TODO
 		}
 		return rootView;
+	}
+
+	private class TrackedGamesUpdater extends AsyncTask<List<Game>, Void, Void> {
+		private View rootView;
+		private boolean updated;
+
+		public TrackedGamesUpdater(View rootView) {
+			this.rootView = rootView;
+		}
+
+		@Override
+		protected Void doInBackground(List<Game>... params) {
+			List<Game> games = params[0];
+			for (Game game : games) {
+				GiantBombGamesQuery gameQuery = GiantBombApi.createQuery();
+				gameQuery.addFilter(FilterEnum.id, game.getId() + "");
+				try {
+					Game newGame = gameQuery.execute().get(0);
+					if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
+						dao.updateGame(newGame);
+						updated = true;
+						Log.i("updated", newGame.getName());
+					} else {
+						Log.i("not updated", newGame.getName());
+					}
+				} catch (Exception e) {
+					Log.e("not updated", e.getMessage(), e);
+				}
+
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if (updated) {
+				ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
+				ListAdapter adapter = listview.getAdapter();
+				((GamesListArrayAdapter) adapter).notifyDataSetChanged();
+			}
+		}
 	}
 
 	private class InfoDownloader extends AsyncTask<GiantBombGamesQuery, List<Game>, Void> {
@@ -125,6 +169,5 @@ public class GamesListFragment extends Fragment {
 				Toast.makeText(getActivity(), "gotowe", Toast.LENGTH_LONG).show();
 			}
 		}
-
 	}
 }

@@ -61,6 +61,31 @@ public class GameDAO {
 		close();
 	}
 
+	public void updateGame(Game game) {
+		open();
+		long id = game.getId();
+		ContentValues values = new ContentValues();
+		values.put(SQLiteHelper.COLUMN_NAME, game.getName());
+		values.put(SQLiteHelper.COLUMN_DATE_LAST_UPDATED, game.getDateLastUpdated());
+		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, game.getExpectedReleaseDay());
+		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, game.getExpectedReleaseMonth());
+		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, game.getExpectedReleaseYear());
+		values.put(SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, game.getExpectedReleaseQuarter());
+		StringBuilder platformsBuilder = new StringBuilder();
+		for (String platform : game.getPlatforms()) {
+			platformsBuilder.append(platform).append(",");
+		}
+		if (platformsBuilder.length() > 0) {
+			platformsBuilder.setLength(platformsBuilder.length() - 1);
+		}
+		values.put(SQLiteHelper.COLUMN_PLATFORMS, platformsBuilder.toString());
+		values.put(SQLiteHelper.COLUMN_ICON_URL, game.getIconURL());
+		values.put(SQLiteHelper.COLUMN_SMALL_URL, game.getSmallURL());
+		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
+		database.update(SQLiteHelper.TABLE_GAMES, values, SQLiteHelper.COLUMN_ID + " = " + id, null);
+		close();
+	}
+
 	public boolean isTracked(Game game) {
 		open();
 		long id = game.getId();

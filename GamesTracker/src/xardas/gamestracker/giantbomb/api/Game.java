@@ -1,8 +1,8 @@
 package xardas.gamestracker.giantbomb.api;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+
+import org.joda.time.DateTime;
 
 public class Game {
 	private String name;
@@ -105,10 +105,9 @@ public class Game {
 		this.notify = notify;
 	}
 
-	public Date getReleaseDate() {
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth - 1, expectedReleaseDay == 0 ? 31 : expectedReleaseDay);
-		return calendar.getTime();
+	public DateTime getReleaseDate() {
+		DateTime release = new DateTime(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 30 : expectedReleaseDay, 0, 0);
+		return release;
 	}
 
 	@Override

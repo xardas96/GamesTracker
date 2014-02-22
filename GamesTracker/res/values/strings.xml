@@ -18,4 +18,7 @@
     <string name="stopped_tracking_game">You\'ve stopped tracking \n%s</string>
     <string name="day">Release in %d day</string>
     <string name="days">Release in %d days</string>
+    <string name="out_today">Out since today</string>
+    <string name="out_since_day">Out since %d day</string>
+    <string name="out_since_days">Out since %d days</string>
 </resources>

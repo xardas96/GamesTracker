@@ -6,8 +6,7 @@
     android:paddingBottom="0dp"
     android:paddingLeft="0dp"
     android:paddingRight="0dp"
-    android:paddingTop="0dp"
-    tools:context=".MainActivity$DummySectionFragment" >
+    android:paddingTop="0dp" >
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -21,6 +20,7 @@
         android:id="@+id/gamesListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="5dp"
         android:divider="@null"
         android:dividerHeight="5dp" >
 

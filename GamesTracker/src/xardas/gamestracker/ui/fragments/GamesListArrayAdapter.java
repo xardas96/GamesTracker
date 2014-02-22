@@ -9,11 +9,12 @@ import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
@@ -26,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,6 +45,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private Resources res;
 	private Map<Long, Bitmap> bitmapMap;
 	private Bitmap placeholder;
+	private GameDAO gameDAO;
 
 	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games, int selection) {
 		super(context, layoutId, textViewResourceId, games);
@@ -52,6 +55,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		res = context.getResources();
 		Collections.sort(games, new GameComparator());
 		placeholder = BitmapFactory.decodeResource(res, R.drawable.controller_snes);
+		gameDAO = new GameDAO(context);
 		initBitmapListWithPlaceholders();
 	}
 
@@ -82,18 +86,28 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		}
 		ImageView cover = (ImageView) convertView.findViewById(R.id.coverImageView);
 		cover.setImageBitmap(bitmapMap.get(game.getId()));
-		ImgDownload d = new ImgDownload(game.getIconURL(), (ImageView) convertView.findViewById(R.id.coverImageView), game);
-		d.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+		ImageDownloader downloader = new ImageDownloader(game.getIconURL(), cover, game);
+		downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		ImageButton button = (ImageButton) convertView.findViewById(R.id.addGameButton);
-		if (new GameDAO(context).isTracked(game)) {
+		if (gameDAO.isTracked(game)) {
+			convertView.setBackgroundResource(R.drawable.games_list_item_background_untrack);
+
 			button.setImageResource(R.drawable.star_delete);
 			button.setBackgroundColor(res.getColor(R.color.red));
 			button.setTag("del");
 		} else {
+			convertView.setBackgroundResource(R.drawable.games_list_item_background_track);
+
 			button.setImageResource(R.drawable.star_add);
 			button.setBackgroundColor(res.getColor(R.color.green));
 			button.setTag("add");
 		}
+		ImageView timer = (ImageView) convertView.findViewById(R.id.timerImageView);
+		// if(game.isNotify()) {
+		// timer.setVisibility(View.VISIBLE);
+		// } else {
+		// timer.setVisibility(View.GONE);
+		// }
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -107,15 +121,30 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 					addGameButton.setTag("del");
 					dao.addGame(game);
 					String msg = String.format(res.getString(R.string.tracking_game), game.getName());
-					Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+					Toast toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+					TextView tv = (TextView) toast.getView().findViewById(android.R.id.message);
+					if (tv != null) {
+						tv.setGravity(Gravity.CENTER);
+					}
+					toast.show();
+					notifyDataSetChanged();
 				} else {
 					GameDAO dao = new GameDAO(getContext());
 					addGameButton.setImageResource(R.drawable.star_add);
 					addGameButton.setBackgroundColor(getContext().getResources().getColor(R.color.green));
 					addGameButton.setTag("add");
 					dao.deleteGame(game);
+					if (selection == DrawerSelection.TRACKED.getValue()) {
+						remove(game);
+					}
 					String msg = String.format(res.getString(R.string.stopped_tracking_game), game.getName());
-					Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+					Toast toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
+					TextView tv = (TextView) toast.getView().findViewById(android.R.id.message);
+					if (tv != null) {
+						tv.setGravity(Gravity.CENTER);
+					}
+					toast.show();
+					notifyDataSetChanged();
 				}
 			}
 		});
@@ -138,15 +167,19 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	}
 
 	private String getDateDifferenceInDays(Game game) {
-		Date releaseDate = game.getReleaseDate();
-		Date now = Calendar.getInstance().getTime();
-
-		long diff = releaseDate.getTime() - now.getTime();
-
-		long days = TimeUnit.MILLISECONDS.toDays(diff);
+		DateTime now = new DateTime();
+		DateTime release = game.getReleaseDate();
+		Days d = Days.daysBetween(now, release);
+		int days = d.getDays();
 		String differenceInDays;
 		if (days == 1) {
 			differenceInDays = String.format(res.getString(R.string.day), days);
+		} else if (days == 0) {
+			differenceInDays = res.getString(R.string.out_today);
+		} else if (days == -1) {
+			differenceInDays = String.format(res.getString(R.string.out_since_day), -days);
+		} else if (days < -1) {
+			differenceInDays = String.format(res.getString(R.string.out_since_days), -days);
 		} else {
 			differenceInDays = String.format(res.getString(R.string.days), days);
 		}
@@ -157,18 +190,18 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		StringBuilder relDateBuilder = new StringBuilder();
 		relDateBuilder.append(game.getExpectedReleaseDay() == 0 ? "" : game.getExpectedReleaseDay() + "-");
 		relDateBuilder.append(game.getExpectedReleaseMonth() == 0 ? "" : game.getExpectedReleaseMonth() + "-");
-		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + "-");
+		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + " ");
 		relDateBuilder.append(game.getExpectedReleaseYear());
 		return relDateBuilder.toString();
 	}
 
-	private class ImgDownload extends AsyncTask<Void, Void, Void> {
+	private class ImageDownloader extends AsyncTask<Void, Void, Void> {
 		private String requestUrl;
 		private ImageView view;
 		private Bitmap pic;
 		private Game game;
 
-		private ImgDownload(String requestUrl, ImageView view, Game game) {
+		private ImageDownloader(String requestUrl, ImageView view, Game game) {
 			this.requestUrl = requestUrl;
 			this.view = view;
 			this.game = game;
