@@ -9,14 +9,17 @@ import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
+import xardas.gamestracker.ui.DrawerSelection;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -30,21 +33,21 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private List<Game> games;
+	private int selection;
 	private Context context;
 	private Resources res;
-
 	private Map<Long, Bitmap> bitmapMap;
 	private Bitmap placeholder;
 
-	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games) {
+	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games, int selection) {
 		super(context, layoutId, textViewResourceId, games);
 		this.games = games;
+		this.selection = selection;
 		this.context = context;
 		res = context.getResources();
 		Collections.sort(games, new GameComparator());
@@ -75,7 +78,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		final Game game = games.get(position);
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.game_list_item, null);
+			convertView = inflater.inflate(R.layout.games_list_item, null);
 		}
 		ImageView cover = (ImageView) convertView.findViewById(R.id.coverImageView);
 		cover.setImageBitmap(bitmapMap.get(game.getId()));
@@ -121,18 +124,42 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		TextView platforms = (TextView) convertView.findViewById(R.id.platformsTextView);
 		platforms.setText(game.getPlatforms().toString());
 		TextView release = (TextView) convertView.findViewById(R.id.relDateTextView);
-		StringBuilder relDateBuilder = new StringBuilder();
-		relDateBuilder.append(game.getExpectedReleaseDay() == 0 ? "" : game.getExpectedReleaseDay() + "-");
-		relDateBuilder.append(game.getExpectedReleaseMonth() == 0 ? "" : game.getExpectedReleaseMonth() + "-");
-		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + "-");
-		relDateBuilder.append(game.getExpectedReleaseYear());
-		release.setText(relDateBuilder.toString());
+		if (selection == DrawerSelection.TRACKED.getValue()) {
+			release.setText(getDateDifferenceInDays(game));
+		} else {
+			release.setText(buildReleaseDate(game));
+		}
 		return convertView;
 	}
 
 	@Override
 	public Game getItem(int position) {
 		return games.get(position);
+	}
+
+	private String getDateDifferenceInDays(Game game) {
+		Date releaseDate = game.getReleaseDate();
+		Date now = Calendar.getInstance().getTime();
+
+		long diff = releaseDate.getTime() - now.getTime();
+
+		long days = TimeUnit.MILLISECONDS.toDays(diff);
+		String differenceInDays;
+		if (days == 1) {
+			differenceInDays = String.format(res.getString(R.string.day), days);
+		} else {
+			differenceInDays = String.format(res.getString(R.string.days), days);
+		}
+		return differenceInDays;
+	}
+
+	private String buildReleaseDate(Game game) {
+		StringBuilder relDateBuilder = new StringBuilder();
+		relDateBuilder.append(game.getExpectedReleaseDay() == 0 ? "" : game.getExpectedReleaseDay() + "-");
+		relDateBuilder.append(game.getExpectedReleaseMonth() == 0 ? "" : game.getExpectedReleaseMonth() + "-");
+		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + "-");
+		relDateBuilder.append(game.getExpectedReleaseYear());
+		return relDateBuilder.toString();
 	}
 
 	private class ImgDownload extends AsyncTask<Void, Void, Void> {

@@ -3,6 +3,7 @@
     android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/games_list_item_background"
     android:orientation="vertical" >
 
     <TextView
@@ -37,10 +38,6 @@
         android:layout_marginRight="5dp"
         android:layout_toLeftOf="@+id/addGameButton"
         android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <Space
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
     <ImageButton
         android:id="@+id/addGameButton"

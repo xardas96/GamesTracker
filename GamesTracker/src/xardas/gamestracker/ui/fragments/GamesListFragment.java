@@ -12,6 +12,7 @@ import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
+import xardas.gamestracker.ui.DrawerSelection;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,41 +26,42 @@ import android.widget.Toast;
 
 public class GamesListFragment extends Fragment {
 	private GameDAO dao;
+	private int selection;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.games_list_fragment, container, false);
-		int position = getArguments().getInt("selection");
+		selection = getArguments().getInt("selection");
 		Calendar calendar = Calendar.getInstance();
-		if (position == 0) { // tracked
+		if (selection == DrawerSelection.TRACKED.getValue()) {
 			// TODO
 			dao = new GameDAO(getActivity());
 			List<Game> games = dao.getAllGames();
 			Collections.sort(games, new GameComparator());
 			ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
-			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.game_list_item, R.id.titleTextView, games);
+			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, games, selection);
 			gamesListView.setAdapter(adapter);
-		} else if (position == 1) { // out this month
+		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 1;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
 			InfoDownloader downloader = new InfoDownloader(rootView);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
-		} else if (position == 2) { // out next month
+		} else if (selection == DrawerSelection.NEXT_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 2;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
 			InfoDownloader downloader = new InfoDownloader(rootView);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
-		} else if (position == 3) { // out this year
+		} else if (selection == DrawerSelection.YEAR.getValue()) {
 			GiantBombGamesQuery query = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			query.addFilter(FilterEnum.expected_release_year, year + "");
 			InfoDownloader downloader = new InfoDownloader(rootView);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, query);
-		} else if (position == 4) { // search
+		} else if (selection == DrawerSelection.SEARCH.getValue()) {
 			// TODO
 		}
 		return rootView;
@@ -106,7 +108,7 @@ public class GamesListFragment extends Fragment {
 			ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
 			ListAdapter adapter = listview.getAdapter();
 			if (adapter == null) {
-				adapter = new GamesListArrayAdapter(getActivity(), R.layout.game_list_item, R.id.titleTextView, result);
+				adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, result, selection);
 				listview.setAdapter(adapter);
 			} else {
 				((GamesListArrayAdapter) adapter).addAll(result);

@@ -107,7 +107,7 @@ public class Game {
 
 	public Date getReleaseDate() {
 		Calendar calendar = Calendar.getInstance();
-		calendar.set(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 31 : expectedReleaseDay);
+		calendar.set(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth - 1, expectedReleaseDay == 0 ? 31 : expectedReleaseDay);
 		return calendar.getTime();
 	}
 
