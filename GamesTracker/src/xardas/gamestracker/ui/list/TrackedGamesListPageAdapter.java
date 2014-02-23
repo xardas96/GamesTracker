@@ -206,7 +206,11 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 						outStream.close();
 						Log.i("FILES", "DL");
 					} catch (Exception ex) {
-						pic = placeholder;
+						if (cover.exists()) {
+							pic = BitmapFactory.decodeFile(cover.getAbsolutePath());
+						} else {
+							pic = placeholder;
+						}
 					}
 				} else {
 					Log.i("FILES", "CACHE");

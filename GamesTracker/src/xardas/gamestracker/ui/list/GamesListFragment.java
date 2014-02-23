@@ -96,7 +96,6 @@ public class GamesListFragment extends Fragment {
 				} catch (Exception e) {
 					Log.e("not updated", e.getMessage(), e);
 				}
-
 			}
 			return null;
 		}
