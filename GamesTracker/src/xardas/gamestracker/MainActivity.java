@@ -3,12 +3,12 @@ package xardas.gamestracker;
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.ui.drawer.DrawerListArrayAdapter;
 import xardas.gamestracker.ui.fragments.GamesListFragment;
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
@@ -17,7 +17,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
 	private DrawerLayout drawerLayout;
 	private ListView drawerList;
 	private ActionBarDrawerToggle drawerToggle;
@@ -50,7 +50,7 @@ public class MainActivity extends Activity {
 					Bundle arguments = new Bundle();
 					arguments.putInt("selection", position);
 					fragment.setArguments(arguments);
-					FragmentManager fragmentManager = getFragmentManager();
+					FragmentManager fragmentManager = getSupportFragmentManager();
 					fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 					setTitle(drawerListTitles[position]);
 				}
