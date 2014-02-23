@@ -21,4 +21,6 @@
     <string name="out_today">Out since today</string>
     <string name="out_since_day">Out since %d day</string>
     <string name="out_since_days">Out since %d days</string>
+    <string name="notify">Notify me 7 days before release</string>
+    <string name="not_notify">Don\'t notify</string>
 </resources>

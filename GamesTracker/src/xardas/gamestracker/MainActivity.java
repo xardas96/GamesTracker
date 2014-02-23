@@ -2,11 +2,10 @@ package xardas.gamestracker;
 
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.ui.drawer.DrawerListArrayAdapter;
-import xardas.gamestracker.ui.fragments.GamesListFragment;
+import xardas.gamestracker.ui.list.GamesListFragment;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -46,7 +45,7 @@ public class MainActivity extends FragmentActivity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (selected != position) {
 					selected = position;
-					Fragment fragment = new GamesListFragment();
+					GamesListFragment fragment = new GamesListFragment();
 					Bundle arguments = new Bundle();
 					arguments.putInt("selection", position);
 					fragment.setArguments(arguments);

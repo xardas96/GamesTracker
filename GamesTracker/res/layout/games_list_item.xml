@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/RelativeLayout1"
+    android:id="@+id/gamesListItemLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/games_list_item_background_track"
@@ -30,32 +30,6 @@
         android:scrollHorizontally="true"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
-    <TextView
-        android:id="@+id/relDateTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/platformsTextView"
-        android:layout_marginRight="5dp"
-        android:layout_toLeftOf="@+id/addGameButton"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <ImageButton
-        android:id="@+id/addGameButton"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignBottom="@+id/relDateTextView"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:background="@color/green"
-        android:contentDescription="@string/image"
-        android:onClick="onAddGameClick"
-        android:scaleType="fitCenter"
-        android:src="@drawable/star_add"
-        android:tag="add" />
-
     <ImageView
         android:id="@+id/coverImageView"
         android:layout_width="64dp"
@@ -63,22 +37,30 @@
         android:layout_alignBottom="@+id/relDateTextView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_alignTop="@+id/addGameButton"
         android:contentDescription="@string/image"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:paddingTop="5dp"
-        android:src="@drawable/thiefboxart" />
+        android:paddingTop="5dp" />
 
     <ImageView
         android:id="@+id/timerImageView"
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_alignBottom="@+id/relDateTextView"
+        android:layout_alignTop="@+id/relDateTextView"
         android:layout_toLeftOf="@+id/relDateTextView"
         android:contentDescription="@string/image"
         android:scaleType="fitCenter"
         android:src="@drawable/timer" />
+
+    <TextView
+        android:id="@+id/relDateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

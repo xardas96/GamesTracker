@@ -1,4 +1,4 @@
-package xardas.gamestracker.ui.fragments;
+package xardas.gamestracker.ui.list;
 
 import java.util.ArrayList;
 import java.util.Calendar;
