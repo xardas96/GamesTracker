@@ -49,23 +49,27 @@ public class GamesListFragment extends Fragment {
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 1;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
-			InfoDownloader downloader = new InfoDownloader(rootView);
+			InfoDownloader downloader = new InfoDownloader(rootView, true);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.NEXT_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 2;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
-			InfoDownloader downloader = new InfoDownloader(rootView);
+			InfoDownloader downloader = new InfoDownloader(rootView, true);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.YEAR.getValue()) {
 			GiantBombGamesQuery query = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			query.addFilter(FilterEnum.expected_release_year, year + "");
-			InfoDownloader downloader = new InfoDownloader(rootView);
+			InfoDownloader downloader = new InfoDownloader(rootView, true);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, query);
 		} else if (selection == DrawerSelection.SEARCH.getValue()) {
 			// TODO
+			GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
+			nameQuery.addFilter(FilterEnum.name, "dragon%20age");
+			InfoDownloader downloader = new InfoDownloader(rootView, false);
+			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, nameQuery);
 		}
 		return rootView;
 	}
@@ -85,7 +89,7 @@ public class GamesListFragment extends Fragment {
 				GiantBombGamesQuery gameQuery = GiantBombApi.createQuery();
 				gameQuery.addFilter(FilterEnum.id, game.getId() + "");
 				try {
-					Game newGame = gameQuery.execute().get(0);
+					Game newGame = gameQuery.execute(false).get(0);
 					if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
 						dao.updateGame(newGame);
 						updated = true;
@@ -112,11 +116,13 @@ public class GamesListFragment extends Fragment {
 
 	private class InfoDownloader extends AsyncTask<GiantBombGamesQuery, List<Game>, Void> {
 		private View rootView;
+		private boolean untilToday;
 		private ProgressBar progress;
 		private boolean failed;
 
-		public InfoDownloader(View rootView) {
+		public InfoDownloader(View rootView, boolean untilToday) {
 			this.rootView = rootView;
+			this.untilToday = untilToday;
 		}
 
 		@Override
@@ -132,7 +138,7 @@ public class GamesListFragment extends Fragment {
 			while (!query.reachedOffset() && !failed) {
 				List<Game> result;
 				try {
-					result = query.execute();
+					result = query.execute(untilToday);
 					publishProgress(result);
 				} catch (Exception ex) {
 					failed = true;

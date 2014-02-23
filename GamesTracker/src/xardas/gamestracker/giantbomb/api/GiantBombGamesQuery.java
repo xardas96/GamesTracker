@@ -17,6 +17,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
+import org.joda.time.DateTime;
 
 public class GiantBombGamesQuery {
 	private static final String URL = "http://www.giantbomb.com/api/games/";
@@ -44,7 +45,7 @@ public class GiantBombGamesQuery {
 		return this;
 	}
 
-	public List<Game> execute() throws Exception {
+	public List<Game> execute(boolean untilToday) throws Exception {
 		List<Game> games = new ArrayList<Game>();
 		Document doc = DocumentHelper.parseText(getResponse());
 		Element root = doc.getRootElement();
@@ -53,7 +54,7 @@ public class GiantBombGamesQuery {
 		if (status == 1) {
 			int results = Integer.valueOf(root.selectSingleNode("number_of_page_results").getText());
 			totalResults = Integer.valueOf(root.selectSingleNode("number_of_total_results").getText());
-			games.addAll(parseResponse(root));
+			games.addAll(parseResponse(root, untilToday));
 			offset += results;
 		}
 		return games;
@@ -75,22 +76,43 @@ public class GiantBombGamesQuery {
 		return sb.toString();
 	}
 
-	private List<Game> parseResponse(Element root) {
+	private List<Game> parseResponse(Element root, boolean untilToday) {
 		List<Game> result = new ArrayList<Game>();
 		@SuppressWarnings("unchecked")
 		List<Node> games = root.selectNodes("//game");
 		for (Node gameNode : games) {
+			Game game = new Game();
+			String dateLastUpdated = gameNode.selectSingleNode("date_last_updated").getText();
+			long time;
+			try {
+				time = sdf.parse(dateLastUpdated).getTime();
+			} catch (ParseException e) {
+				time = 0;
+			}
+			game.setDateLastUpdated(time);
+			String id = gameNode.selectSingleNode("id").getText();
+			game.setId(Long.valueOf(id));
+			Node iconNode = gameNode.selectSingleNode("image/icon_url");
+			Node smallNode = gameNode.selectSingleNode("image/small_url");
+			if (iconNode != null) {
+				String iconURL = iconNode.getText();
+				game.setIconURL(iconURL);
+			}
+			if (smallNode != null) {
+				String smallURL = smallNode.getText();
+				game.setSmallURL(smallURL);
+			}
+			String name = gameNode.selectSingleNode("name").getText();
+			game.setName(name);
+			@SuppressWarnings("unchecked")
+			List<Node> platforms = gameNode.selectNodes("platforms/platform");
+			List<String> platformsList = new ArrayList<String>();
+			for (Node platform : platforms) {
+				platformsList.add(platform.selectSingleNode("abbreviation").getText());
+			}
+			game.setPlatforms(platformsList);
 			String originalReleaseDate = gameNode.selectSingleNode("original_release_date").getText();
 			if (originalReleaseDate.equals("")) {
-				Game game = new Game();
-				String dateLastUpdated = gameNode.selectSingleNode("date_last_updated").getText();
-				long time;
-				try {
-					time = sdf.parse(dateLastUpdated).getTime();
-				} catch (ParseException e) {
-					time = 0;
-				}
-				game.setDateLastUpdated(time);
 				String expectedReleaseDay = gameNode.selectSingleNode("expected_release_day").getText();
 				game.setExpectedReleaseDay(expectedReleaseDay.equals("") ? 0 : Integer.valueOf(expectedReleaseDay));
 				String expectedReleaseMonth = gameNode.selectSingleNode("expected_release_month").getText();
@@ -99,31 +121,19 @@ public class GiantBombGamesQuery {
 				game.setExpectedReleaseQuarter(expectedReleaseQuarter.equals("") ? 0 : Integer.valueOf(expectedReleaseQuarter));
 				String expectedReleaseYear = gameNode.selectSingleNode("expected_release_year").getText();
 				game.setExpectedReleaseYear(expectedReleaseYear.equals("") ? 0 : Integer.valueOf(expectedReleaseYear));
-				String id = gameNode.selectSingleNode("id").getText();
-				game.setId(Long.valueOf(id));
-				Node iconNode = gameNode.selectSingleNode("image/icon_url");
-				Node smallNode = gameNode.selectSingleNode("image/small_url");
-				if (iconNode != null) {
-					String iconURL = iconNode.getText();
-					game.setIconURL(iconURL);
+			} else if (!untilToday) {
+				try {
+					time = sdf.parse(originalReleaseDate).getTime();
+				} catch (ParseException e) {
+					time = 0;
 				}
-				if (smallNode != null) {
-					String smallURL = smallNode.getText();
-					game.setSmallURL(smallURL);
-				}
-				String name = gameNode.selectSingleNode("name").getText();
-				game.setName(name);
-				@SuppressWarnings("unchecked")
-				List<Node> platforms = gameNode.selectNodes("platforms/platform");
-				List<String> platformsList = new ArrayList<String>();
-				for (Node platform : platforms) {
-					platformsList.add(platform.selectSingleNode("abbreviation").getText());
-				}
-				game.setPlatforms(platformsList);
-				result.add(game);
+				DateTime relTime = new DateTime(time);
+				game.setExpectedReleaseDay(relTime.getDayOfMonth());
+				game.setExpectedReleaseMonth(relTime.getMonthOfYear());
+				game.setExpectedReleaseYear(relTime.getYear());
 			}
+			result.add(game);
 		}
-
 		return result;
 	}
 
