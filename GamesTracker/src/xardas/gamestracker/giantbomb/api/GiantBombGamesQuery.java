@@ -25,7 +25,7 @@ public class GiantBombGamesQuery {
 	private Map<String, String> filters;
 	private SimpleDateFormat sdf;
 	private int offset = 0;
-	private int limit = 25;
+	private int limit = 20;
 	private int totalResults = 1;
 	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms" };
 
@@ -121,6 +121,7 @@ public class GiantBombGamesQuery {
 				game.setExpectedReleaseQuarter(expectedReleaseQuarter.equals("") ? 0 : Integer.valueOf(expectedReleaseQuarter));
 				String expectedReleaseYear = gameNode.selectSingleNode("expected_release_year").getText();
 				game.setExpectedReleaseYear(expectedReleaseYear.equals("") ? 0 : Integer.valueOf(expectedReleaseYear));
+				result.add(game);
 			} else if (!untilToday) {
 				try {
 					time = sdf.parse(originalReleaseDate).getTime();
@@ -131,8 +132,8 @@ public class GiantBombGamesQuery {
 				game.setExpectedReleaseDay(relTime.getDayOfMonth());
 				game.setExpectedReleaseMonth(relTime.getMonthOfYear());
 				game.setExpectedReleaseYear(relTime.getYear());
+				result.add(game);
 			}
-			result.add(game);
 		}
 		return result;
 	}

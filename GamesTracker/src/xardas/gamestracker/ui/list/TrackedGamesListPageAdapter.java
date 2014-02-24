@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -109,7 +110,12 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		platforms.setText(game.getPlatforms().toString());
 		TextView release = (TextView) view.findViewById(R.id.relDateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
-			release.setText(getDateDifferenceInDays(game));
+			int daysToRelease = getDateDifferenceInDays(game);
+			if(daysToRelease == 0) {
+				title.setTextColor(res.getColor(R.color.green));
+				title.setTypeface(null, Typeface.BOLD);
+			}
+			release.setText(getDateDifferenceInDays(daysToRelease));
 		} else {
 			release.setText(buildReleaseDate(game));
 		}
@@ -124,12 +130,16 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	public void destroyItem(View container, int position, Object object) {
 		((ViewPager) container).removeView((View) object);
 	}
-
-	private String getDateDifferenceInDays(Game game) {
+	
+	private int getDateDifferenceInDays(Game game) {
 		DateTime now = new DateTime();
 		DateTime release = game.getReleaseDate();
 		Days d = Days.daysBetween(now, release);
 		int days = d.getDays();
+		return days;
+	}
+
+	private String getDateDifferenceInDays(int days) {
 		String differenceInDays;
 		if (days == 1) {
 			differenceInDays = String.format(res.getString(R.string.day), days);
