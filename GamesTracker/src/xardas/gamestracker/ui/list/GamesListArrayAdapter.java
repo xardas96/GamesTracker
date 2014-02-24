@@ -43,13 +43,13 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		Collections.sort(games, new GameComparator());
 		placeholder = BitmapFactory.decodeResource(res, R.drawable.controller_snes);
 		gameDAO = new GameDAO(context);
-		initBitmapListWithPlaceholders();
+		bitmapMap = new HashMap<Long, Bitmap>();
+		initBitmapListWithPlaceholders(games);
 	}
 
-	private void initBitmapListWithPlaceholders() {
-		bitmapMap = new HashMap<Long, Bitmap>();
-		for (int i = 0; i < games.size(); i++) {
-			bitmapMap.put(games.get(i).getId(), placeholder);
+	private void initBitmapListWithPlaceholders(Collection<? extends Game> collection) {
+		for (Game game : collection) {
+			bitmapMap.put(game.getId(), placeholder);
 		}
 	}
 
@@ -57,7 +57,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	public void addAll(Collection<? extends Game> collection) {
 		super.addAll(collection);
 		Collections.sort(games, new GameComparator());
-		initBitmapListWithPlaceholders();
+		initBitmapListWithPlaceholders(collection);
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 							public void run() {
 								myPager.setCurrentItem(1, true);
 								myPager.postDelayed(new Runnable() {
-									
+
 									public void run() {
 										notifyDataSetChanged();
 									};
@@ -106,7 +106,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 									myPager.setCurrentItem(1, true);
 								}
 								myPager.postDelayed(new Runnable() {
-									
+
 									public void run() {
 										notifyDataSetChanged();
 									};
@@ -121,7 +121,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 							public void run() {
 								myPager.setCurrentItem(1, true);
 								myPager.postDelayed(new Runnable() {
-									
+
 									public void run() {
 										notifyDataSetChanged();
 									};

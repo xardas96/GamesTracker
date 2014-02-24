@@ -12,8 +12,17 @@ public class GameComparator implements Comparator<Game> {
 		DateTime rel2 = rhs.getReleaseDate();
 		if (rel1.compareTo(rel2) == 0) {
 			int quarters = lhs.getExpectedReleaseQuarter() - rhs.getExpectedReleaseQuarter();
-			if (quarters == 0) {
+			if (quarters == 0 && rhs.getExpectedReleaseQuarter() != 0 && lhs.getExpectedReleaseQuarter() != 0) {
 				return lhs.getName().compareTo(rhs.getName());
+			}
+			if (lhs.getExpectedReleaseQuarter() == 0 && rhs.getExpectedReleaseQuarter() == 0) {
+				return lhs.getName().compareTo(rhs.getName());
+			}
+			if (lhs.getExpectedReleaseQuarter() == 0 && rhs.getExpectedReleaseQuarter() != 0) {
+				return -1;
+			}
+			if (lhs.getExpectedReleaseQuarter() == 0 && rhs.getExpectedReleaseQuarter() != 0) {
+				return 1;
 			}
 			return quarters;
 		}

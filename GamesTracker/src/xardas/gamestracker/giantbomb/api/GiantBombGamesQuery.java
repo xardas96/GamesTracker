@@ -122,6 +122,10 @@ public class GiantBombGamesQuery {
 				String expectedReleaseYear = gameNode.selectSingleNode("expected_release_year").getText();
 				game.setExpectedReleaseYear(expectedReleaseYear.equals("") ? 0 : Integer.valueOf(expectedReleaseYear));
 				result.add(game);
+				// TODO giantbomb legacy
+			} else if (originalReleaseDate.equals("2014-01-01 00:00:00")) {
+				game.setExpectedReleaseYear(2014);
+				result.add(game);
 			} else if (!untilToday) {
 				try {
 					time = sdf.parse(originalReleaseDate).getTime();
