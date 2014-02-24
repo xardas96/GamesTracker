@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
-import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -21,7 +21,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.v4.util.LruCache;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -36,20 +39,22 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	protected Resources res;
 	protected Game game;
 	protected GameDAO gameDAO;
-	protected Map<Long, Bitmap> bitmapMap;
+	protected LruCache<Long, Bitmap> cache;
 	protected int selection;
 	protected Bitmap placeholder;
 	protected int pageCount;
+	protected LayoutInflater inflater;
 
-	public TrackedGamesListPageAdapter(Context ctx, Game game, Map<Long, Bitmap> bitmapMap, int selection, Bitmap placeholder) {
+	public TrackedGamesListPageAdapter(Context ctx, Game game, LruCache<Long, Bitmap> cache, int selection, Bitmap placeholder) {
 		this.ctx = ctx;
 		this.game = game;
-		this.bitmapMap = bitmapMap;
+		this.cache = cache;
 		this.selection = selection;
 		this.placeholder = placeholder;
 		gameDAO = new GameDAO(ctx);
 		res = ctx.getResources();
 		pageCount = 3;
+		inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	public void setGame(Game game) {
@@ -64,7 +69,6 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	@Override
 	public Object instantiateItem(ViewGroup container, int position) {
 		View view = null;
-		LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		if (position == 0) {
 			view = inflater.inflate(R.layout.games_list_item_notify, null);
 			TextView notify = (TextView) view.findViewById(R.id.notifyTextView);
@@ -89,10 +93,6 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	}
 
 	protected void buildView(View view) {
-		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
-		cover.setImageBitmap(bitmapMap.get(game.getId()));
-		ImageDownloader downloader = new ImageDownloader(game.getIconURL(), cover, game);
-		downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		if (gameDAO.isTracked(game)) {
 			view.setBackgroundResource(R.drawable.games_list_item_background_untrack);
 		} else {
@@ -119,6 +119,8 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		} else {
 			release.setText(buildReleaseDate(game));
 		}
+		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
+		loadBitmap(game.getIconURL(), cover, game);
 	}
 
 	@Override
@@ -131,7 +133,7 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		((ViewPager) container).removeView((View) object);
 	}
 
-	private int getDateDifferenceInDays(Game game) {
+	protected int getDateDifferenceInDays(Game game) {
 		DateTime now = new DateTime();
 		DateTime release = game.getReleaseDate().plusDays(1);
 		Days d = Days.daysBetween(now, release);
@@ -139,7 +141,7 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		return days;
 	}
 
-	private String getDateDifferenceInDays(int days) {
+	protected String getDateDifferenceInDays(int days) {
 		String differenceInDays;
 		if (days == 1) {
 			differenceInDays = String.format(res.getString(R.string.day), days);
@@ -155,7 +157,7 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		return differenceInDays;
 	}
 
-	private String buildReleaseDate(Game game) {
+	protected String buildReleaseDate(Game game) {
 		StringBuilder relDateBuilder = new StringBuilder();
 		relDateBuilder.append(game.getExpectedReleaseDay() == 0 ? "" : game.getExpectedReleaseDay() + "-");
 		relDateBuilder.append(game.getExpectedReleaseMonth() == 0 ? "" : game.getExpectedReleaseMonth() + "-");
@@ -164,24 +166,73 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		return relDateBuilder.toString();
 	}
 
-	private void onBitmapLoaded(long id, Bitmap bmp) {
-		bitmapMap.put(id, bmp);
+	private void addBitmapToMemoryCache(Long key, Bitmap bitmap) {
+		if (getBitmapFromMemCache(key) == null) {
+			cache.put(key, bitmap);
+		}
 	}
 
-	private class ImageDownloader extends AsyncTask<Void, Void, Void> {
+	private Bitmap getBitmapFromMemCache(Long key) {
+		return cache.get(key);
+	}
+
+	protected void loadBitmap(String requestURL, ImageView imageView, Game game) {
+		if (cancelPotentialWork(game, imageView)) {
+			final Long imageKey = game.getId();
+			final Bitmap bitmap = getBitmapFromMemCache(imageKey);
+			if (bitmap != null) {
+				imageView.setImageBitmap(bitmap);
+			} else {
+				ImageDownloader task = new ImageDownloader(requestURL, imageView, game);
+				AsyncDrawable asyncDrawable = new AsyncDrawable(res, placeholder, task);
+				imageView.setImageDrawable(asyncDrawable);
+				task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+			}
+		}
+	}
+
+	private boolean cancelPotentialWork(Game data, ImageView imageView) {
+		ImageDownloader bitmapWorkerTask = getBitmapWorkerTask(imageView);
+		if (bitmapWorkerTask != null) {
+			long bitmapData = bitmapWorkerTask.getGame().getId();
+			if (bitmapData == 0 || bitmapData != data.getId()) {
+				bitmapWorkerTask.cancel(true);
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private ImageDownloader getBitmapWorkerTask(ImageView imageView) {
+		if (imageView != null) {
+			final Drawable drawable = imageView.getDrawable();
+			if (drawable instanceof AsyncDrawable) {
+				AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
+				return asyncDrawable.getBitmapWorkerTask();
+			}
+		}
+		return null;
+	}
+
+	private class ImageDownloader extends AsyncTask<Void, Void, Bitmap> {
 		private String requestUrl;
-		private ImageView view;
-		private Bitmap pic;
+		private WeakReference<ImageView> view;
 		private Game game;
 
 		private ImageDownloader(String requestUrl, ImageView view, Game game) {
 			this.requestUrl = requestUrl;
-			this.view = view;
+			this.view = new WeakReference<ImageView>(view);
 			this.game = game;
 		}
 
+		public Game getGame() {
+			return game;
+		}
+
 		@Override
-		protected Void doInBackground(Void... objects) {
+		protected Bitmap doInBackground(Void... objects) {
+			Bitmap pic;
 			File cache = new File(ctx.getCacheDir().getAbsolutePath() + File.separator + game.getId());
 			if (!cache.exists()) {
 				cache.mkdir();
@@ -230,14 +281,37 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 				Log.i("FILES", "CACHE");
 				pic = placeholder;
 			}
-			return null;
+			return pic;
 		}
 
 		@Override
-		protected void onPostExecute(Void o) {
-			onBitmapLoaded(game.getId(), pic);
-			view.setImageBitmap(bitmapMap.get(game.getId()));
+		protected void onPostExecute(Bitmap output) {
+			if (isCancelled()) {
+				output = null;
+			}
+			if (view != null && view.get() != null) {
+				addBitmapToMemoryCache(game.getId(), output);
+				ImageView img = view.get();
+				ImageDownloader bitmapWorkerTask = getBitmapWorkerTask(img);
+				if (this == bitmapWorkerTask && img != null) {
+					img.setImageBitmap(output);
+				}
+				img.setImageBitmap(cache.get(game.getId()));
+			}
+
 		}
 	}
 
+	private class AsyncDrawable extends BitmapDrawable {
+		private final WeakReference<ImageDownloader> bitmapWorkerTaskReference;
+
+		public AsyncDrawable(Resources res, Bitmap bitmap, ImageDownloader bitmapWorkerTask) {
+			super(res, bitmap);
+			bitmapWorkerTaskReference = new WeakReference<ImageDownloader>(bitmapWorkerTask);
+		}
+
+		public ImageDownloader getBitmapWorkerTask() {
+			return bitmapWorkerTaskReference.get();
+		}
+	}
 }

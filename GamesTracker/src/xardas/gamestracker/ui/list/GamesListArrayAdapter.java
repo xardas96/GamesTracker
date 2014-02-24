@@ -2,9 +2,7 @@ package xardas.gamestracker.ui.list;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
@@ -15,6 +13,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v4.util.LruCache;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -28,7 +27,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private int selection;
 	private Context context;
 	private Resources res;
-	private Map<Long, Bitmap> bitmapMap;
+	private LruCache<Long, Bitmap> cache;
 	private Bitmap placeholder;
 	private GameDAO gameDAO;
 	private static final int SMALL_DELAY = 200;
@@ -43,21 +42,20 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		Collections.sort(games, new GameComparator());
 		placeholder = BitmapFactory.decodeResource(res, R.drawable.controller_snes);
 		gameDAO = new GameDAO(context);
-		bitmapMap = new HashMap<Long, Bitmap>();
-		initBitmapListWithPlaceholders(games);
-	}
-
-	private void initBitmapListWithPlaceholders(Collection<? extends Game> collection) {
-		for (Game game : collection) {
-			bitmapMap.put(game.getId(), placeholder);
-		}
+		int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+		int cacheSize = maxMemory / 8;
+		cache = new LruCache<Long, Bitmap>(cacheSize) {
+			@Override
+			protected int sizeOf(Long key, Bitmap bitmap) {
+				return bitmap.getByteCount() / 1024;
+			}
+		};
 	}
 
 	@Override
 	public void addAll(Collection<? extends Game> collection) {
 		super.addAll(collection);
 		Collections.sort(games, new GameComparator());
-		initBitmapListWithPlaceholders(collection);
 	}
 
 	@Override
@@ -68,15 +66,23 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.games_list_item_pager, null, false);
 		}
+		int currentPageItem;
 		PagerAdapter adapter;
-		if (tracked) {
-			adapter = new TrackedGamesListPageAdapter(context, game, bitmapMap, selection, placeholder);
+		if (game.isOut()) {
+			adapter = new TrackedReleasedGamesListPageAdapter(context, game, cache, position, placeholder);
+			currentPageItem = 0;
 		} else {
-			adapter = new UntrackedGamesListPageAdapter(context, game, bitmapMap, selection, placeholder);
+			if (tracked) {
+				adapter = new TrackedGamesListPageAdapter(context, game, cache, selection, placeholder);
+				currentPageItem = 1;
+			} else {
+				adapter = new UntrackedGamesListPageAdapter(context, game, cache, selection, placeholder);
+				currentPageItem = 1;
+			}
 		}
 		final ViewPager myPager = (ViewPager) convertView.findViewById(R.id.mypager);
 		myPager.setAdapter(adapter);
-		myPager.setCurrentItem(1);
+		myPager.setCurrentItem(currentPageItem);
 		myPager.setOnPageChangeListener(new OnPageChangeListener() {
 
 			@Override

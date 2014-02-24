@@ -1,11 +1,10 @@
 package xardas.gamestracker.ui.list;
 
-import java.util.Map;
-
 import xardas.gamestracker.R;
 import xardas.gamestracker.giantbomb.api.Game;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,7 @@ import android.widget.TextView;
 
 public class UntrackedGamesListPageAdapter extends TrackedGamesListPageAdapter {
 
-	public UntrackedGamesListPageAdapter(Context ctx, Game game, Map<Long, Bitmap> bitmapMap, int selection, Bitmap placeholder) {
+	public UntrackedGamesListPageAdapter(Context ctx, Game game, LruCache<Long, Bitmap> bitmapMap, int selection, Bitmap placeholder) {
 		super(ctx, game, bitmapMap, selection, placeholder);
 		pageCount = 2;
 	}

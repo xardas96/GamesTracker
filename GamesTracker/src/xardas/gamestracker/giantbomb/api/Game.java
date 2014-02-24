@@ -3,6 +3,7 @@ package xardas.gamestracker.giantbomb.api;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 public class Game {
 	private String name;
@@ -108,6 +109,14 @@ public class Game {
 	public DateTime getReleaseDate() {
 		DateTime release = new DateTime(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 30 : expectedReleaseDay, 0, 0);
 		return release;
+	}
+
+	public boolean isOut() {
+		DateTime now = new DateTime();
+		DateTime release = getReleaseDate().plusDays(1);
+		Days d = Days.daysBetween(now, release);
+		int days = d.getDays();
+		return days == 0;
 	}
 
 	@Override
