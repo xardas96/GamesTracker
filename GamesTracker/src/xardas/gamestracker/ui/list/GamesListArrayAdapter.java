@@ -10,6 +10,7 @@ import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
+import xardas.gamestracker.ui.DrawerSelection;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -30,6 +31,8 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private Map<Long, Bitmap> bitmapMap;
 	private Bitmap placeholder;
 	private GameDAO gameDAO;
+	private static final int SMALL_DELAY = 200;
+	private static final int LONG_DELAY = 1500;
 
 	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games, int selection) {
 		super(context, layoutId, textViewResourceId, games);
@@ -58,7 +61,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, final ViewGroup parent) {
 		final Game game = games.get(position);
 		final boolean tracked = gameDAO.isTracked(game);
 		if (convertView == null) {
@@ -84,26 +87,47 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 						gameDAO.updateGame(game);
 						myPager.postDelayed(new Runnable() {
 							public void run() {
-								notifyDataSetChanged();
+								myPager.setCurrentItem(1, true);
+								myPager.postDelayed(new Runnable() {
+									
+									public void run() {
+										notifyDataSetChanged();
+									};
+								}, SMALL_DELAY);
 							}
-						}, 3000);
+						}, LONG_DELAY);
 					} else if (position == 2) {
 						gameDAO.deleteGame(game);
 						myPager.postDelayed(new Runnable() {
 							public void run() {
-								games.remove(game);
-								notifyDataSetChanged();
+								if (selection == DrawerSelection.TRACKED.getValue()) {
+									games.remove(game);
+								} else {
+									myPager.setCurrentItem(1, true);
+								}
+								myPager.postDelayed(new Runnable() {
+									
+									public void run() {
+										notifyDataSetChanged();
+									};
+								}, SMALL_DELAY);
 							}
-						}, 1500);
+						}, LONG_DELAY);
 					}
 				} else {
 					if (position == 0) {
 						gameDAO.addGame(game);
 						myPager.postDelayed(new Runnable() {
 							public void run() {
-								notifyDataSetChanged();
+								myPager.setCurrentItem(1, true);
+								myPager.postDelayed(new Runnable() {
+									
+									public void run() {
+										notifyDataSetChanged();
+									};
+								}, SMALL_DELAY);
 							}
-						}, 1500);
+						}, LONG_DELAY);
 					}
 				}
 			}

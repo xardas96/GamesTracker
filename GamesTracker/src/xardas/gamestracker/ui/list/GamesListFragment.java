@@ -43,7 +43,7 @@ public class GamesListFragment extends Fragment {
 			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, games, selection);
 			gamesListView.setAdapter(adapter);
 			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
-			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, games);
+			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(games));
 		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);

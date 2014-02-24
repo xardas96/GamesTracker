@@ -111,7 +111,7 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		TextView release = (TextView) view.findViewById(R.id.relDateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			int daysToRelease = getDateDifferenceInDays(game);
-			if(daysToRelease == 0) {
+			if (daysToRelease == 0) {
 				title.setTextColor(res.getColor(R.color.green));
 				title.setTypeface(null, Typeface.BOLD);
 			}
@@ -130,10 +130,10 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	public void destroyItem(View container, int position, Object object) {
 		((ViewPager) container).removeView((View) object);
 	}
-	
+
 	private int getDateDifferenceInDays(Game game) {
 		DateTime now = new DateTime();
-		DateTime release = game.getReleaseDate();
+		DateTime release = game.getReleaseDate().plusDays(1);
 		Days d = Days.daysBetween(now, release);
 		int days = d.getDays();
 		return days;
