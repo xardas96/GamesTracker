@@ -162,7 +162,7 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		relDateBuilder.append(game.getExpectedReleaseDay() == 0 ? "" : game.getExpectedReleaseDay() + "-");
 		relDateBuilder.append(game.getExpectedReleaseMonth() == 0 ? "" : game.getExpectedReleaseMonth() + "-");
 		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + " ");
-		relDateBuilder.append(game.getExpectedReleaseYear());
+		relDateBuilder.append(game.getExpectedReleaseYear() == 0 ? "" : game.getExpectedReleaseYear());
 		return relDateBuilder.toString();
 	}
 

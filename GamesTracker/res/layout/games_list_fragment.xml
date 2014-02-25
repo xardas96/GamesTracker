@@ -8,22 +8,37 @@
     android:paddingRight="0dp"
     android:paddingTop="0dp" >
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:visibility="gone" />
+        android:orientation="vertical" >
 
-    <ListView
-        android:id="@+id/gamesListView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:divider="@null"
-        android:dividerHeight="5dp" >
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-    </ListView>
+        <EditText
+            android:id="@+id/searchText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:ems="10"
+            android:hint="@string/game_title"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:visibility="gone" />
+
+        <ListView
+            android:id="@+id/gamesListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:divider="@null"
+            android:dividerHeight="5dp" >
+        </ListView>
+
+    </LinearLayout>
 
 </FrameLayout>

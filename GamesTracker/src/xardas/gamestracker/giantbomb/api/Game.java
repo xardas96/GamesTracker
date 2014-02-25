@@ -116,7 +116,7 @@ public class Game {
 		DateTime release = getReleaseDate().plusDays(1);
 		Days d = Days.daysBetween(now, release);
 		int days = d.getDays();
-		return days == 0;
+		return days <= 0;
 	}
 
 	@Override

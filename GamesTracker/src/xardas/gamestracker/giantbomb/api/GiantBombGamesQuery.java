@@ -64,6 +64,10 @@ public class GiantBombGamesQuery {
 		return offset >= totalResults;
 	}
 
+	public int getTotalResults() {
+		return totalResults;
+	}
+
 	public String getResponse() throws Exception {
 		URL url = buildQuery();
 		InputStream is = url.openStream();

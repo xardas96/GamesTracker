@@ -2,7 +2,6 @@ package xardas.gamestracker.ui.list;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.giantbomb.api.Game;
-import xardas.gamestracker.ui.DrawerSelection;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -48,16 +47,10 @@ public class TrackedReleasedGamesListPageAdapter extends UntrackedGamesListPageA
 		TextView platforms = (TextView) view.findViewById(R.id.platformsTextView);
 		platforms.setText(game.getPlatforms().toString());
 		TextView release = (TextView) view.findViewById(R.id.relDateTextView);
-		if (selection == DrawerSelection.TRACKED.getValue()) {
-			int daysToRelease = getDateDifferenceInDays(game);
-			if (daysToRelease == 0) {
-				title.setTextColor(res.getColor(R.color.green));
-				title.setTypeface(null, Typeface.BOLD);
-			}
-			release.setText(getDateDifferenceInDays(daysToRelease));
-		} else {
-			release.setText(buildReleaseDate(game));
-		}
+		int daysToRelease = getDateDifferenceInDays(game);
+		title.setTextColor(res.getColor(R.color.green));
+		title.setTypeface(null, Typeface.BOLD);
+		release.setText(getDateDifferenceInDays(daysToRelease));
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
 		loadBitmap(game.getIconURL(), cover, game);
 	}

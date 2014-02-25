@@ -28,7 +28,7 @@ public class MainActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_activity);
-		
+
 		GiantBombApi.setApiKey("ca8b79e01baa4e10a46ca36c648182bfe9e60c3b");
 
 		title = drawerTitle = getTitle();

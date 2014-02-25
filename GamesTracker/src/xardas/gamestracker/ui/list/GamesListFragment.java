@@ -13,26 +13,37 @@ import xardas.gamestracker.giantbomb.api.GameComparator;
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
 import xardas.gamestracker.ui.DrawerSelection;
+import android.content.Context;
+import android.graphics.PorterDuff.Mode;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 public class GamesListFragment extends Fragment {
 	private GameDAO dao;
 	private int selection;
+	private ProgressBar progress;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.games_list_fragment, container, false);
+		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
+		progress.getProgressDrawable().setColorFilter(getResources().getColor(R.color.green), Mode.SRC_IN);
 		selection = getArguments().getInt("selection");
 		Calendar calendar = Calendar.getInstance();
 		if (selection == DrawerSelection.TRACKED.getValue()) {
@@ -65,11 +76,26 @@ public class GamesListFragment extends Fragment {
 			InfoDownloader downloader = new InfoDownloader(rootView, true);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, query);
 		} else if (selection == DrawerSelection.SEARCH.getValue()) {
-			// TODO
-			GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
-			nameQuery.addFilter(FilterEnum.name, "dragon%20age");
-			InfoDownloader downloader = new InfoDownloader(rootView, false);
-			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, nameQuery);
+			final EditText searchBox = (EditText) rootView.findViewById(R.id.searchText);
+			searchBox.setVisibility(View.VISIBLE);
+			searchBox.requestFocus();
+			final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.showSoftInput(searchBox, InputMethodManager.SHOW_IMPLICIT);
+			searchBox.setOnEditorActionListener(new OnEditorActionListener() {
+				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+					if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+						String searchPhrase = searchBox.getText().toString();
+						searchPhrase = searchPhrase.replace(" ", "%20");
+						GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
+						nameQuery.addFilter(FilterEnum.name, searchPhrase);
+						InfoDownloader downloader = new InfoDownloader(rootView, false);
+						downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, nameQuery);
+						imm.hideSoftInputFromWindow(searchBox.getWindowToken(), 0);
+						return true;
+					}
+					return false;
+				}
+			});
 		}
 		return rootView;
 	}
@@ -80,11 +106,19 @@ public class GamesListFragment extends Fragment {
 
 		public TrackedGamesUpdater(View rootView) {
 			this.rootView = rootView;
+
+		}
+
+		@Override
+		protected void onPreExecute() {
+			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
+			progress.setProgress(0);
 		}
 
 		@Override
 		protected Void doInBackground(List<Game>... params) {
 			List<Game> games = params[0];
+			progress.setMax(games.size());
 			for (Game game : games) {
 				GiantBombGamesQuery gameQuery = GiantBombApi.createQuery();
 				gameQuery.addFilter(FilterEnum.id, game.getId() + "");
@@ -100,12 +134,19 @@ public class GamesListFragment extends Fragment {
 				} catch (Exception e) {
 					Log.e("not updated", e.getMessage(), e);
 				}
+				publishProgress((Void) null);
 			}
 			return null;
 		}
 
 		@Override
+		protected void onProgressUpdate(Void... values) {
+			progress.incrementProgressBy(1);
+		}
+
+		@Override
 		protected void onPostExecute(Void result) {
+			progress.setProgress(progress.getMax());
 			if (updated) {
 				ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
 				ListAdapter adapter = listview.getAdapter();
@@ -119,6 +160,7 @@ public class GamesListFragment extends Fragment {
 		private boolean untilToday;
 		private ProgressBar progress;
 		private boolean failed;
+		private int totalResults = -1;
 
 		public InfoDownloader(View rootView, boolean untilToday) {
 			this.rootView = rootView;
@@ -128,7 +170,7 @@ public class GamesListFragment extends Fragment {
 		@Override
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
-			progress.setVisibility(View.VISIBLE);
+			progress.setProgress(0);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -139,6 +181,10 @@ public class GamesListFragment extends Fragment {
 				List<Game> result;
 				try {
 					result = query.execute(untilToday);
+					if (totalResults == -1) {
+						totalResults = query.getTotalResults();
+						progress.setMax(totalResults);
+					}
 					publishProgress(result);
 				} catch (Exception ex) {
 					failed = true;
@@ -149,11 +195,11 @@ public class GamesListFragment extends Fragment {
 
 		@Override
 		protected void onProgressUpdate(List<Game>... values) {
-			progress.setVisibility(View.GONE);
 			List<Game> result = new ArrayList<Game>();
 			for (List<Game> value : values) {
 				result.addAll(value);
 			}
+			progress.incrementProgressBy(result.size());
 			ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
 			ListAdapter adapter = listview.getAdapter();
 			if (adapter == null) {
@@ -166,12 +212,11 @@ public class GamesListFragment extends Fragment {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			// TODO
-			progress.setVisibility(View.GONE);
+			progress.setProgress(progress.getMax());
 			if (failed) {
-				Toast.makeText(getActivity(), "nie ma internetów", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_LONG).show();
 			} else {
-				Toast.makeText(getActivity(), "gotowe", Toast.LENGTH_LONG).show();
+				Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_LONG).show();
 			}
 		}
 	}
