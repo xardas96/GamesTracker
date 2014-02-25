@@ -111,7 +111,7 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		TextView release = (TextView) view.findViewById(R.id.relDateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			int daysToRelease = getDateDifferenceInDays(game);
-			if (daysToRelease == 0) {
+			if (daysToRelease <= 0) {
 				title.setTextColor(res.getColor(R.color.green));
 				title.setTypeface(null, Typeface.BOLD);
 			}

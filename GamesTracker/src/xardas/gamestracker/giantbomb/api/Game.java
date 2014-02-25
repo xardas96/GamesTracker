@@ -111,14 +111,6 @@ public class Game {
 		return release;
 	}
 
-	public boolean isOut() {
-		DateTime now = new DateTime();
-		DateTime release = getReleaseDate().plusDays(1);
-		Days d = Days.daysBetween(now, release);
-		int days = d.getDays();
-		return days <= 0;
-	}
-
 	@Override
 	public String toString() {
 		return name;

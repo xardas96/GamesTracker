@@ -68,10 +68,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		}
 		int currentPageItem;
 		PagerAdapter adapter;
-		if (game.isOut() && tracked) {
-			adapter = new TrackedReleasedGamesListPageAdapter(context, game, cache, position, placeholder);
-			currentPageItem = 0;
-		} else if (!game.isOut() && tracked || tracked) {
+		if (tracked) {
 			adapter = new TrackedGamesListPageAdapter(context, game, cache, selection, placeholder);
 			currentPageItem = 1;
 		} else {
@@ -100,7 +97,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 								}, SMALL_DELAY);
 							}
 						}, LONG_DELAY);
-					} else if (position == 2 || game.isOut() && position == 1) {
+					} else if (position == 2) {
 						gameDAO.deleteGame(game);
 						myPager.postDelayed(new Runnable() {
 							public void run() {
