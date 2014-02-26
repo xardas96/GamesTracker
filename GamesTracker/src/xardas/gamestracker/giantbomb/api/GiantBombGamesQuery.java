@@ -115,6 +115,8 @@ public class GiantBombGamesQuery {
 				platformsList.add(platform.selectSingleNode("abbreviation").getText());
 			}
 			game.setPlatforms(platformsList);
+			DateTime now = new DateTime();
+			int year = now.getYear();
 			String originalReleaseDate = gameNode.selectSingleNode("original_release_date").getText();
 			if (originalReleaseDate.equals("")) {
 				String expectedReleaseDay = gameNode.selectSingleNode("expected_release_day").getText();
@@ -127,8 +129,8 @@ public class GiantBombGamesQuery {
 				game.setExpectedReleaseYear(expectedReleaseYear.equals("") ? 0 : Integer.valueOf(expectedReleaseYear));
 				result.add(game);
 				// TODO giantbomb legacy
-			} else if (originalReleaseDate.equals("2014-01-01 00:00:00")) {
-				game.setExpectedReleaseYear(2014);
+			} else if (originalReleaseDate.equals(year + "-01-01 00:00:00")) {
+				game.setExpectedReleaseYear(year);
 				result.add(game);
 			} else if (!untilToday) {
 				try {

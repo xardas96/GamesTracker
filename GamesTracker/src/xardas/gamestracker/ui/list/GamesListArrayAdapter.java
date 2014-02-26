@@ -43,7 +43,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		placeholder = BitmapFactory.decodeResource(res, R.drawable.controller_snes);
 		gameDAO = new GameDAO(context);
 		int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-		int cacheSize = maxMemory / 8;
+		int cacheSize = maxMemory / 6;
 		cache = new LruCache<Long, Bitmap>(cacheSize) {
 			@Override
 			protected int sizeOf(Long key, Bitmap bitmap) {

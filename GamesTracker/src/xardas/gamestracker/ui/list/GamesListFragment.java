@@ -84,6 +84,8 @@ public class GamesListFragment extends Fragment {
 			searchBox.setOnEditorActionListener(new OnEditorActionListener() {
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+						ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
+						listView.setAdapter(null);
 						String searchPhrase = searchBox.getText().toString();
 						searchPhrase = searchPhrase.replace(" ", "%20");
 						GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
@@ -200,11 +202,11 @@ public class GamesListFragment extends Fragment {
 				result.addAll(value);
 			}
 			progress.incrementProgressBy(result.size());
-			ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
-			ListAdapter adapter = listview.getAdapter();
+			ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
+			ListAdapter adapter = listView.getAdapter();
 			if (adapter == null) {
 				adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, result, selection);
-				listview.setAdapter(adapter);
+				listView.setAdapter(adapter);
 			} else {
 				((GamesListArrayAdapter) adapter).addAll(result);
 			}
@@ -214,9 +216,13 @@ public class GamesListFragment extends Fragment {
 		protected void onPostExecute(Void result) {
 			progress.setProgress(progress.getMax());
 			if (failed) {
-				Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_LONG).show();
+				if (getActivity() != null) {
+					Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_LONG).show();
+				}
 			} else {
-				Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_LONG).show();
+				if (getActivity() != null) {
+					Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_LONG).show();
+				}
 			}
 		}
 	}

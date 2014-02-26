@@ -107,17 +107,29 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 		TextView title = (TextView) view.findViewById(R.id.titleTextView);
 		title.setText(game.getName());
 		TextView platforms = (TextView) view.findViewById(R.id.platformsTextView);
-		platforms.setText(game.getPlatforms().toString());
+		if (game.getPlatforms().isEmpty() || game.getPlatforms().get(0).equals("")) {
+			platforms.setText(res.getString(R.string.unknown_platforms));
+		} else {
+			platforms.setText(game.getPlatforms().toString());
+		}
 		TextView release = (TextView) view.findViewById(R.id.relDateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			int daysToRelease = getDateDifferenceInDays(game);
-			if (daysToRelease <= 0) {
+			if (daysToRelease <= 0 && game.getExpectedReleaseYear() != 0) {
 				title.setTextColor(res.getColor(R.color.green));
 				title.setTypeface(null, Typeface.BOLD);
 			}
-			release.setText(getDateDifferenceInDays(daysToRelease));
+			if (game.getExpectedReleaseYear() == 0) {
+				release.setText(res.getString(R.string.unknown_release));
+			} else {
+				release.setText(getDateDifferenceInDays(daysToRelease));
+			}
 		} else {
-			release.setText(buildReleaseDate(game));
+			if (game.getExpectedReleaseYear() == 0) {
+				release.setText(res.getString(R.string.unknown_release));
+			} else {
+				release.setText(buildReleaseDate(game));
+			}
 		}
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
 		loadBitmap(game.getIconURL(), cover, game);

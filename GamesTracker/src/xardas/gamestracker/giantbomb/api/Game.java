@@ -3,7 +3,6 @@ package xardas.gamestracker.giantbomb.api;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.joda.time.Days;
 
 public class Game {
 	private String name;

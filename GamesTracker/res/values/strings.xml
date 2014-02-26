@@ -26,4 +26,7 @@
     <string name="game_title">Enter game title</string>
     <string name="no_games_error">No games found or no Internet connection</string>
     <string name="all_loaded">All info loaded!</string>
+    <string name="unknown_release">Unknown release date</string>
+    <string name="unknown_platforms">Unknown platforms</string>
+
 </resources>

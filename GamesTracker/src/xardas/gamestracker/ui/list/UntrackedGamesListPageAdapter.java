@@ -13,8 +13,8 @@ import android.widget.TextView;
 
 public class UntrackedGamesListPageAdapter extends TrackedGamesListPageAdapter {
 
-	public UntrackedGamesListPageAdapter(Context ctx, Game game, LruCache<Long, Bitmap> bitmapMap, int selection, Bitmap placeholder) {
-		super(ctx, game, bitmapMap, selection, placeholder);
+	public UntrackedGamesListPageAdapter(Context ctx, Game game, LruCache<Long, Bitmap> cache, int selection, Bitmap placeholder) {
+		super(ctx, game, cache, selection, placeholder);
 		pageCount = 2;
 	}
 
