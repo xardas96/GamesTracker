@@ -3,8 +3,6 @@ package xardas.gamestracker.ui.list;
 import xardas.gamestracker.R;
 import xardas.gamestracker.giantbomb.api.Game;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.support.v4.util.LruCache;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,8 +11,8 @@ import android.widget.TextView;
 
 public class UntrackedGamesListPageAdapter extends TrackedGamesListPageAdapter {
 
-	public UntrackedGamesListPageAdapter(Context ctx, Game game, LruCache<Long, Bitmap> cache, int selection, Bitmap placeholder) {
-		super(ctx, game, cache, selection, placeholder);
+	public UntrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListArrayAdapter parentAdapter) {
+		super(ctx, game, selection, parentAdapter);
 		pageCount = 2;
 	}
 
@@ -34,7 +32,7 @@ public class UntrackedGamesListPageAdapter extends TrackedGamesListPageAdapter {
 			track.setText(trackText);
 		} else {
 			view = inflater.inflate(R.layout.games_list_item, null);
-			buildView(view);
+			parentAdapter.buildView(view, game, false);
 		}
 		((ViewPager) container).addView(view, 0);
 		return view;

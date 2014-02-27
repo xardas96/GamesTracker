@@ -27,7 +27,7 @@ public class GiantBombGamesQuery {
 	private int offset = 0;
 	private int limit = 20;
 	private int totalResults = 1;
-	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms" };
+	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms", "deck" };
 
 	public GiantBombGamesQuery() {
 		filters = new HashMap<String, String>();
@@ -115,6 +115,8 @@ public class GiantBombGamesQuery {
 				platformsList.add(platform.selectSingleNode("abbreviation").getText());
 			}
 			game.setPlatforms(platformsList);
+			String description = gameNode.selectSingleNode("deck").getText();
+			game.setDescription(description);
 			DateTime now = new DateTime();
 			int year = now.getYear();
 			String originalReleaseDate = gameNode.selectSingleNode("original_release_date").getText();

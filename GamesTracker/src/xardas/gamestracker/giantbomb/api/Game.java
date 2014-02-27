@@ -1,10 +1,14 @@
 package xardas.gamestracker.giantbomb.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
 
-public class Game {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Game implements Parcelable {
 	private String name;
 	private long id;
 	private long dateLastUpdated;
@@ -16,6 +20,27 @@ public class Game {
 	private String iconURL;
 	private String smallURL;
 	private boolean notify;
+	private String description;
+
+	public Game() {
+		platforms = new ArrayList<String>();
+	}
+
+	public Game(Parcel in) {
+		this();
+		name = in.readString();
+		id = in.readLong();
+		dateLastUpdated = in.readLong();
+		expectedReleaseDay = in.readInt();
+		expectedReleaseMonth = in.readInt();
+		expectedReleaseYear = in.readInt();
+		expectedReleaseQuarter = in.readInt();
+		in.readStringList(platforms);
+		iconURL = in.readString();
+		smallURL = in.readString();
+		notify = in.readInt() == 1;
+		description = in.readString();
+	}
 
 	public String getName() {
 		return name;
@@ -105,6 +130,14 @@ public class Game {
 		this.notify = notify;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public DateTime getReleaseDate() {
 		DateTime release = new DateTime(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 30 : expectedReleaseDay, 0, 0);
 		return release;
@@ -115,4 +148,35 @@ public class Game {
 		return name;
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(name);
+		dest.writeLong(id);
+		dest.writeLong(dateLastUpdated);
+		dest.writeInt(expectedReleaseDay);
+		dest.writeInt(expectedReleaseMonth);
+		dest.writeInt(expectedReleaseYear);
+		dest.writeInt(expectedReleaseQuarter);
+		dest.writeStringList(platforms);
+		dest.writeString(iconURL);
+		dest.writeString(smallURL);
+		dest.writeInt(notify ? 1 : 0);
+		dest.writeString(description);
+	}
+
+	@SuppressWarnings("rawtypes")
+	public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+		public Game createFromParcel(Parcel in) {
+			return new Game(in);
+		}
+
+		public Game[] newArray(int size) {
+			return new Game[size];
+		}
+	};
 }

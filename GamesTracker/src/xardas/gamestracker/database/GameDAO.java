@@ -15,7 +15,7 @@ import android.database.sqlite.SQLiteDatabase;
 public class GameDAO {
 	private SQLiteDatabase database;
 	private SQLiteHelper dbHelper;
-	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SMALL_URL, SQLiteHelper.COLUMN_NOTIFY };
+	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SMALL_URL, SQLiteHelper.COLUMN_NOTIFY, SQLiteHelper.COLUMN_DESCRIPTION };
 
 	public GameDAO(Context context) {
 		dbHelper = new SQLiteHelper(context);
@@ -50,6 +50,7 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_ICON_URL, game.getIconURL());
 		values.put(SQLiteHelper.COLUMN_SMALL_URL, game.getSmallURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
+		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		database.insert(SQLiteHelper.TABLE_GAMES, null, values);
 		close();
 	}
@@ -82,6 +83,7 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_ICON_URL, game.getIconURL());
 		values.put(SQLiteHelper.COLUMN_SMALL_URL, game.getSmallURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
+		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		database.update(SQLiteHelper.TABLE_GAMES, values, SQLiteHelper.COLUMN_ID + " = " + id, null);
 		close();
 	}
@@ -110,6 +112,16 @@ public class GameDAO {
 		return games;
 	}
 
+	public Game getGame(long id) {
+		open();
+		Game game;
+		Cursor cursor = database.query(SQLiteHelper.TABLE_GAMES, allColumns, SQLiteHelper.COLUMN_ID + "=" + id, null, null, null, null);
+		cursor.moveToFirst();
+		game = parseGame(cursor);
+		close();
+		return game;
+	}
+
 	private Game parseGame(Cursor cursor) {
 		Game game = new Game();
 		game.setId(cursor.getLong(0));
@@ -126,6 +138,7 @@ public class GameDAO {
 		game.setIconURL(cursor.getString(8));
 		game.setSmallURL(cursor.getString(9));
 		game.setNotify(cursor.getInt(10) == 1);
+		game.setDescription(cursor.getString(11));
 		return game;
 	}
 }

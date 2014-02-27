@@ -17,6 +17,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_ICON_URL = "iconUrl";
 	public static final String COLUMN_SMALL_URL = "smallUrl";
 	public static final String COLUMN_NOTIFY = "notify";
+	public static final String COLUMN_DESCRIPTION = "description";
 
 	private static final String DB_NAME = "games.db";
 	private static final int DB_VERSION = 1;
@@ -33,7 +34,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_PLATFORMS + " text, "
 			+ COLUMN_ICON_URL + " text, "
 			+ COLUMN_SMALL_URL + " text, "
-			+ COLUMN_NOTIFY + " integer"
+			+ COLUMN_NOTIFY + " integer, "
+			+ COLUMN_DESCRIPTION + " text"
 			+ ");";
 	
 	public SQLiteHelper(Context context) {

@@ -34,7 +34,6 @@
         android:id="@+id/coverImageView"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_alignBottom="@+id/relDateTextView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/image"
