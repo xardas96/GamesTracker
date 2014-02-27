@@ -45,9 +45,9 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 			TextView notify = (TextView) view.findViewById(R.id.notifyTextView);
 			String notifyText;
 			if (game.isNotify()) {
-				notifyText = res.getString(R.string.not_notify);
+				notifyText = res.getString(R.string.not_remind);
 			} else {
-				notifyText = res.getString(R.string.notify);
+				notifyText = res.getString(R.string.remind);
 			}
 			notify.setText(notifyText);
 		} else if (position == 1) {

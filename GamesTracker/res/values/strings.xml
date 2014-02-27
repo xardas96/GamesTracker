@@ -21,12 +21,13 @@
     <string name="out_today">Out since today</string>
     <string name="out_since_day">Out since %d day</string>
     <string name="out_since_days">Out since %d days</string>
-    <string name="notify">Notify me 7 days before release</string>
-    <string name="not_notify">Don\'t notify</string>
+    <string name="remind">Remind me 7 days before release</string>
+    <string name="not_remind">Don\'t remind</string>
     <string name="game_title">Enter game title</string>
     <string name="no_games_error">No games found or no Internet connection</string>
     <string name="all_loaded">All info loaded!</string>
     <string name="unknown_release">Unknown release date</string>
     <string name="unknown_platforms">Unknown platforms</string>
+    <string name="game_release">Game releases on</string>
 
 </resources>
