@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 public class UntrackedGamesListPageAdapter extends TrackedGamesListPageAdapter {
 
-	public UntrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListArrayAdapter parentAdapter) {
-		super(ctx, game, selection, parentAdapter);
+	public UntrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListArrayAdapter parentAdapter, int notifyDuration) {
+		super(ctx, game, selection, parentAdapter, notifyDuration);
 		pageCount = 2;
 	}
 

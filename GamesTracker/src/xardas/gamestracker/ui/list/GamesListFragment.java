@@ -12,6 +12,8 @@ import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
+import xardas.gamestracker.settings.Settings;
+import xardas.gamestracker.settings.SettingsManager;
 import xardas.gamestracker.ui.DrawerSelection;
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;
@@ -37,11 +39,15 @@ public class GamesListFragment extends Fragment {
 	private GameDAO dao;
 	private int selection;
 	private ProgressBar progress;
+	private int notifyDuration;
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.games_list_fragment, container, false);
+		SettingsManager manager = new SettingsManager(getActivity());
+		Settings settings = manager.loadSettings();
+		notifyDuration = settings.getDuration();
 		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 		progress.getProgressDrawable().setColorFilter(getResources().getColor(R.color.green), Mode.SRC_IN);
 		selection = getArguments().getInt("selection");
@@ -51,7 +57,7 @@ public class GamesListFragment extends Fragment {
 			List<Game> games = dao.getAllGames();
 			Collections.sort(games, new GameComparator());
 			ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
-			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, games, selection);
+			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, games, selection, notifyDuration);
 			gamesListView.setAdapter(adapter);
 			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
 			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(games));
@@ -204,10 +210,10 @@ public class GamesListFragment extends Fragment {
 			progress.incrementProgressBy(result.size());
 			ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
 			ListAdapter adapter = listView.getAdapter();
-			if (adapter == null) {
-				adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, result, selection);
+			if (adapter == null && getActivity() != null) {
+				adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, result, selection, notifyDuration);
 				listView.setAdapter(adapter);
-			} else {
+			} else if (adapter != null) {
 				((GamesListArrayAdapter) adapter).addAll(result);
 			}
 		}
@@ -221,7 +227,13 @@ public class GamesListFragment extends Fragment {
 				}
 			} else {
 				if (getActivity() != null) {
-					Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_LONG).show();
+					ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
+					ListAdapter adapter = listView.getAdapter();
+					if (adapter.getCount() == 0) {
+						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_found), Toast.LENGTH_LONG).show();
+					} else {
+						Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_LONG).show();
+					}
 				}
 			}
 		}

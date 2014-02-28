@@ -15,7 +15,7 @@ import android.database.sqlite.SQLiteDatabase;
 public class GameDAO {
 	private SQLiteDatabase database;
 	private SQLiteHelper dbHelper;
-	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SMALL_URL, SQLiteHelper.COLUMN_NOTIFY, SQLiteHelper.COLUMN_DESCRIPTION };
+	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SITE_DETAIL_URL, SQLiteHelper.COLUMN_NOTIFY, SQLiteHelper.COLUMN_DESCRIPTION };
 
 	public GameDAO(Context context) {
 		dbHelper = new SQLiteHelper(context);
@@ -48,7 +48,7 @@ public class GameDAO {
 		}
 		values.put(SQLiteHelper.COLUMN_PLATFORMS, platformsBuilder.toString());
 		values.put(SQLiteHelper.COLUMN_ICON_URL, game.getIconURL());
-		values.put(SQLiteHelper.COLUMN_SMALL_URL, game.getSmallURL());
+		values.put(SQLiteHelper.COLUMN_SITE_DETAIL_URL, game.getSiteDetailURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		database.insert(SQLiteHelper.TABLE_GAMES, null, values);
@@ -81,7 +81,7 @@ public class GameDAO {
 		}
 		values.put(SQLiteHelper.COLUMN_PLATFORMS, platformsBuilder.toString());
 		values.put(SQLiteHelper.COLUMN_ICON_URL, game.getIconURL());
-		values.put(SQLiteHelper.COLUMN_SMALL_URL, game.getSmallURL());
+		values.put(SQLiteHelper.COLUMN_SITE_DETAIL_URL, game.getSiteDetailURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		database.update(SQLiteHelper.TABLE_GAMES, values, SQLiteHelper.COLUMN_ID + " = " + id, null);
@@ -136,7 +136,7 @@ public class GameDAO {
 		List<String> platformsList = Arrays.asList(split);
 		game.setPlatforms(platformsList);
 		game.setIconURL(cursor.getString(8));
-		game.setSmallURL(cursor.getString(9));
+		game.setSiteDetailURL(cursor.getString(9));
 		game.setNotify(cursor.getInt(10) == 1);
 		game.setDescription(cursor.getString(11));
 		return game;

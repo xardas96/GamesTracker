@@ -42,6 +42,12 @@ public class DrawerListArrayAdapter extends ArrayAdapter<String> {
 		case 4:
 			icon.setImageResource(R.drawable.page_search);
 			break;
+		case 5:
+			icon.setImageResource(R.drawable.settings);
+			break;
+		case 6:
+			icon.setImageResource(R.drawable.about);
+			break;
 		}
 		return convertView;
 	}

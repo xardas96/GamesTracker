@@ -1,11 +1,13 @@
 package xardas.gamestracker;
 
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
+import xardas.gamestracker.ui.DrawerSelection;
 import xardas.gamestracker.ui.drawer.DrawerListArrayAdapter;
 import xardas.gamestracker.ui.list.GamesListFragment;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import xardas.gamestracker.ui.settings.SettingsFragment;
 
 public class MainActivity extends FragmentActivity {
 	private DrawerLayout drawerLayout;
@@ -45,10 +48,17 @@ public class MainActivity extends FragmentActivity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (selected != position) {
 					selected = position;
-					GamesListFragment fragment = new GamesListFragment();
-					Bundle arguments = new Bundle();
-					arguments.putInt("selection", position);
-					fragment.setArguments(arguments);
+					Fragment fragment = null;
+					if (selected == DrawerSelection.SETTINGS.getValue()) {
+						fragment = new SettingsFragment();
+					} else if (selected == DrawerSelection.ABOUT.getValue()) {
+
+					} else {
+						fragment = new GamesListFragment();
+						Bundle arguments = new Bundle();
+						arguments.putInt("selection", position);
+						fragment.setArguments(arguments);
+					}
 					FragmentManager fragmentManager = getSupportFragmentManager();
 					fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 					setTitle(drawerListTitles[position]);

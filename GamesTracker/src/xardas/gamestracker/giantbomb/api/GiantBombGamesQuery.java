@@ -27,7 +27,7 @@ public class GiantBombGamesQuery {
 	private int offset = 0;
 	private int limit = 20;
 	private int totalResults = 1;
-	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms", "deck" };
+	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms", "deck", "site_detail_url" };
 
 	public GiantBombGamesQuery() {
 		filters = new HashMap<String, String>();
@@ -97,15 +97,12 @@ public class GiantBombGamesQuery {
 			String id = gameNode.selectSingleNode("id").getText();
 			game.setId(Long.valueOf(id));
 			Node iconNode = gameNode.selectSingleNode("image/icon_url");
-			Node smallNode = gameNode.selectSingleNode("image/small_url");
 			if (iconNode != null) {
 				String iconURL = iconNode.getText();
 				game.setIconURL(iconURL);
 			}
-			if (smallNode != null) {
-				String smallURL = smallNode.getText();
-				game.setSmallURL(smallURL);
-			}
+			String siteDetailURL = gameNode.selectSingleNode("site_detail_url").getText();
+			game.setSiteDetailURL(siteDetailURL);
 			String name = gameNode.selectSingleNode("name").getText();
 			game.setName(name);
 			@SuppressWarnings("unchecked")

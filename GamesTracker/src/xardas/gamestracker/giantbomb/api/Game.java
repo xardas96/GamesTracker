@@ -18,7 +18,7 @@ public class Game implements Parcelable {
 	private int expectedReleaseQuarter;
 	private List<String> platforms;
 	private String iconURL;
-	private String smallURL;
+	private String siteDetailURL;
 	private boolean notify;
 	private String description;
 
@@ -37,7 +37,7 @@ public class Game implements Parcelable {
 		expectedReleaseQuarter = in.readInt();
 		in.readStringList(platforms);
 		iconURL = in.readString();
-		smallURL = in.readString();
+		siteDetailURL = in.readString();
 		notify = in.readInt() == 1;
 		description = in.readString();
 	}
@@ -114,12 +114,12 @@ public class Game implements Parcelable {
 		this.iconURL = iconURL;
 	}
 
-	public String getSmallURL() {
-		return smallURL;
+	public String getSiteDetailURL() {
+		return siteDetailURL;
 	}
 
-	public void setSmallURL(String smallURL) {
-		this.smallURL = smallURL;
+	public void setSiteDetailURL(String siteDetailURL) {
+		this.siteDetailURL = siteDetailURL;
 	}
 
 	public boolean isNotify() {
@@ -164,7 +164,7 @@ public class Game implements Parcelable {
 		dest.writeInt(expectedReleaseQuarter);
 		dest.writeStringList(platforms);
 		dest.writeString(iconURL);
-		dest.writeString(smallURL);
+		dest.writeString(siteDetailURL);
 		dest.writeInt(notify ? 1 : 0);
 		dest.writeString(description);
 	}

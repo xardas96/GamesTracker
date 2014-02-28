@@ -72,7 +72,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/coverImageView"
-        android:layout_alignParentLeft="false"
         android:layout_alignParentRight="true"
         android:layout_alignRight="@+id/relDateTextView"
         android:layout_below="@+id/coverImageView"
@@ -93,7 +92,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="false"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/scrollView1"
+        android:layout_below="@+id/linkTextView"
         android:contentDescription="@string/image" />
 
     <ImageButton
@@ -102,7 +101,17 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="false"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/scrollView1"
+        android:layout_below="@+id/linkTextView"
         android:contentDescription="@string/image" />
+
+    <TextView
+        android:id="@+id/linkTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/positiveButton"
+        android:layout_alignRight="@+id/negativeButton"
+        android:layout_below="@+id/scrollView1"
+        android:layout_marginBottom="20dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>

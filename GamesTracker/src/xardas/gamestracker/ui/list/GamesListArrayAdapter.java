@@ -33,6 +33,7 @@ import android.support.v4.util.LruCache;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -55,10 +56,11 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private LruCache<Long, Bitmap> cache;
 	private Bitmap placeholder;
 	private GameDAO gameDAO;
+	private int notifyDuration;
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
 
-	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games, int selection) {
+	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games, int selection, int notifyDuration) {
 		super(context, layoutId, textViewResourceId, games);
 		this.games = games;
 		this.selection = selection;
@@ -75,6 +77,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 				return bitmap.getByteCount() / 1024;
 			}
 		};
+		this.notifyDuration = notifyDuration;
 	}
 
 	@Override
@@ -94,10 +97,10 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		int currentPageItem;
 		PagerAdapter adapter;
 		if (tracked) {
-			adapter = new TrackedGamesListPageAdapter(context, game, selection, this);
+			adapter = new TrackedGamesListPageAdapter(context, game, selection, this, notifyDuration);
 			currentPageItem = 1;
 		} else {
-			adapter = new UntrackedGamesListPageAdapter(context, game, selection, this);
+			adapter = new UntrackedGamesListPageAdapter(context, game, selection, this, notifyDuration);
 			currentPageItem = 1;
 		}
 		final ViewPager myPager = (ViewPager) convertView.findViewById(R.id.mypager);
@@ -278,6 +281,9 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		if (extraInfo) {
 			TextView extraInfoTextView = (TextView) view.findViewById(R.id.descriptionTextView);
 			extraInfoTextView.setText(game.getDescription());
+			TextView siteDetailURL = (TextView) view.findViewById(R.id.linkTextView);
+			siteDetailURL.setText(game.getSiteDetailURL());
+			Linkify.addLinks(siteDetailURL, Linkify.EMAIL_ADDRESSES | Linkify.WEB_URLS);
 		}
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
 		loadBitmap(game.getIconURL(), cover, game);
@@ -417,7 +423,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 						outStream.close();
 						Log.i("FILES", "DL");
 					} catch (Exception ex) {
-						if (cover.exists()) {
+						if (cover != null && cover.exists()) {
 							pic = BitmapFactory.decodeFile(cover.getAbsolutePath());
 						} else {
 							pic = placeholder;

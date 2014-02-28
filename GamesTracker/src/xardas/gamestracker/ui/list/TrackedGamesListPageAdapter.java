@@ -18,14 +18,16 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	protected int pageCount;
 	protected LayoutInflater inflater;
 	protected GamesListArrayAdapter parentAdapter;
+	protected int notifyDuration;
 
-	public TrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListArrayAdapter parentAdapter) {
+	public TrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListArrayAdapter parentAdapter, int notifyDuration) {
 		this.ctx = ctx;
 		this.game = game;
 		res = ctx.getResources();
 		pageCount = 3;
 		inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.parentAdapter = parentAdapter;
+		this.notifyDuration = notifyDuration;
 	}
 
 	public void setGame(Game game) {
@@ -47,7 +49,13 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 			if (game.isNotify()) {
 				notifyText = res.getString(R.string.not_remind);
 			} else {
-				notifyText = res.getString(R.string.remind);
+				String label;
+				if (notifyDuration == 1) {
+					label = res.getString(R.string.remind_day);
+				} else {
+					label = res.getString(R.string.remind_days);
+				}
+				notifyText = String.format(label, notifyDuration);
 			}
 			notify.setText(notifyText);
 		} else if (position == 1) {

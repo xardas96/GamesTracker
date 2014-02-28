@@ -15,7 +15,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_PLATFORMS = "platforms";
 	public static final String COLUMN_EXPECTED_RELEASE_QUARTER = "expectedReleaseQuarter";
 	public static final String COLUMN_ICON_URL = "iconUrl";
-	public static final String COLUMN_SMALL_URL = "smallUrl";
+	public static final String COLUMN_SITE_DETAIL_URL = "siteDetailURL";
 	public static final String COLUMN_NOTIFY = "notify";
 	public static final String COLUMN_DESCRIPTION = "description";
 
@@ -33,7 +33,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_EXPECTED_RELEASE_QUARTER + " integer, "
 			+ COLUMN_PLATFORMS + " text, "
 			+ COLUMN_ICON_URL + " text, "
-			+ COLUMN_SMALL_URL + " text, "
+			+ COLUMN_SITE_DETAIL_URL + " text, "
 			+ COLUMN_NOTIFY + " integer, "
 			+ COLUMN_DESCRIPTION + " text"
 			+ ");";

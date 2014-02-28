@@ -9,6 +9,8 @@ import xardas.gamestracker.MainActivity;
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.Game;
+import xardas.gamestracker.settings.Settings;
+import xardas.gamestracker.settings.SettingsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -65,7 +67,9 @@ public class ReleaseDateNotificationService extends Service {
 	}
 
 	private int loadDaysToNotify() {
-		return 7; // TODO
+		SettingsManager manager = new SettingsManager(this);
+		Settings settings = manager.loadSettings();
+		return settings.getDuration();
 	}
 
 }
