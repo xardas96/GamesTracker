@@ -15,6 +15,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 
 public class ReleaseDateNotificationService extends Service {
 
@@ -47,7 +48,7 @@ public class ReleaseDateNotificationService extends Service {
 				Days days = Days.daysBetween(now, releaseDate);
 				int daysDifference = days.getDays();
 				if (toNotify >= daysDifference) {
-					Notification n = new Notification.Builder(this).setContentTitle(game.getName()).setContentText(getResources().getString(R.string.game_release) + " " + game.getReleaseDate().toLocalDate().toString()).setSmallIcon(R.drawable.app_icon).setAutoCancel(true).setContentIntent(openMainPendingIntent).addAction(R.drawable.timer_again, "", voidPendingIntent).addAction(R.drawable.timer_stop, "", stopNotifyPendingIntent).addAction(R.drawable.star_delete, "", deletePendingIntent).build();
+					Notification n = new NotificationCompat.Builder(this).setContentTitle(game.getName()).setContentText(getResources().getString(R.string.game_release) + " " + game.getReleaseDate().toLocalDate().toString()).setSmallIcon(R.drawable.app_icon).setAutoCancel(true).setContentIntent(openMainPendingIntent).addAction(R.drawable.timer_again, "", voidPendingIntent).addAction(R.drawable.timer_stop, "", stopNotifyPendingIntent).addAction(R.drawable.star_delete, "", deletePendingIntent).build();
 					n.defaults |= Notification.DEFAULT_VIBRATE;
 					NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 					notificationManager.notify((int) game.getId(), n);
