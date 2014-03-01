@@ -19,7 +19,7 @@ import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
-import xardas.gamestracker.ui.DrawerSelection;
+import xardas.gamestracker.ui.drawer.DrawerSelection;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;

@@ -12,7 +12,7 @@ import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
 import xardas.gamestracker.settings.Settings;
 import xardas.gamestracker.settings.SettingsManager;
-import xardas.gamestracker.ui.DrawerSelection;
+import xardas.gamestracker.ui.drawer.DrawerSelection;
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;
 import android.os.AsyncTask;

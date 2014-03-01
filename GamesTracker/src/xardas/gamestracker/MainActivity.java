@@ -1,8 +1,8 @@
 package xardas.gamestracker;
 
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
-import xardas.gamestracker.ui.DrawerSelection;
 import xardas.gamestracker.ui.drawer.DrawerListArrayAdapter;
+import xardas.gamestracker.ui.drawer.DrawerSelection;
 import xardas.gamestracker.ui.list.GamesListFragment;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -51,8 +51,6 @@ public class MainActivity extends FragmentActivity {
 					Fragment fragment = null;
 					if (selected == DrawerSelection.SETTINGS.getValue()) {
 						fragment = new SettingsFragment();
-					} else if (selected == DrawerSelection.ABOUT.getValue()) {
-						//TODO
 					} else {
 						fragment = new GamesListFragment();
 						Bundle arguments = new Bundle();
