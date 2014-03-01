@@ -41,5 +41,6 @@
     <string name="settings_cache_cleared">Cache cleared</string>
     <string name="updating_tracked">Updating tracked games&#8230;</string>
     <string name="updated_tracked">All tracked games updated!</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

@@ -12,12 +12,12 @@ import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
 import xardas.gamestracker.settings.Settings;
 import xardas.gamestracker.settings.SettingsManager;
+import xardas.gamestracker.ui.RefreshableFragment;
 import xardas.gamestracker.ui.drawer.DrawerSelection;
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -33,7 +33,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-public class GamesListFragment extends Fragment {
+public class GamesListFragment extends RefreshableFragment {
 	private GameDAO dao;
 	private int selection;
 	private ProgressBar progress;
@@ -48,6 +48,16 @@ public class GamesListFragment extends Fragment {
 		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 		progress.getProgressDrawable().setColorFilter(getResources().getColor(R.color.green), Mode.SRC_IN);
 		selection = getArguments().getInt("selection");
+		refresh(rootView);
+		return rootView;
+	}
+
+	@Override
+	public void refresh(View view) {
+		if (view == null) {
+			view = getView();
+		}
+		final View rootView = view;
 		Calendar calendar = Calendar.getInstance();
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			dao = new GameDAO(getActivity());
@@ -97,7 +107,7 @@ public class GamesListFragment extends Fragment {
 				}
 			});
 		}
-		return rootView;
+
 	}
 
 	private class GamesListInitializer extends AsyncTask<Void, List<Game>, List<Game>> {
@@ -198,8 +208,8 @@ public class GamesListFragment extends Fragment {
 		protected void onPostExecute(Void result) {
 			progress.setProgress(progress.getMax());
 			if (updated) {
-				ListView listview = (ListView) rootView.findViewById(R.id.gamesListView);
-				ListAdapter adapter = listview.getAdapter();
+				ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
+				ListAdapter adapter = listView.getAdapter();
 				((GamesListArrayAdapter) adapter).notifyDataSetChanged();
 			}
 			if (getActivity() != null) {

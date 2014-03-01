@@ -82,7 +82,11 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 
 	@Override
 	public void addAll(Collection<? extends Game> collection) {
-		super.addAll(collection);
+		for (Game game : collection) {
+			if (!games.contains(game)) {
+				games.add(game);
+			}
+		}
 		Collections.sort(games, new GameComparator());
 	}
 

@@ -5,10 +5,10 @@ import java.io.File;
 import xardas.gamestracker.R;
 import xardas.gamestracker.settings.Settings;
 import xardas.gamestracker.settings.SettingsManager;
+import xardas.gamestracker.ui.RefreshableFragment;
 import android.graphics.PorterDuff.Mode;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,7 +20,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends RefreshableFragment {
 	private int seekBarValue;
 
 	@Override
@@ -130,5 +130,9 @@ public class SettingsFragment extends Fragment {
 				Toast.makeText(getActivity(), getResources().getString(R.string.settings_cache_cleared), Toast.LENGTH_SHORT).show();
 			}
 		}
+	}
+
+	@Override
+	public void refresh(View view) {
 	}
 }

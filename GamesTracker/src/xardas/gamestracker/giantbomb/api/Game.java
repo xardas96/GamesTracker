@@ -147,6 +147,20 @@ public class Game implements Parcelable {
 	public String toString() {
 		return name;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		boolean equals = false;
+		if(o instanceof Game) {
+			equals = id == ((Game)o).id;
+		}
+		return equals;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (int) id;
+	}
 
 	@Override
 	public int describeContents() {
