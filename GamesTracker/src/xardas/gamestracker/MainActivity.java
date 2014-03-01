@@ -52,7 +52,7 @@ public class MainActivity extends FragmentActivity {
 					if (selected == DrawerSelection.SETTINGS.getValue()) {
 						fragment = new SettingsFragment();
 					} else if (selected == DrawerSelection.ABOUT.getValue()) {
-
+						//TODO
 					} else {
 						fragment = new GamesListFragment();
 						Bundle arguments = new Bundle();

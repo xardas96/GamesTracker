@@ -2,11 +2,9 @@ package xardas.gamestracker.database;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import xardas.gamestracker.giantbomb.api.Game;
-import xardas.gamestracker.giantbomb.api.GameComparator;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -16,6 +14,9 @@ public class GameDAO {
 	private SQLiteDatabase database;
 	private SQLiteHelper dbHelper;
 	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SITE_DETAIL_URL, SQLiteHelper.COLUMN_NOTIFY, SQLiteHelper.COLUMN_DESCRIPTION };
+	private static final int LIMIT = 20;
+	private int offset = 0;
+	private boolean next = true;
 
 	public GameDAO(Context context) {
 		dbHelper = new SQLiteHelper(context);
@@ -97,6 +98,10 @@ public class GameDAO {
 		return isTracked;
 	}
 
+	public boolean hasNext() {
+		return next;
+	}
+
 	public List<Game> getAllGames() {
 		open();
 		List<Game> games = new ArrayList<Game>();
@@ -108,7 +113,25 @@ public class GameDAO {
 			cursor.moveToNext();
 		}
 		close();
-		Collections.sort(games, new GameComparator());
+		return games;
+	}
+
+	public List<Game> getGames() {
+		open();
+		List<Game> games = new ArrayList<Game>();
+		Cursor cursor = database.query(SQLiteHelper.TABLE_GAMES, allColumns, null, null, null, null, null, offset + "," + LIMIT);
+		next = cursor.moveToFirst();
+		if (!next) {
+			offset = 0;
+		} else {
+			while (!cursor.isAfterLast()) {
+				Game game = parseGame(cursor);
+				games.add(game);
+				cursor.moveToNext();
+				offset++;
+			}
+		}
+		close();
 		return games;
 	}
 

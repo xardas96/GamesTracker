@@ -2,14 +2,12 @@ package xardas.gamestracker.ui.list;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.FilterEnum;
 import xardas.gamestracker.giantbomb.api.Game;
-import xardas.gamestracker.giantbomb.api.GameComparator;
 import xardas.gamestracker.giantbomb.api.GiantBombApi;
 import xardas.gamestracker.giantbomb.api.GiantBombGamesQuery;
 import xardas.gamestracker.settings.Settings;
@@ -41,7 +39,6 @@ public class GamesListFragment extends Fragment {
 	private ProgressBar progress;
 	private int notifyDuration;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.games_list_fragment, container, false);
@@ -54,13 +51,8 @@ public class GamesListFragment extends Fragment {
 		Calendar calendar = Calendar.getInstance();
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			dao = new GameDAO(getActivity());
-			List<Game> games = dao.getAllGames();
-			Collections.sort(games, new GameComparator());
-			ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
-			GamesListArrayAdapter adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, games, selection, notifyDuration);
-			gamesListView.setAdapter(adapter);
-			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
-			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(games));
+			GamesListInitializer initializer = new GamesListInitializer(rootView);
+			initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
@@ -108,19 +100,69 @@ public class GamesListFragment extends Fragment {
 		return rootView;
 	}
 
+	private class GamesListInitializer extends AsyncTask<Void, List<Game>, List<Game>> {
+		private View rootView;
+
+		public GamesListInitializer(View rootView) {
+			this.rootView = rootView;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected List<Game> doInBackground(Void... params) {
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				Log.e(getClass().getName(), e.getMessage(), e);
+			}
+			List<Game> result = new ArrayList<Game>();
+			while (dao.hasNext()) {
+				List<Game> games = dao.getGames();
+				result.addAll(games);
+				publishProgress(games);
+			}
+			return result;
+		}
+
+		@Override
+		protected void onProgressUpdate(List<Game>... values) {
+			for (List<Game> list : values) {
+				ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
+				ListAdapter adapter = gamesListView.getAdapter();
+				if (adapter == null) {
+					adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, list, selection, notifyDuration);
+					gamesListView.setAdapter(adapter);
+				} else {
+					((GamesListArrayAdapter) adapter).addAll(list);
+				}
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void onPostExecute(List<Game> result) {
+			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
+			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(result));
+		}
+
+	}
+
 	private class TrackedGamesUpdater extends AsyncTask<List<Game>, Void, Void> {
 		private View rootView;
 		private boolean updated;
 
 		public TrackedGamesUpdater(View rootView) {
 			this.rootView = rootView;
-
 		}
 
 		@Override
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 			progress.setProgress(0);
+			if (getActivity() != null) {
+				Toast.makeText(getActivity(), getResources().getString(R.string.updating_tracked), Toast.LENGTH_SHORT).show();
+			}
+
 		}
 
 		@Override
@@ -160,6 +202,9 @@ public class GamesListFragment extends Fragment {
 				ListAdapter adapter = listview.getAdapter();
 				((GamesListArrayAdapter) adapter).notifyDataSetChanged();
 			}
+			if (getActivity() != null) {
+				Toast.makeText(getActivity(), getResources().getString(R.string.updated_tracked), Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 
@@ -179,6 +224,9 @@ public class GamesListFragment extends Fragment {
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 			progress.setProgress(0);
+			if (getActivity() != null) {
+				Toast.makeText(getActivity(), getResources().getString(R.string.loading_games), Toast.LENGTH_SHORT).show();
+			}
 		}
 
 		@SuppressWarnings("unchecked")
@@ -223,16 +271,16 @@ public class GamesListFragment extends Fragment {
 			progress.setProgress(progress.getMax());
 			if (failed) {
 				if (getActivity() != null) {
-					Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_LONG).show();
+					Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_SHORT).show();
 				}
 			} else {
 				if (getActivity() != null) {
 					ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
 					ListAdapter adapter = listView.getAdapter();
 					if (adapter.getCount() == 0) {
-						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_found), Toast.LENGTH_LONG).show();
+						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_found), Toast.LENGTH_SHORT).show();
 					} else {
-						Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_LONG).show();
+						Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_SHORT).show();
 					}
 				}
 			}
