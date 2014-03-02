@@ -26,65 +26,8 @@ public class SettingsFragment extends RefreshableFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.settings_fragment, container, false);
-		final SettingsManager manager = new SettingsManager(getActivity());
-		final Settings settings = manager.loadSettings();
-		final TextView daysLabelTextView = (TextView) rootView.findViewById(R.id.daysLabelTextView);
-		final CheckBox notifyCheckBox = (CheckBox) rootView.findViewById(R.id.notifyCheckbox);
-		final SeekBar seekBar = (SeekBar) rootView.findViewById(R.id.daysSeekBar);
-		seekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.green), Mode.SRC_IN);
-		seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-				settings.setNotify(notifyCheckBox.isChecked());
-				settings.setDuration(seekBarValue);
-				manager.saveSettings(settings);
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-			}
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-				if (fromUser) {
-					seekBarValue = progress + 1;
-					setLabelForSeekBar(seekBarValue, daysLabelTextView);
-				}
-			}
-		});
-		notifyCheckBox.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				settings.setNotify(!settings.isNotify());
-				settings.setDuration(seekBarValue);
-				daysLabelTextView.setEnabled(settings.isNotify());
-				seekBar.setEnabled(settings.isNotify());
-				manager.saveSettings(settings);
-			}
-		});
-		notifyCheckBox.setChecked(settings.isNotify());
-		if (settings.isNotify()) {
-			seekBarValue = settings.getDuration();
-		} else {
-			seekBarValue = 1;
-		}
-		setLabelForSeekBar(seekBarValue, daysLabelTextView);
-		seekBar.setProgress(seekBarValue - 1);
-		daysLabelTextView.setEnabled(settings.isNotify());
-		seekBar.setEnabled(settings.isNotify());
-
-		Button clearImageCacheButton = (Button) rootView.findViewById(R.id.clearImageCacheButton);
-		clearImageCacheButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				CacheDeleter deleter = new CacheDeleter();
-				deleter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
-			}
-		});
-
+		Initializer initializer = new Initializer(rootView);
+		initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		return rootView;
 	}
 
@@ -96,6 +39,81 @@ public class SettingsFragment extends RefreshableFragment {
 			label = getActivity().getResources().getString(R.string.remind_days);
 		}
 		daysLabelTextView.setText(String.format(label, seekBarValue));
+	}
+
+	private class Initializer extends AsyncTask<Void, Void, Settings> {
+		private View rootView;
+		private SettingsManager manager;
+
+		public Initializer(View rootView) {
+			this.rootView = rootView;
+			manager = new SettingsManager(getActivity());
+		}
+
+		@Override
+		protected Settings doInBackground(Void... params) {
+			return manager.loadSettings();
+		}
+
+		@Override
+		protected void onPostExecute(final Settings result) {
+			final TextView daysLabelTextView = (TextView) rootView.findViewById(R.id.daysLabelTextView);
+			final CheckBox notifyCheckBox = (CheckBox) rootView.findViewById(R.id.notifyCheckbox);
+			final SeekBar seekBar = (SeekBar) rootView.findViewById(R.id.daysSeekBar);
+			seekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.green), Mode.SRC_IN);
+			seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+				@Override
+				public void onStopTrackingTouch(SeekBar seekBar) {
+					result.setNotify(notifyCheckBox.isChecked());
+					result.setDuration(seekBarValue);
+					manager.saveSettings(result);
+				}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {
+				}
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+					if (fromUser) {
+						seekBarValue = progress + 1;
+						setLabelForSeekBar(seekBarValue, daysLabelTextView);
+					}
+				}
+			});
+			notifyCheckBox.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					result.setNotify(!result.isNotify());
+					result.setDuration(seekBarValue);
+					daysLabelTextView.setEnabled(result.isNotify());
+					seekBar.setEnabled(result.isNotify());
+					manager.saveSettings(result);
+				}
+			});
+			notifyCheckBox.setChecked(result.isNotify());
+			if (result.isNotify()) {
+				seekBarValue = result.getDuration();
+			} else {
+				seekBarValue = 1;
+			}
+			setLabelForSeekBar(seekBarValue, daysLabelTextView);
+			seekBar.setProgress(seekBarValue - 1);
+			daysLabelTextView.setEnabled(result.isNotify());
+			seekBar.setEnabled(result.isNotify());
+
+			Button clearImageCacheButton = (Button) rootView.findViewById(R.id.clearImageCacheButton);
+			clearImageCacheButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					CacheDeleter deleter = new CacheDeleter();
+					deleter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+				}
+			});
+		}
 	}
 
 	private class CacheDeleter extends AsyncTask<Void, Void, Void> {

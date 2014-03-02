@@ -192,7 +192,6 @@ public class GamesListFragment extends RefreshableFragment {
 			if (getActivity() != null) {
 				Toast.makeText(getActivity(), getResources().getString(R.string.updating_tracked), Toast.LENGTH_SHORT).show();
 			}
-
 		}
 
 		@Override
@@ -254,11 +253,6 @@ public class GamesListFragment extends RefreshableFragment {
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 			progress.setProgress(0);
-			try {
-				Thread.sleep(300);
-			} catch (InterruptedException e) {
-				Log.e(getClass().getName(), e.getMessage(), e);
-			}
 			if (getActivity() != null) {
 				Toast.makeText(getActivity(), getResources().getString(R.string.loading_games), Toast.LENGTH_SHORT).show();
 			}
