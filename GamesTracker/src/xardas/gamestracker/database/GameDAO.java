@@ -109,6 +109,7 @@ public class GameDAO {
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {
 			Game game = parseGame(cursor);
+			game.setTracked(true);
 			games.add(game);
 			cursor.moveToNext();
 		}
@@ -126,6 +127,7 @@ public class GameDAO {
 		} else {
 			while (!cursor.isAfterLast()) {
 				Game game = parseGame(cursor);
+				game.setTracked(true);
 				games.add(game);
 				cursor.moveToNext();
 				offset++;

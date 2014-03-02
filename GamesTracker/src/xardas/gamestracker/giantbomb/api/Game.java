@@ -21,6 +21,7 @@ public class Game implements Parcelable {
 	private String siteDetailURL;
 	private boolean notify;
 	private String description;
+	private boolean tracked;
 
 	public Game() {
 		platforms = new ArrayList<String>();
@@ -40,6 +41,7 @@ public class Game implements Parcelable {
 		siteDetailURL = in.readString();
 		notify = in.readInt() == 1;
 		description = in.readString();
+		tracked = in.readInt() == 1;
 	}
 
 	public String getName() {
@@ -161,6 +163,14 @@ public class Game implements Parcelable {
 	public int hashCode() {
 		return (int) id;
 	}
+	
+	public boolean isTracked() {
+		return tracked;
+	}
+	
+	public void setTracked(boolean tracked) {
+		this.tracked = tracked;
+	}
 
 	@Override
 	public int describeContents() {
@@ -181,6 +191,7 @@ public class Game implements Parcelable {
 		dest.writeString(siteDetailURL);
 		dest.writeInt(notify ? 1 : 0);
 		dest.writeString(description);
+		dest.writeInt(tracked ? 1 : 0);
 	}
 
 	@SuppressWarnings("rawtypes")

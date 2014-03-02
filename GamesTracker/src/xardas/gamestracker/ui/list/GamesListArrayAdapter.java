@@ -93,35 +93,34 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	@Override
 	public View getView(int position, View convertView, final ViewGroup parent) {
 		final Game game = games.get(position);
-		final boolean tracked = gameDAO.isTracked(game);
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.games_list_item_pager, null, false);
 		}
 		int currentPageItem;
 		PagerAdapter adapter;
-		if (tracked) {
+		if (game.isTracked()) {
 			adapter = new TrackedGamesListPageAdapter(context, game, selection, this, notifyDuration);
 			currentPageItem = 1;
 		} else {
 			adapter = new UntrackedGamesListPageAdapter(context, game, selection, this, notifyDuration);
 			currentPageItem = 1;
 		}
-		final ViewPager myPager = (ViewPager) convertView.findViewById(R.id.mypager);
-		myPager.setAdapter(adapter);
-		myPager.setCurrentItem(currentPageItem);
-		myPager.setOnPageChangeListener(new OnPageChangeListener() {
+		final ViewPager viewPager = (ViewPager) convertView.findViewById(R.id.view_pager);
+		viewPager.setAdapter(adapter);
+		viewPager.setCurrentItem(currentPageItem);
+		viewPager.setOnPageChangeListener(new OnPageChangeListener() {
 
 			@Override
 			public void onPageSelected(int position) {
-				if (tracked) {
+				if (game.isTracked()) {
 					if (position == 0) {
 						game.setNotify(!game.isNotify());
 						gameDAO.updateGame(game);
-						myPager.postDelayed(new Runnable() {
+						viewPager.postDelayed(new Runnable() {
 							public void run() {
-								myPager.setCurrentItem(1, true);
-								myPager.postDelayed(new Runnable() {
+								viewPager.setCurrentItem(1, true);
+								viewPager.postDelayed(new Runnable() {
 
 									public void run() {
 										notifyDataSetChanged();
@@ -131,14 +130,14 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 						}, LONG_DELAY);
 					} else if (position == 2) {
 						gameDAO.deleteGame(game);
-						myPager.postDelayed(new Runnable() {
+						viewPager.postDelayed(new Runnable() {
 							public void run() {
 								if (selection == DrawerSelection.TRACKED.getValue()) {
 									games.remove(game);
 								} else {
-									myPager.setCurrentItem(1, true);
+									viewPager.setCurrentItem(1, true);
 								}
-								myPager.postDelayed(new Runnable() {
+								viewPager.postDelayed(new Runnable() {
 
 									public void run() {
 										notifyDataSetChanged();
@@ -150,10 +149,10 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 				} else {
 					if (position == 0) {
 						gameDAO.addGame(game);
-						myPager.postDelayed(new Runnable() {
+						viewPager.postDelayed(new Runnable() {
 							public void run() {
-								myPager.setCurrentItem(1, true);
-								myPager.postDelayed(new Runnable() {
+								viewPager.setCurrentItem(1, true);
+								viewPager.postDelayed(new Runnable() {
 
 									public void run() {
 										notifyDataSetChanged();
@@ -186,7 +185,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 				moreInfoDialog.setCanceledOnTouchOutside(true);
 				ImageButton positiveButton = (ImageButton) moreInfoView.findViewById(R.id.positiveButton);
 				ImageButton negativeButton = (ImageButton) moreInfoView.findViewById(R.id.negativeButton);
-				if (gameDAO.isTracked(game)) {
+				if (game.isTracked()) {
 					positiveButton.setImageResource(R.drawable.timer);
 					positiveButton.setBackgroundColor(res.getColor(R.color.purple));
 					positiveButton.setOnClickListener(new OnClickListener() {
@@ -229,7 +228,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 				return super.onSingleTapConfirmed(e);
 			}
 		});
-		myPager.setOnTouchListener(new OnTouchListener() {
+		viewPager.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
 				tapGestureDetector.onTouchEvent(event);
 				return false;
@@ -244,7 +243,7 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	}
 
 	protected void buildView(View view, final Game game, boolean extraInfo) {
-		if (gameDAO.isTracked(game)) {
+		if (game.isTracked()) {
 			view.setBackgroundResource(R.drawable.games_list_item_background_untrack);
 		} else {
 			view.setBackgroundResource(R.drawable.games_list_item_background_track);

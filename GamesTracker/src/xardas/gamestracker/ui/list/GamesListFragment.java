@@ -55,10 +55,10 @@ public class GamesListFragment extends RefreshableFragment {
 		if (view == null) {
 			view = getView();
 		}
+		dao = new GameDAO(getActivity());
 		final View rootView = view;
 		Calendar calendar = Calendar.getInstance();
 		if (selection == DrawerSelection.TRACKED.getValue()) {
-			dao = new GameDAO(getActivity());
 			GamesListInitializer initializer = new GamesListInitializer(rootView);
 			initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
@@ -275,6 +275,9 @@ public class GamesListFragment extends RefreshableFragment {
 					if (totalResults == -1) {
 						totalResults = query.getTotalResults();
 						progress.setMax(totalResults);
+					}
+					for (Game game : result) {
+						game.setTracked(dao.isTracked(game));
 					}
 					publishProgress(result);
 				} catch (Exception ex) {
