@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 import xardas.gamestracker.R;
+import xardas.gamestracker.async.AsyncTask;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.Game;
 import xardas.gamestracker.giantbomb.api.GameComparator;
@@ -28,7 +30,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -80,13 +81,14 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		this.notifyDuration = notifyDuration;
 	}
 
-	@Override
 	public void addAll(Collection<? extends Game> collection) {
+		Collection<Game> toAdd = new ArrayList<Game>();
 		for (Game game : collection) {
 			if (!games.contains(game)) {
-				games.add(game);
+				toAdd.add(game);
 			}
 		}
+		super.addAll(toAdd);
 		Collections.sort(games, new GameComparator());
 	}
 

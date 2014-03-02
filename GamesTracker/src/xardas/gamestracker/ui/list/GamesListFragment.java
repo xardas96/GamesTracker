@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import xardas.gamestracker.R;
+import xardas.gamestracker.async.AsyncTask;
 import xardas.gamestracker.database.GameDAO;
 import xardas.gamestracker.giantbomb.api.FilterEnum;
 import xardas.gamestracker.giantbomb.api.Game;
@@ -16,7 +17,6 @@ import xardas.gamestracker.ui.RefreshableFragment;
 import xardas.gamestracker.ui.drawer.DrawerSelection;
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;

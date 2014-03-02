@@ -3,11 +3,11 @@ package xardas.gamestracker.ui.settings;
 import java.io.File;
 
 import xardas.gamestracker.R;
+import xardas.gamestracker.async.AsyncTask;
 import xardas.gamestracker.settings.Settings;
 import xardas.gamestracker.settings.SettingsManager;
 import xardas.gamestracker.ui.RefreshableFragment;
 import android.graphics.PorterDuff.Mode;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
