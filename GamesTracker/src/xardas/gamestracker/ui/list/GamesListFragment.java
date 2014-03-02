@@ -16,14 +16,13 @@ import xardas.gamestracker.settings.SettingsManager;
 import xardas.gamestracker.ui.RefreshableFragment;
 import xardas.gamestracker.ui.drawer.DrawerSelection;
 import android.content.Context;
-import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -46,7 +45,6 @@ public class GamesListFragment extends RefreshableFragment {
 		Settings settings = manager.loadSettings();
 		notifyDuration = settings.getDuration();
 		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
-		progress.getProgressDrawable().setColorFilter(getResources().getColor(R.color.green), Mode.SRC_IN);
 		selection = getArguments().getInt("selection");
 		refresh(rootView);
 		return rootView;
@@ -87,27 +85,49 @@ public class GamesListFragment extends RefreshableFragment {
 			final EditText searchBox = (EditText) rootView.findViewById(R.id.searchText);
 			searchBox.setVisibility(View.VISIBLE);
 			searchBox.requestFocus();
-			final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.showSoftInput(searchBox, InputMethodManager.SHOW_IMPLICIT);
+			showKeyboard(searchBox);
 			searchBox.setOnEditorActionListener(new OnEditorActionListener() {
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-					if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-						ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
-						listView.setAdapter(null);
-						String searchPhrase = searchBox.getText().toString();
-						searchPhrase = searchPhrase.replace(" ", "%20");
-						GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
-						nameQuery.addFilter(FilterEnum.name, searchPhrase);
-						InfoDownloader downloader = new InfoDownloader(rootView, false);
-						downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, nameQuery);
-						imm.hideSoftInputFromWindow(searchBox.getWindowToken(), 0);
-						return true;
-					}
-					return false;
+					ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
+					listView.setAdapter(null);
+					String searchPhrase = searchBox.getText().toString();
+					searchPhrase = searchPhrase.replace(" ", "%20");
+					GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
+					nameQuery.addFilter(FilterEnum.name, searchPhrase);
+					hideKeyboard();
+					InfoDownloader downloader = new InfoDownloader(rootView, false);
+					downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, nameQuery);
+					return true;
+				}
+			});
+			searchBox.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					showKeyboard(searchBox);
+
 				}
 			});
 		}
 
+	}
+
+	private void showKeyboard(EditText searchBox) {
+		final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (android.os.Build.VERSION.SDK_INT < 11) {
+			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+		} else {
+			imm.showSoftInput(searchBox, InputMethodManager.SHOW_IMPLICIT);
+		}
+	}
+
+	private void hideKeyboard() {
+		final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (android.os.Build.VERSION.SDK_INT < 11) {
+			imm.hideSoftInputFromWindow(getActivity().getWindow().getCurrentFocus().getWindowToken(), 0);
+		} else {
+			imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		}
 	}
 
 	private class GamesListInitializer extends AsyncTask<Void, List<Game>, List<Game>> {
@@ -234,6 +254,11 @@ public class GamesListFragment extends RefreshableFragment {
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 			progress.setProgress(0);
+			try {
+				Thread.sleep(300);
+			} catch (InterruptedException e) {
+				Log.e(getClass().getName(), e.getMessage(), e);
+			}
 			if (getActivity() != null) {
 				Toast.makeText(getActivity(), getResources().getString(R.string.loading_games), Toast.LENGTH_SHORT).show();
 			}

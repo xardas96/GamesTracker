@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -75,21 +74,20 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		cache = new LruCache<Long, Bitmap>(cacheSize) {
 			@Override
 			protected int sizeOf(Long key, Bitmap bitmap) {
-				return bitmap.getByteCount() / 1024;
+				return bitmap.getWidth() * bitmap.getHeight() / 1024;
 			}
 		};
 		this.notifyDuration = notifyDuration;
 	}
 
 	public void addAll(Collection<? extends Game> collection) {
-		Collection<Game> toAdd = new ArrayList<Game>();
 		for (Game game : collection) {
 			if (!games.contains(game)) {
-				toAdd.add(game);
+				games.add(game);
 			}
 		}
-		super.addAll(toAdd);
 		Collections.sort(games, new GameComparator());
+		notifyDataSetChanged();
 	}
 
 	@Override
