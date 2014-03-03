@@ -1,5 +1,7 @@
 package xardas.gamestracker.service;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -16,6 +18,8 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 
@@ -38,7 +42,7 @@ public class ReleaseDateNotificationService extends Service {
 		Intent openMain = new Intent(this, MainActivity.class);
 		PendingIntent openMainPendingIntent = PendingIntent.getActivity(this, 0, openMain, 0);
 		DateTime now = new DateTime();
-		for (Game game : games) {
+		for (final Game game : games) {
 			if (game.isNotify()) {
 				stopNotifyIntent.putExtra("gameId", game.getId());
 				deleteIntent.putExtra("gameId", game.getId());
@@ -50,7 +54,22 @@ public class ReleaseDateNotificationService extends Service {
 				Days days = Days.daysBetween(now, releaseDate);
 				int daysDifference = days.getDays();
 				if (toNotify >= daysDifference) {
-					Notification n = new NotificationCompat.Builder(this).setContentTitle(game.getName()).setContentText(getResources().getString(R.string.game_release) + " " + game.getReleaseDate().toLocalDate().toString()).setSmallIcon(R.drawable.app_icon).setAutoCancel(true).setContentIntent(openMainPendingIntent).addAction(R.drawable.timer_again, "", voidPendingIntent).addAction(R.drawable.timer_stop, "", stopNotifyPendingIntent).addAction(R.drawable.star_delete, "", deletePendingIntent).build();
+					Bitmap largeIcon;
+					File cache = new File(getCacheDir().getAbsolutePath() + File.separator + game.getId());
+					if (cache.exists()) {
+						File[] files = cache.listFiles(new FileFilter() {
+
+							@Override
+							public boolean accept(File pathname) {
+								return pathname.getName().contains(game.getId() + "-small-");
+							}
+						});
+						File cover = files.length == 0 ? null : files[0];
+						largeIcon = cover != null ? BitmapFactory.decodeFile(cover.getAbsolutePath()) : BitmapFactory.decodeResource(getResources(), R.drawable.controller_snes);
+					} else {
+						largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.controller_snes);
+					}
+					Notification n = new NotificationCompat.Builder(this).setContentTitle(game.getName()).setContentText(getResources().getString(R.string.game_release) + " " + game.getReleaseDate().toLocalDate().toString()).setSmallIcon(R.drawable.app_icon).setLargeIcon(largeIcon).setAutoCancel(true).setContentIntent(openMainPendingIntent).addAction(R.drawable.timer_again, "", voidPendingIntent).addAction(R.drawable.timer_stop, "", stopNotifyPendingIntent).addAction(R.drawable.star_delete, "", deletePendingIntent).build();
 					n.defaults |= Notification.DEFAULT_VIBRATE;
 					NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 					notificationManager.notify((int) game.getId(), n);

@@ -21,6 +21,7 @@ public class SystemBootReceiver extends BroadcastReceiver {
 			if (settings.isNotify()) {
 				Intent service = new Intent(context, ReleaseDateNotificationService.class);
 				PendingIntent pendingIntent = PendingIntent.getService(context, 0, service, 0);
+				context.startService(service);
 				AlarmManager alarm = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 				DateTime dateTime = new DateTime();
 				alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, dateTime.getMillis(), 6 * AlarmManager.INTERVAL_HOUR, pendingIntent);

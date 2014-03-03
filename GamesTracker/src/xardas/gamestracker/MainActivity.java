@@ -6,7 +6,10 @@ import xardas.gamestracker.ui.drawer.DrawerListArrayAdapter;
 import xardas.gamestracker.ui.drawer.DrawerSelection;
 import xardas.gamestracker.ui.list.GamesListFragment;
 import xardas.gamestracker.ui.settings.SettingsFragment;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
@@ -20,6 +23,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+
 public class MainActivity extends ActionBarActivity {
 	private DrawerLayout drawerLayout;
 	private ListView drawerList;
@@ -28,16 +34,16 @@ public class MainActivity extends ActionBarActivity {
 	private CharSequence title;
 	private String[] drawerListTitles;
 	private RefreshableFragment fragment;
+	private AdView adView;
+	private boolean adLoaded;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		setProgressBarVisibility(false);
-		setProgressBarIndeterminateVisibility(false);
 		setContentView(R.layout.main_activity);
 
-		
+		adView = (AdView) findViewById(R.id.adView);
+		checkConnection();
 		GiantBombApi.setApiKey("ca8b79e01baa4e10a46ca36c648182bfe9e60c3b");
 
 		title = drawerTitle = getTitle();
@@ -50,6 +56,7 @@ public class MainActivity extends ActionBarActivity {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				checkConnection();
 				if (selected != position) {
 					selected = position;
 					if (selected == DrawerSelection.SETTINGS.getValue()) {
@@ -101,6 +108,46 @@ public class MainActivity extends ActionBarActivity {
 		default:
 			return drawerToggle.onOptionsItemSelected(item);
 		}
+	}
+
+	private void checkConnection() {
+		ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+		if (activeNetwork != null && activeNetwork.isConnected()) {
+			adView.setVisibility(View.VISIBLE);
+			if (!adLoaded) {
+				AdRequest adRequest = new AdRequest.Builder().addTestDevice("8601A23B1A531F92019924C767CFC438").build();
+				adView.loadAd(adRequest);
+				adLoaded = true;
+			}
+		} else {
+			adView.setVisibility(View.GONE);
+			adLoaded = false;
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		if (adView != null) {
+			adView.resume();
+		}
+		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		if (adView != null) {
+			adView.pause();
+		}
+		super.onPause();
+	}
+
+	@Override
+	protected void onDestroy() {
+		if (adView != null) {
+			adView.destroy();
+		}
+		super.onDestroy();
 	}
 
 	@Override
