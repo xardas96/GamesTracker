@@ -17,10 +17,10 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	protected Game game;
 	protected int pageCount;
 	protected LayoutInflater inflater;
-	protected GamesListArrayAdapter parentAdapter;
+	protected GamesListExpandableListAdapter parentAdapter;
 	protected int notifyDuration;
 
-	public TrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListArrayAdapter parentAdapter, int notifyDuration) {
+	public TrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListExpandableListAdapter parentAdapter, int notifyDuration) {
 		this.ctx = ctx;
 		this.game = game;
 		res = ctx.getResources();

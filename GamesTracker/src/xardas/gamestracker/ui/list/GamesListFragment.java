@@ -25,8 +25,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -36,7 +37,10 @@ public class GamesListFragment extends RefreshableFragment {
 	private GameDAO dao;
 	private int selection;
 	private ProgressBar progress;
+	private ExpandableListView listView;
 	private int notifyDuration;
+	private List<Integer> expandSections;
+	private boolean expanded;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,8 +48,10 @@ public class GamesListFragment extends RefreshableFragment {
 		SettingsManager manager = new SettingsManager(getActivity());
 		Settings settings = manager.loadSettings();
 		notifyDuration = settings.getDuration();
+		expandSections = settings.getAutoExpand();
 		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 		selection = getArguments().getInt("selection");
+		listView = (ExpandableListView) rootView.findViewById(R.id.gamesListView);
 		refresh(rootView);
 		return rootView;
 	}
@@ -66,20 +72,20 @@ public class GamesListFragment extends RefreshableFragment {
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 1;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
-			InfoDownloader downloader = new InfoDownloader(rootView, true);
+			InfoDownloader downloader = new InfoDownloader(rootView, false);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.NEXT_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 2;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
-			InfoDownloader downloader = new InfoDownloader(rootView, true);
+			InfoDownloader downloader = new InfoDownloader(rootView, false);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.YEAR.getValue()) {
 			GiantBombGamesQuery query = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
 			query.addFilter(FilterEnum.expected_release_year, year + "");
-			InfoDownloader downloader = new InfoDownloader(rootView, true);
+			InfoDownloader downloader = new InfoDownloader(rootView, false);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, query);
 		} else if (selection == DrawerSelection.SEARCH.getValue()) {
 			final EditText searchBox = (EditText) rootView.findViewById(R.id.searchText);
@@ -88,8 +94,7 @@ public class GamesListFragment extends RefreshableFragment {
 			showKeyboard(searchBox);
 			searchBox.setOnEditorActionListener(new OnEditorActionListener() {
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-					ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
-					listView.setAdapter(null);
+					listView.setAdapter((GamesListExpandableListAdapter) null);
 					String searchPhrase = searchBox.getText().toString();
 					searchPhrase = searchPhrase.replace(" ", "%20");
 					GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
@@ -105,11 +110,18 @@ public class GamesListFragment extends RefreshableFragment {
 				@Override
 				public void onClick(View v) {
 					showKeyboard(searchBox);
-
 				}
 			});
 		}
+	}
 
+	private void expandListSections() {
+		if (!expanded) {
+			for (Integer section : expandSections) {
+				listView.expandGroup(section);
+			}
+			expanded = true;
+		}
 	}
 
 	private void showKeyboard(EditText searchBox) {
@@ -157,20 +169,21 @@ public class GamesListFragment extends RefreshableFragment {
 		@Override
 		protected void onProgressUpdate(List<Game>... values) {
 			for (List<Game> list : values) {
-				ListView gamesListView = (ListView) rootView.findViewById(R.id.gamesListView);
-				ListAdapter adapter = gamesListView.getAdapter();
+				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 				if (adapter == null) {
-					adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, list, selection, notifyDuration);
-					gamesListView.setAdapter(adapter);
+					adapter = new GamesListExpandableListAdapter(getActivity(), list, selection, notifyDuration);
+					listView.setAdapter(adapter);
 				} else {
-					((GamesListArrayAdapter) adapter).addAll(list);
+					((GamesListExpandableListAdapter) adapter).addAll(list);
 				}
+				expandListSections();
 			}
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		protected void onPostExecute(List<Game> result) {
+			expanded = false;
 			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
 			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(result));
 		}
@@ -227,9 +240,8 @@ public class GamesListFragment extends RefreshableFragment {
 		protected void onPostExecute(Void result) {
 			progress.setProgress(progress.getMax());
 			if (updated) {
-				ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
-				ListAdapter adapter = listView.getAdapter();
-				((GamesListArrayAdapter) adapter).notifyDataSetChanged();
+				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
+				((GamesListExpandableListAdapter) adapter).notifyDataSetChanged();
 			}
 			if (getActivity() != null) {
 				Toast.makeText(getActivity(), getResources().getString(R.string.updated_tracked), Toast.LENGTH_SHORT).show();
@@ -288,18 +300,19 @@ public class GamesListFragment extends RefreshableFragment {
 				result.addAll(value);
 			}
 			progress.incrementProgressBy(result.size());
-			ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
-			ListAdapter adapter = listView.getAdapter();
+			ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 			if (adapter == null && getActivity() != null) {
-				adapter = new GamesListArrayAdapter(getActivity(), R.layout.games_list_item, R.id.titleTextView, result, selection, notifyDuration);
+				adapter = new GamesListExpandableListAdapter(getActivity(), result, selection, notifyDuration);
 				listView.setAdapter(adapter);
 			} else if (adapter != null) {
-				((GamesListArrayAdapter) adapter).addAll(result);
+				((GamesListExpandableListAdapter) adapter).addAll(result);
 			}
+			expandListSections();
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
+			expanded = false;
 			progress.setProgress(progress.getMax());
 			if (failed) {
 				if (getActivity() != null) {
@@ -307,7 +320,6 @@ public class GamesListFragment extends RefreshableFragment {
 				}
 			} else {
 				if (getActivity() != null) {
-					ListView listView = (ListView) rootView.findViewById(R.id.gamesListView);
 					ListAdapter adapter = listView.getAdapter();
 					if (adapter.getCount() == 0) {
 						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_found), Toast.LENGTH_SHORT).show();

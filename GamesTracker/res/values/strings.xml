@@ -11,6 +11,10 @@
         <item>Search</item>
         <item>Settings</item>
     </string-array>
+    <string-array name="list_categories">
+        <item>Released games</item>
+        <item>Not released games</item>
+    </string-array>
 
     <string name="drawer_open">Open drawer</string>
     <string name="drawer_close">Close drawer</string>
@@ -42,5 +46,6 @@
     <string name="updating_tracked">Updating tracked games&#8230;</string>
     <string name="updated_tracked">All tracked games updated!</string>
     <string name="refresh">Refresh</string>
+    <string name="auto_expand">Autoexpand list sections:</string>
 
 </resources>

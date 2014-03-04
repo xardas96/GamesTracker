@@ -145,6 +145,7 @@ public class GameDAO {
 		Cursor cursor = database.query(SQLiteHelper.TABLE_GAMES, allColumns, SQLiteHelper.COLUMN_ID + "=" + id, null, null, null, null);
 		cursor.moveToFirst();
 		game = parseGame(cursor);
+		game.setTracked(true);
 		close();
 		return game;
 	}

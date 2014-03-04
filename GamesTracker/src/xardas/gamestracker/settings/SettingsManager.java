@@ -3,6 +3,8 @@ package xardas.gamestracker.settings;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -13,7 +15,6 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 
 import xardas.gamestracker.R;
-
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
@@ -24,7 +25,6 @@ public class SettingsManager {
 
 	public SettingsManager(Context context) {
 		this.context = context;
-
 	}
 
 	public Settings loadSettings() {
@@ -44,6 +44,16 @@ public class SettingsManager {
 						settings.setDuration(duration);
 					}
 				}
+				Node autoExpandNode = root.selectSingleNode("expand");
+				List<Integer> autoExpandList = new ArrayList<Integer>();
+				if (autoExpandNode != null) {
+					String autoExpandValue = autoExpandNode.valueOf("@autoExpand");
+					String[] split = autoExpandValue.split(",");
+					for (String autoExpandSplit : split) {
+						autoExpandList.add(Integer.valueOf(autoExpandSplit));
+					}
+				}
+				settings.setAutoExpand(autoExpandList);
 			} catch (DocumentException e) {
 				Log.e(getClass().getSimpleName(), e.getMessage(), e);
 			}
@@ -58,6 +68,15 @@ public class SettingsManager {
 		Element notifyElement = root.addElement("notify");
 		notifyElement.addAttribute("notify", String.valueOf(settings.isNotify()));
 		notifyElement.addAttribute("duration", String.valueOf(settings.getDuration()));
+		StringBuilder autoExpandBuilder = new StringBuilder();
+		for (Integer autoExpand : settings.getAutoExpand()) {
+			autoExpandBuilder.append(autoExpand).append(",");
+		}
+		if (autoExpandBuilder.length() > 0) {
+			autoExpandBuilder.setLength(autoExpandBuilder.length() - 1);
+		}
+		Element autoExpandNode = root.addElement("expand");
+		autoExpandNode.addAttribute("autoExpand", autoExpandBuilder.toString());
 		XMLWriter writer;
 		try {
 			writer = new XMLWriter(new FileWriter(settingsFile));

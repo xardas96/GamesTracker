@@ -1,6 +1,7 @@
 package xardas.gamestracker.ui.settings;
 
 import java.io.File;
+import java.util.List;
 
 import xardas.gamestracker.R;
 import xardas.gamestracker.async.AsyncTask;
@@ -15,6 +16,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -57,6 +61,31 @@ public class SettingsFragment extends RefreshableFragment {
 
 		@Override
 		protected void onPostExecute(final Settings result) {
+			final List<Integer> autoExpand = result.getAutoExpand();
+			LinearLayout autoExpandLinearLayout = (LinearLayout) rootView.findViewById(R.id.checkBoxExpandLayout);
+			String[] categories = getResources().getStringArray(R.array.list_categories);
+			for (int i = 0; i < categories.length; i++) {
+				String category = categories[i];
+				CheckBox categoryBox = new CheckBox(getActivity());
+				categoryBox.setText(category);
+				categoryBox.setChecked(autoExpand.contains(i));
+				final int indexForListener = i;
+				categoryBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						if (isChecked) {
+							autoExpand.add((Integer) indexForListener);
+						} else {
+							autoExpand.remove((Integer) indexForListener);
+						}
+						result.setAutoExpand(autoExpand);
+						manager.saveSettings(result);
+					}
+				});
+				autoExpandLinearLayout.addView(categoryBox);
+			}
+
 			final TextView daysLabelTextView = (TextView) rootView.findViewById(R.id.daysLabelTextView);
 			final CheckBox notifyCheckBox = (CheckBox) rootView.findViewById(R.id.notifyCheckbox);
 			final SeekBar seekBar = (SeekBar) rootView.findViewById(R.id.daysSeekBar);

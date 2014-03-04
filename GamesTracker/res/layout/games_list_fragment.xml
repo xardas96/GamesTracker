@@ -32,14 +32,11 @@
             android:inputType="text"
             android:visibility="gone" />
 
-        <ListView
+        <ExpandableListView
             android:id="@+id/gamesListView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@null"
-            android:dividerHeight="5dp" >
-        </ListView>
-
+            android:layout_height="wrap_content" >
+        </ExpandableListView>
     </LinearLayout>
 
 </FrameLayout>

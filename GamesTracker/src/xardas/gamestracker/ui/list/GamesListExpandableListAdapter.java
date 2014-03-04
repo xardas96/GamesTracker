@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,13 +44,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.CheckedTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class GamesListArrayAdapter extends ArrayAdapter<Game> {
+public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
+
+	private String[] categories;
 	private List<Game> games;
+	private List<Game> outGames;
 	private int selection;
 	private Context context;
 	private Resources res;
@@ -60,13 +65,14 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
 
-	public GamesListArrayAdapter(Context context, int layoutId, int textViewResourceId, List<Game> games, int selection, int notifyDuration) {
-		super(context, layoutId, textViewResourceId, games);
-		this.games = games;
+	public GamesListExpandableListAdapter(Context context, List<Game> games, int selection, int notifyDuration) {
+		this.outGames = new ArrayList<Game>();
+		this.games = new ArrayList<Game>();
+		addAll(games);
 		this.selection = selection;
 		this.context = context;
 		res = context.getResources();
-		Collections.sort(games, new GameComparator());
+		categories = res.getStringArray(R.array.list_categories);
 		placeholder = BitmapFactory.decodeResource(res, R.drawable.controller_snes);
 		gameDAO = new GameDAO(context);
 		int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
@@ -82,17 +88,29 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 
 	public void addAll(Collection<? extends Game> collection) {
 		for (Game game : collection) {
-			if (!games.contains(game)) {
-				games.add(game);
+			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
+				if (!outGames.contains(game)) {
+					outGames.add(game);
+				}
+			} else {
+				if (!games.contains(game)) {
+					games.add(game);
+				}
 			}
 		}
 		Collections.sort(games, new GameComparator());
+		Collections.sort(outGames, new GameComparator());
 		notifyDataSetChanged();
 	}
 
 	@Override
-	public View getView(int position, View convertView, final ViewGroup parent) {
-		final Game game = games.get(position);
+	public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+		final Game game;
+		if (groupPosition == 0) {
+			game = outGames.get(childPosition);
+		} else {
+			game = games.get(childPosition);
+		}
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = inflater.inflate(R.layout.games_list_item_pager, null, false);
@@ -235,11 +253,6 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 			}
 		});
 		return convertView;
-	}
-
-	@Override
-	public Game getItem(int position) {
-		return games.get(position);
 	}
 
 	protected void buildView(View view, final Game game, boolean extraInfo) {
@@ -471,6 +484,62 @@ public class GamesListArrayAdapter extends ArrayAdapter<Game> {
 		public ImageDownloader getBitmapWorkerTask() {
 			return bitmapWorkerTaskReference.get();
 		}
+	}
+
+	@Override
+	public Object getChild(int groupPosition, int childPosition) {
+		return null;
+	}
+
+	@Override
+	public long getChildId(int groupPosition, int childPosition) {
+		return 0;
+	}
+
+	@Override
+	public int getChildrenCount(int groupPosition) {
+		return groupPosition == 0 ? outGames.size() : games.size();
+	}
+
+	@Override
+	public Object getGroup(int groupPosition) {
+		return null;
+	}
+
+	@Override
+	public int getGroupCount() {
+		return categories.length;
+	}
+
+	@Override
+	public long getGroupId(int groupPosition) {
+		return 0;
+	}
+
+	@Override
+	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = inflater.inflate(R.layout.categories_row_header, null);
+		}
+		if (groupPosition == 0) {
+			convertView.setBackgroundColor(res.getColor(R.color.green));
+		} else {
+			convertView.setBackgroundColor(res.getColor(R.color.red));
+		}
+		((CheckedTextView) convertView).setText(categories[groupPosition]);
+		((CheckedTextView) convertView).setChecked(isExpanded);
+		return convertView;
+	}
+
+	@Override
+	public boolean hasStableIds() {
+		return false;
+	}
+
+	@Override
+	public boolean isChildSelectable(int groupPosition, int childPosition) {
+		return false;
 	}
 
 }

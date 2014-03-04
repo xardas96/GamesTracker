@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -145,6 +146,22 @@ public class Game implements Parcelable {
 		return release;
 	}
 
+	public boolean isTracked() {
+		return tracked;
+	}
+
+	public void setTracked(boolean tracked) {
+		this.tracked = tracked;
+	}
+
+	public int isOutFor() {
+		DateTime now = new DateTime();
+		DateTime release = getReleaseDate().plusDays(1);
+		Days d = Days.daysBetween(now, release);
+		int days = d.getDays();
+		return days;
+	}
+
 	@Override
 	public String toString() {
 		return name;
@@ -162,14 +179,6 @@ public class Game implements Parcelable {
 	@Override
 	public int hashCode() {
 		return (int) id;
-	}
-
-	public boolean isTracked() {
-		return tracked;
-	}
-
-	public void setTracked(boolean tracked) {
-		this.tracked = tracked;
 	}
 
 	@Override
