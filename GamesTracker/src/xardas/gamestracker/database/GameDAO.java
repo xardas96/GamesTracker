@@ -53,6 +53,7 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		database.insert(SQLiteHelper.TABLE_GAMES, null, values);
+		game.setTracked(true);
 		close();
 	}
 
@@ -60,6 +61,7 @@ public class GameDAO {
 		open();
 		long id = game.getId();
 		database.delete(SQLiteHelper.TABLE_GAMES, SQLiteHelper.COLUMN_ID + " = " + id, null);
+		game.setTracked(false);
 		close();
 	}
 
