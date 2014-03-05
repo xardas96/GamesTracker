@@ -62,10 +62,11 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 	private Bitmap placeholder;
 	private GameDAO gameDAO;
 	private int notifyDuration;
+	private boolean canNotify;
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
 
-	public GamesListExpandableListAdapter(Context context, List<Game> games, int selection, int notifyDuration) {
+	public GamesListExpandableListAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify) {
 		this.outGames = new ArrayList<Game>();
 		this.games = new ArrayList<Game>();
 		addAll(games);
@@ -84,6 +85,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 			}
 		};
 		this.notifyDuration = notifyDuration;
+		this.canNotify = canNotify;
 	}
 
 	public void addAll(Collection<? extends Game> collection) {
@@ -118,7 +120,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		int currentPageItem;
 		PagerAdapter adapter;
 		if (game.isTracked()) {
-			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
+			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0 || !canNotify) {
 				adapter = new ReleasedGamesListPageAdapter(context, game, selection, this, notifyDuration);
 				currentPageItem = 0;
 			} else {
@@ -231,18 +233,22 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 				ImageButton positiveButton = (ImageButton) moreInfoView.findViewById(R.id.positiveButton);
 				ImageButton negativeButton = (ImageButton) moreInfoView.findViewById(R.id.negativeButton);
 				if (game.isTracked()) {
-					positiveButton.setImageResource(R.drawable.timer);
-					positiveButton.setBackgroundColor(res.getColor(R.color.purple));
-					positiveButton.setOnClickListener(new OnClickListener() {
+					if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0 || !canNotify) {
+						positiveButton.setVisibility(View.GONE);
+					} else {
+						positiveButton.setImageResource(R.drawable.timer);
+						positiveButton.setBackgroundColor(res.getColor(R.color.purple));
+						positiveButton.setOnClickListener(new OnClickListener() {
 
-						@Override
-						public void onClick(View v) {
-							game.setNotify(!game.isNotify());
-							gameDAO.updateGame(game);
-							notifyDataSetChanged();
-							moreInfoDialog.dismiss();
-						}
-					});
+							@Override
+							public void onClick(View v) {
+								game.setNotify(!game.isNotify());
+								gameDAO.updateGame(game);
+								notifyDataSetChanged();
+								moreInfoDialog.dismiss();
+							}
+						});
+					}
 					negativeButton.setImageResource(R.drawable.star_delete);
 					negativeButton.setBackgroundColor(res.getColor(R.color.red));
 					negativeButton.setOnClickListener(new OnClickListener() {
@@ -284,7 +290,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 
 	protected void buildView(View view, final Game game, boolean extraInfo) {
 		if (game.isTracked()) {
-			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
+			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0 || !canNotify) {
 				view.setBackgroundResource(R.drawable.games_list_item_background_released);
 			} else {
 				view.setBackgroundResource(R.drawable.games_list_item_background_untrack);

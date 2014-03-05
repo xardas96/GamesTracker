@@ -39,6 +39,7 @@ public class GamesListFragment extends RefreshableFragment {
 	private ProgressBar progress;
 	private ExpandableListView listView;
 	private int notifyDuration;
+	private boolean canNotify;
 	private List<Integer> expandSections;
 	private boolean expanded;
 
@@ -47,6 +48,7 @@ public class GamesListFragment extends RefreshableFragment {
 		final View rootView = inflater.inflate(R.layout.games_list_fragment, container, false);
 		SettingsManager manager = new SettingsManager(getActivity());
 		Settings settings = manager.loadSettings();
+		canNotify = settings.isNotify();
 		notifyDuration = settings.getDuration();
 		expandSections = settings.getAutoExpand();
 		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
@@ -171,7 +173,7 @@ public class GamesListFragment extends RefreshableFragment {
 			for (List<Game> list : values) {
 				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 				if (adapter == null) {
-					adapter = new GamesListExpandableListAdapter(getActivity(), list, selection, notifyDuration);
+					adapter = new GamesListExpandableListAdapter(getActivity(), list, selection, notifyDuration, canNotify);
 					listView.setAdapter(adapter);
 				} else {
 					((GamesListExpandableListAdapter) adapter).addAll(list);
@@ -302,7 +304,7 @@ public class GamesListFragment extends RefreshableFragment {
 			progress.incrementProgressBy(result.size());
 			ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 			if (adapter == null && getActivity() != null) {
-				adapter = new GamesListExpandableListAdapter(getActivity(), result, selection, notifyDuration);
+				adapter = new GamesListExpandableListAdapter(getActivity(), result, selection, notifyDuration, canNotify);
 				listView.setAdapter(adapter);
 			} else if (adapter != null) {
 				((GamesListExpandableListAdapter) adapter).addAll(result);
