@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Game Tracker</string>
+    <string name="app_name">GameRD</string>
 
     <string-array name="side_menu">
         <item>Tracked games</item>
