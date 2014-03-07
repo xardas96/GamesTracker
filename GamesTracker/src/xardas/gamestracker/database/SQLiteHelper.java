@@ -3,6 +3,7 @@ package xardas.gamestracker.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String TABLE_GAMES = "games";
@@ -18,9 +19,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_SITE_DETAIL_URL = "siteDetailURL";
 	public static final String COLUMN_NOTIFY = "notify";
 	public static final String COLUMN_DESCRIPTION = "description";
+	public static final String COLUMN_API_DETAIL = "apiDetailUrl";
 
 	private static final String DB_NAME = "games.db";
-	private static final int DB_VERSION = 1;
+	private static final int DB_VERSION = 2;
 	
 	private static final String DB_CREATE = "CREATE TABLE "
 			+ TABLE_GAMES + "(" 
@@ -36,7 +38,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_SITE_DETAIL_URL + " text, "
 			+ COLUMN_NOTIFY + " integer, "
 			+ COLUMN_DESCRIPTION + " text"
+			+ COLUMN_API_DETAIL + " text"
 			+ ");";
+	private static final String DB_UPDATE_API_DETAIL = "ALTER TABLE " 
+		+ TABLE_GAMES
+		+ " ADD COLUMN " 
+		+ COLUMN_API_DETAIL + " text;";	
 	
 	public SQLiteHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -49,7 +56,19 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_GAMES);
-		onCreate(db);
+		if (oldVersion < 2) {
+			Log.e("UPDATE DB", "UPDATE DB");
+			addApiDetailUrl(db);
+			Log.e("UPDATED DB", "UPDATED DB");
+		}
+	}
+
+	private void addApiDetailUrl(SQLiteDatabase db) {
+		db.execSQL(DB_UPDATE_API_DETAIL);
+		forceUpdate(db);
+	}
+
+	private void forceUpdate(SQLiteDatabase db) {
+		db.execSQL("UPDATE " + TABLE_GAMES + " SET " + COLUMN_DATE_LAST_UPDATED + " = 0");
 	}
 }

@@ -118,7 +118,7 @@ public class GamesListFragment extends RefreshableFragment {
 	}
 
 	private void expandListSections() {
-		if (!expanded) {
+		if (!expanded && listView != null) {
 			for (Integer section : expandSections) {
 				listView.expandGroup(section);
 			}

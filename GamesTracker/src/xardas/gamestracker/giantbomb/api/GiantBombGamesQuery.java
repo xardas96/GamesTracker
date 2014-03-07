@@ -27,7 +27,22 @@ public class GiantBombGamesQuery {
 	private int offset = 0;
 	private int limit = 20;
 	private int totalResults = 1;
-	private String[] fields = new String[] { "id", "date_last_updated", "expected_release_day", "date_last_updated", "original_release_date", "expected_release_month", "expected_release_quarter", "expected_release_year", "image", "name", "platforms", "deck", "site_detail_url" };
+	private String[] fields = new String[] { 
+			"id"
+			, "date_last_updated"
+			, "expected_release_day"
+			, "date_last_updated"
+			, "original_release_date"
+			, "expected_release_month"
+			, "expected_release_quarter"
+			, "expected_release_year"
+			, "image"
+			, "name"
+			, "platforms"
+			, "deck"
+			, "site_detail_url"
+			, "api_detail_url"
+			};
 	
 	public GiantBombGamesQuery() {
 		filters = new HashMap<String, String>();
@@ -96,6 +111,8 @@ public class GiantBombGamesQuery {
 			game.setDateLastUpdated(time);
 			String id = gameNode.selectSingleNode("id").getText();
 			game.setId(Long.valueOf(id));
+			String apiDetailUrl = gameNode.selectSingleNode("api_detail_url").getText();
+			game.setApiDetailURL(apiDetailUrl);
 			Node iconNode = gameNode.selectSingleNode("image/icon_url");
 			if (iconNode != null) {
 				String iconURL = iconNode.getText();

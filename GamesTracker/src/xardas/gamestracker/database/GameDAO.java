@@ -13,7 +13,21 @@ import android.database.sqlite.SQLiteDatabase;
 public class GameDAO {
 	private SQLiteDatabase database;
 	private SQLiteHelper dbHelper;
-	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_DATE_LAST_UPDATED, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER, SQLiteHelper.COLUMN_PLATFORMS, SQLiteHelper.COLUMN_ICON_URL, SQLiteHelper.COLUMN_SITE_DETAIL_URL, SQLiteHelper.COLUMN_NOTIFY, SQLiteHelper.COLUMN_DESCRIPTION };
+	private String[] allColumns = {
+			SQLiteHelper.COLUMN_ID
+			, SQLiteHelper.COLUMN_NAME
+			, SQLiteHelper.COLUMN_DATE_LAST_UPDATED
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_DAY
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_MONTH
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_YEAR
+			, SQLiteHelper.COLUMN_EXPECTED_RELEASE_QUARTER
+			, SQLiteHelper.COLUMN_PLATFORMS
+			, SQLiteHelper.COLUMN_ICON_URL
+			, SQLiteHelper.COLUMN_SITE_DETAIL_URL
+			, SQLiteHelper.COLUMN_NOTIFY
+			, SQLiteHelper.COLUMN_DESCRIPTION
+			, SQLiteHelper.COLUMN_API_DETAIL
+	};
 	private static final int LIMIT = 20;
 	private int offset = 0;
 	private boolean next = true;
@@ -52,6 +66,7 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_SITE_DETAIL_URL, game.getSiteDetailURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
+		values.put(SQLiteHelper.COLUMN_API_DETAIL, game.getApiDetailURL());
 		database.insert(SQLiteHelper.TABLE_GAMES, null, values);
 		game.setTracked(true);
 		close();
@@ -62,6 +77,7 @@ public class GameDAO {
 		long id = game.getId();
 		database.delete(SQLiteHelper.TABLE_GAMES, SQLiteHelper.COLUMN_ID + " = " + id, null);
 		game.setTracked(false);
+		game.setNotify(false);
 		close();
 	}
 
@@ -87,6 +103,7 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_SITE_DETAIL_URL, game.getSiteDetailURL());
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
+		values.put(SQLiteHelper.COLUMN_API_DETAIL, game.getApiDetailURL());
 		database.update(SQLiteHelper.TABLE_GAMES, values, SQLiteHelper.COLUMN_ID + " = " + id, null);
 		close();
 	}
@@ -167,6 +184,7 @@ public class GameDAO {
 		game.setSiteDetailURL(cursor.getString(9));
 		game.setNotify(cursor.getInt(10) == 1);
 		game.setDescription(cursor.getString(11));
+		game.setApiDetailURL(cursor.getString(12));
 		return game;
 	}
 }

@@ -22,6 +22,7 @@ public class Game implements Parcelable {
 	private String siteDetailURL;
 	private boolean notify;
 	private String description;
+	private String apiDetailURL;
 	private boolean tracked;
 
 	public Game() {
@@ -43,6 +44,7 @@ public class Game implements Parcelable {
 		notify = in.readInt() == 1;
 		description = in.readString();
 		tracked = in.readInt() == 1;
+		apiDetailURL = in.readString();
 	}
 
 	public String getName() {
@@ -154,6 +156,14 @@ public class Game implements Parcelable {
 		this.tracked = tracked;
 	}
 
+	public String getApiDetailURL() {
+		return apiDetailURL;
+	}
+
+	public void setApiDetailURL(String apiDetailURL) {
+		this.apiDetailURL = apiDetailURL;
+	}
+
 	public int isOutFor() {
 		DateTime now = new DateTime();
 		DateTime release = getReleaseDate().plusDays(1);
@@ -201,6 +211,7 @@ public class Game implements Parcelable {
 		dest.writeInt(notify ? 1 : 0);
 		dest.writeString(description);
 		dest.writeInt(tracked ? 1 : 0);
+		dest.writeString(apiDetailURL);
 	}
 
 	@SuppressWarnings("rawtypes")

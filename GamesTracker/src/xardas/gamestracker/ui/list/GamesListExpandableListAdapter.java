@@ -107,15 +107,15 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 
 	@Override
 	public View getChildView(int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			convertView = inflater.inflate(R.layout.games_list_item_pager, null, false);
+		}
 		final Game game;
 		if (groupPosition == 0) {
 			game = outGames.get(childPosition);
 		} else {
 			game = games.get(childPosition);
-		}
-		if (convertView == null) {
-			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.games_list_item_pager, null, false);
 		}
 		int currentPageItem;
 		PagerAdapter adapter;
@@ -138,17 +138,15 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 
 			@Override
 			public void onPageSelected(int position) {
+				final PagerAdapter adapter = viewPager.getAdapter();
 				if (game.isTracked()) {
 					if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
-						PagerAdapter adapter = viewPager.getAdapter();
 						if (adapter instanceof ReleasedGamesListPageAdapter && position == 1) {
 							gameDAO.deleteGame(game);
 							viewPager.postDelayed(new Runnable() {
 								public void run() {
 									if (selection == DrawerSelection.TRACKED.getValue()) {
 										outGames.remove(game);
-									} else {
-										viewPager.setCurrentItem(1, true);
 									}
 									viewPager.postDelayed(new Runnable() {
 
@@ -165,7 +163,6 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 							gameDAO.updateGame(game);
 							viewPager.postDelayed(new Runnable() {
 								public void run() {
-									viewPager.setCurrentItem(1, true);
 									viewPager.postDelayed(new Runnable() {
 
 										public void run() {
@@ -180,8 +177,6 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 								public void run() {
 									if (selection == DrawerSelection.TRACKED.getValue()) {
 										games.remove(game);
-									} else {
-										viewPager.setCurrentItem(1, true);
 									}
 									viewPager.postDelayed(new Runnable() {
 
@@ -198,7 +193,6 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 						gameDAO.addGame(game);
 						viewPager.postDelayed(new Runnable() {
 							public void run() {
-								viewPager.setCurrentItem(1, true);
 								viewPager.postDelayed(new Runnable() {
 
 									public void run() {
@@ -301,7 +295,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		ImageView timer = (ImageView) view.findViewById(R.id.timerImageView);
 		if (game.isNotify()) {
 			timer.setVisibility(View.VISIBLE);
-		} else {
+		} else if (!game.isNotify() || !game.isTracked()) {
 			timer.setVisibility(View.GONE);
 		}
 		TextView title = (TextView) view.findViewById(R.id.titleTextView);
