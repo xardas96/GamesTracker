@@ -283,6 +283,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 	}
 
 	protected void buildView(View view, final Game game, boolean extraInfo) {
+		int daysToRelease = getDateDifferenceInDays(game);
 		if (game.isTracked()) {
 			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0 || !canNotify) {
 				view.setBackgroundResource(R.drawable.games_list_item_background_released);
@@ -306,23 +307,26 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		} else {
 			platforms.setText(game.getPlatforms().toString());
 		}
-		TextView release = (TextView) view.findViewById(R.id.relDateTextView);
+		TextView releaseEstimate = (TextView) view.findViewById(R.id.relDateEstimateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
-			int daysToRelease = getDateDifferenceInDays(game);
 			if (daysToRelease <= 0 && game.getExpectedReleaseYear() != 0) {
 				title.setTextColor(res.getColor(R.color.green));
 				title.setTypeface(null, Typeface.BOLD);
 			}
 			if (game.getExpectedReleaseYear() == 0) {
-				release.setText(res.getString(R.string.unknown_release));
+				releaseEstimate.setText(res.getString(R.string.unknown_release));
 			} else {
-				release.setText(getDateDifferenceInDays(daysToRelease));
+				if (Math.abs(daysToRelease) <= 30) {
+					releaseEstimate.setText(getDateDifferenceInDays(daysToRelease));
+				} else {
+					releaseEstimate.setText(buildReleaseDate(game));
+				}
 			}
 		} else {
 			if (game.getExpectedReleaseYear() == 0) {
-				release.setText(res.getString(R.string.unknown_release));
+				releaseEstimate.setText(res.getString(R.string.unknown_release));
 			} else {
-				release.setText(buildReleaseDate(game));
+				releaseEstimate.setText(buildReleaseDate(game));
 			}
 		}
 		if (extraInfo) {
@@ -331,6 +335,11 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 			TextView siteDetailURL = (TextView) view.findViewById(R.id.linkTextView);
 			siteDetailURL.setText(game.getSiteDetailURL());
 			Linkify.addLinks(siteDetailURL, Linkify.EMAIL_ADDRESSES | Linkify.WEB_URLS);
+			releaseEstimate.setText(getDateDifferenceInDays(daysToRelease));
+			TextView releaseDate = (TextView) view.findViewById(R.id.fullDateTextView);
+			releaseDate.setVisibility(View.VISIBLE);
+			releaseDate.setText(buildReleaseDate(game));
+
 		}
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
 		loadBitmap(game.getIconURL(), cover, game);

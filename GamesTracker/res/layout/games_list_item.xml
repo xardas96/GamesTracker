@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/relDateTextView"
+        android:layout_alignRight="@+id/relDateEstimateTextView"
         android:layout_toRightOf="@+id/coverImageView"
         android:ellipsize="end"
         android:maxLines="1"
@@ -46,15 +46,15 @@
         android:id="@+id/timerImageView"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:layout_alignBottom="@+id/relDateTextView"
-        android:layout_alignTop="@+id/relDateTextView"
-        android:layout_toLeftOf="@+id/relDateTextView"
+        android:layout_alignBottom="@+id/relDateEstimateTextView"
+        android:layout_alignTop="@+id/relDateEstimateTextView"
+        android:layout_toLeftOf="@+id/relDateEstimateTextView"
         android:contentDescription="@string/image"
         android:scaleType="fitCenter"
         android:src="@drawable/timer" />
 
     <TextView
-        android:id="@+id/relDateTextView"
+        android:id="@+id/relDateEstimateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
