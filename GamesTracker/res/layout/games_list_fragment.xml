@@ -19,7 +19,9 @@
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="8dp"
+            android:indeterminateOnly="false"
+            android:progressDrawable="@drawable/progress_bar_states" />
 
         <EditText
             android:id="@+id/searchText"

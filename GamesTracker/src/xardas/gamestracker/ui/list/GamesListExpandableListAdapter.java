@@ -224,6 +224,13 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 				moreInfoDialog.setView(moreInfoView);
 				moreInfoDialog.setCancelable(true);
 				moreInfoDialog.setCanceledOnTouchOutside(true);
+				moreInfoView.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						moreInfoDialog.dismiss();
+					}
+				});
 				ImageButton positiveButton = (ImageButton) moreInfoView.findViewById(R.id.positiveButton);
 				ImageButton negativeButton = (ImageButton) moreInfoView.findViewById(R.id.negativeButton);
 				if (game.isTracked()) {
