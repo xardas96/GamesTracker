@@ -15,13 +15,16 @@ import xardas.gamestracker.settings.Settings;
 import xardas.gamestracker.settings.SettingsManager;
 import xardas.gamestracker.ui.RefreshableFragment;
 import xardas.gamestracker.ui.drawer.DrawerSelection;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -42,6 +45,7 @@ public class GamesListFragment extends RefreshableFragment {
 	private boolean canNotify;
 	private List<Integer> expandSections;
 	private boolean expanded;
+	private boolean keyboardShown;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,8 +96,7 @@ public class GamesListFragment extends RefreshableFragment {
 		} else if (selection == DrawerSelection.SEARCH.getValue()) {
 			final EditText searchBox = (EditText) rootView.findViewById(R.id.searchText);
 			searchBox.setVisibility(View.VISIBLE);
-			searchBox.requestFocus();
-			showKeyboard(searchBox);
+			setKeyboardFocus(searchBox);
 			searchBox.setOnEditorActionListener(new OnEditorActionListener() {
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					listView.setAdapter((GamesListExpandableListAdapter) null);
@@ -107,14 +110,24 @@ public class GamesListFragment extends RefreshableFragment {
 					return true;
 				}
 			});
-			searchBox.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					showKeyboard(searchBox);
-				}
-			});
 		}
+	}
+
+	@Override
+	public void onPause() {
+		hideKeyboard();
+		super.onPause();
+	}
+
+	@SuppressLint("Recycle")
+	public void setKeyboardFocus(final EditText primaryTextField) {
+		(new Handler()).postDelayed(new Runnable() {
+			public void run() {
+				primaryTextField.dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN, 0, 0, 0));
+				primaryTextField.dispatchTouchEvent(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(), MotionEvent.ACTION_UP, 0, 0, 0));
+				keyboardShown = true;
+			}
+		}, 20);
 	}
 
 	private void expandListSections() {
@@ -126,21 +139,15 @@ public class GamesListFragment extends RefreshableFragment {
 		}
 	}
 
-	private void showKeyboard(EditText searchBox) {
-		final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		if (android.os.Build.VERSION.SDK_INT < 11) {
-			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-		} else {
-			imm.showSoftInput(searchBox, InputMethodManager.SHOW_IMPLICIT);
-		}
-	}
-
 	private void hideKeyboard() {
-		final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-		if (android.os.Build.VERSION.SDK_INT < 11) {
-			imm.hideSoftInputFromWindow(getActivity().getWindow().getCurrentFocus().getWindowToken(), 0);
-		} else {
-			imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		if (keyboardShown) {
+			final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+			if (android.os.Build.VERSION.SDK_INT < 11) {
+				imm.hideSoftInputFromWindow(getActivity().getWindow().getCurrentFocus().getWindowToken(), 0);
+			} else {
+				imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			}
+			keyboardShown = false;
 		}
 	}
 

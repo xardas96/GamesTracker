@@ -117,7 +117,7 @@ public class MainActivity extends ActionBarActivity {
 			adView.setVisibility(View.VISIBLE);
 			if (!adLoaded) {
 				AdRequest adRequest = new AdRequest.Builder()
-//				.addTestDevice("8601A23B1A531F92019924C767CFC438")
+				.addTestDevice("8601A23B1A531F92019924C767CFC438")
 				.build();
 				adView.loadAd(adRequest);
 				adLoaded = true;
