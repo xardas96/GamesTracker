@@ -59,7 +59,7 @@ public class GiantBombGamesQuery {
 		filters.put(field.name(), value);
 		return this;
 	}
-
+	
 	public List<Game> execute(boolean untilToday) throws Exception {
 		List<Game> games = new ArrayList<Game>();
 		Document doc = DocumentHelper.parseText(getResponse());

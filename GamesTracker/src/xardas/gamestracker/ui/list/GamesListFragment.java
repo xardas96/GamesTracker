@@ -46,6 +46,7 @@ public class GamesListFragment extends RefreshableFragment {
 	private List<Integer> expandSections;
 	private boolean expanded;
 	private boolean keyboardShown;
+	private static final int MONTH_ARRAY_MAX = 14;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -88,11 +89,20 @@ public class GamesListFragment extends RefreshableFragment {
 			InfoDownloader downloader = new InfoDownloader(rootView, false);
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.YEAR.getValue()) {
-			GiantBombGamesQuery query = GiantBombApi.createQuery();
 			int year = calendar.get(Calendar.YEAR);
-			query.addFilter(FilterEnum.expected_release_year, year + "");
+			int month = calendar.get(Calendar.MONTH) + 1;
+			GiantBombGamesQuery[] queries = new GiantBombGamesQuery[MONTH_ARRAY_MAX - month];
+			for (int i = month; i < MONTH_ARRAY_MAX - 1; i++) {
+				GiantBombGamesQuery query = GiantBombApi.createQuery();
+				query.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + i);
+				queries[i - month] = query;
+			}
+			// TODO giantbomb legacy
+			GiantBombGamesQuery query = GiantBombApi.createQuery();
+			query.addFilter(FilterEnum.original_release_date, "2014-01-01 00:00:00".replace(" ", "%20"));
+			queries[MONTH_ARRAY_MAX - 1 - month] = query;
 			InfoDownloader downloader = new InfoDownloader(rootView, false);
-			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, query);
+			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, queries);
 		} else if (selection == DrawerSelection.SEARCH.getValue()) {
 			final EditText searchBox = (EditText) rootView.findViewById(R.id.searchText);
 			searchBox.setVisibility(View.VISIBLE);
@@ -264,6 +274,9 @@ public class GamesListFragment extends RefreshableFragment {
 		private ProgressBar progress;
 		private boolean failed;
 		private int totalResults = -1;
+		private boolean maxProgressSet;
+		private boolean multipleQueries;
+		private boolean lastIteration;
 
 		public InfoDownloader(View rootView, boolean untilToday) {
 			this.rootView = rootView;
@@ -282,21 +295,38 @@ public class GamesListFragment extends RefreshableFragment {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected Void doInBackground(GiantBombGamesQuery... params) {
-			GiantBombGamesQuery query = params[0];
-			while (!query.reachedOffset() && !failed) {
-				List<Game> result;
-				try {
-					result = query.execute(untilToday);
-					if (totalResults == -1) {
-						totalResults = query.getTotalResults();
-						progress.setMax(totalResults);
+			multipleQueries = params.length > 1;
+			for (int i = 0; i < params.length; i++) {
+				lastIteration = i == params.length - 1;
+				GiantBombGamesQuery query = params[i];
+				List<Game> results = new ArrayList<Game>();
+				while (!query.reachedOffset() && !failed) {
+					List<Game> result;
+					try {
+						result = query.execute(untilToday);
+						if (!maxProgressSet && !multipleQueries) {
+							totalResults = query.getTotalResults();
+							progress.setMax(totalResults);
+							maxProgressSet = true;
+						} else if (!maxProgressSet && multipleQueries) {
+							progress.setMax(params.length);
+							maxProgressSet = true;
+						}
+						for (Game game : result) {
+							game.setTracked(dao.isTracked(game));
+						}
+						if (multipleQueries) {
+							results.addAll(result);
+						}
+						if (!multipleQueries || lastIteration) {
+							publishProgress(result);
+						}
+					} catch (Exception ex) {
+						failed = true;
 					}
-					for (Game game : result) {
-						game.setTracked(dao.isTracked(game));
-					}
-					publishProgress(result);
-				} catch (Exception ex) {
-					failed = true;
+				}
+				if (multipleQueries && !failed || lastIteration && !failed) {
+					publishProgress(results);
 				}
 			}
 			return null;
@@ -308,13 +338,21 @@ public class GamesListFragment extends RefreshableFragment {
 			for (List<Game> value : values) {
 				result.addAll(value);
 			}
-			progress.incrementProgressBy(result.size());
+			if (multipleQueries) {
+				if (lastIteration) {
+					progress.setMax(progress.getMax() + 1);
+				}
+				progress.incrementProgressBy(1);
+			} else {
+				progress.incrementProgressBy(result.size());
+			}
 			ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 			if (adapter == null && getActivity() != null) {
 				adapter = new GamesListExpandableListAdapter(getActivity(), result, selection, notifyDuration, canNotify);
 				listView.setAdapter(adapter);
 			} else if (adapter != null) {
 				((GamesListExpandableListAdapter) adapter).addAll(result);
+
 			}
 			expandListSections();
 		}
