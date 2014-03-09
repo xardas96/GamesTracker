@@ -342,10 +342,14 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 			TextView siteDetailURL = (TextView) view.findViewById(R.id.linkTextView);
 			siteDetailURL.setText(game.getSiteDetailURL());
 			Linkify.addLinks(siteDetailURL, Linkify.EMAIL_ADDRESSES | Linkify.WEB_URLS);
-			releaseEstimate.setText(getDateDifferenceInDays(daysToRelease));
-			TextView releaseDate = (TextView) view.findViewById(R.id.fullDateTextView);
-			releaseDate.setVisibility(View.VISIBLE);
-			releaseDate.setText(buildReleaseDate(game));
+			if (game.getExpectedReleaseYear() == 0) {
+				releaseEstimate.setText(res.getString(R.string.unknown_release));
+			} else {
+				releaseEstimate.setText(getDateDifferenceInDays(daysToRelease));
+				TextView releaseDate = (TextView) view.findViewById(R.id.fullDateTextView);
+				releaseDate.setVisibility(View.VISIBLE);
+				releaseDate.setText(buildReleaseDate(game));
+			}
 
 		}
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);

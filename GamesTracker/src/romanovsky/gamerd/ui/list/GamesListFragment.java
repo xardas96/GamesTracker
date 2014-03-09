@@ -47,6 +47,8 @@ public class GamesListFragment extends RefreshableFragment {
 	private boolean expanded;
 	private boolean keyboardShown;
 	private static final int MONTH_ARRAY_MAX = 14;
+	@SuppressWarnings("rawtypes")
+	private AsyncTask workingTask;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,6 +75,7 @@ public class GamesListFragment extends RefreshableFragment {
 		Calendar calendar = Calendar.getInstance();
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			GamesListInitializer initializer = new GamesListInitializer(rootView);
+			workingTask = initializer;
 			initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
@@ -80,6 +83,7 @@ public class GamesListFragment extends RefreshableFragment {
 			int month = calendar.get(Calendar.MONTH) + 1;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
 			InfoDownloader downloader = new InfoDownloader(rootView, false);
+			workingTask = downloader;
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.NEXT_MONTH.getValue()) {
 			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
@@ -87,6 +91,7 @@ public class GamesListFragment extends RefreshableFragment {
 			int month = calendar.get(Calendar.MONTH) + 2;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
 			InfoDownloader downloader = new InfoDownloader(rootView, false);
+			workingTask = downloader;
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.YEAR.getValue()) {
 			int year = calendar.get(Calendar.YEAR);
@@ -102,6 +107,7 @@ public class GamesListFragment extends RefreshableFragment {
 			query.addFilter(FilterEnum.original_release_date, "2014-01-01 00:00:00".replace(" ", "%20"));
 			queries[MONTH_ARRAY_MAX - 1 - month] = query;
 			InfoDownloader downloader = new InfoDownloader(rootView, false);
+			workingTask = downloader;
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, queries);
 		} else if (selection == DrawerSelection.SEARCH.getValue()) {
 			final EditText searchBox = (EditText) rootView.findViewById(R.id.searchText);
@@ -116,6 +122,7 @@ public class GamesListFragment extends RefreshableFragment {
 					nameQuery.addFilter(FilterEnum.name, searchPhrase);
 					hideKeyboard();
 					InfoDownloader downloader = new InfoDownloader(rootView, false);
+					workingTask = downloader;
 					downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, nameQuery);
 					return true;
 				}
@@ -126,6 +133,9 @@ public class GamesListFragment extends RefreshableFragment {
 	@Override
 	public void onPause() {
 		hideKeyboard();
+		if (workingTask != null) {
+			workingTask.cancel(true);
+		}
 		super.onPause();
 	}
 
@@ -195,20 +205,24 @@ public class GamesListFragment extends RefreshableFragment {
 				} else {
 					((GamesListExpandableListAdapter) adapter).addAll(list);
 				}
-				expandListSections();
+				if (!isCancelled()) {
+					expandListSections();
+				}
 			}
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
 		protected void onPostExecute(List<Game> result) {
+			workingTask = null;
 			expanded = false;
-			if(result.isEmpty()) {
+			if (result.isEmpty()) {
 				TextView nothingTracked = (TextView) rootView.findViewById(R.id.nothingTrackedTextView);
 				nothingTracked.setVisibility(View.VISIBLE);
 			} else {
-			TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
-			updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(result));
+				TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
+				workingTask = updater;
+				updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(result));
 			}
 		}
 
@@ -236,21 +250,23 @@ public class GamesListFragment extends RefreshableFragment {
 			List<Game> games = params[0];
 			progress.setMax(games.size());
 			for (Game game : games) {
-				GiantBombGamesQuery gameQuery = GiantBombApi.createQuery();
-				gameQuery.addFilter(FilterEnum.id, game.getId() + "");
-				try {
-					Game newGame = gameQuery.execute(false).get(0);
-					if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
-						dao.updateGame(newGame);
-						updated = true;
-						Log.i("updated", newGame.getName());
-					} else {
-						Log.i("not updated", newGame.getName());
+				if (!isCancelled()) {
+					GiantBombGamesQuery gameQuery = GiantBombApi.createQuery();
+					gameQuery.addFilter(FilterEnum.id, game.getId() + "");
+					try {
+						Game newGame = gameQuery.execute(false).get(0);
+						if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
+							dao.updateGame(newGame);
+							updated = true;
+							Log.i("updated", newGame.getName());
+						} else {
+							Log.i("not updated", newGame.getName());
+						}
+					} catch (Exception e) {
+						Log.e("not updated", e.getMessage(), e);
 					}
-				} catch (Exception e) {
-					Log.e("not updated", e.getMessage(), e);
+					publishProgress((Void) null);
 				}
-				publishProgress((Void) null);
 			}
 			return null;
 		}
@@ -262,13 +278,16 @@ public class GamesListFragment extends RefreshableFragment {
 
 		@Override
 		protected void onPostExecute(Void result) {
-			progress.setProgress(progress.getMax());
-			if (updated) {
-				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
-				((GamesListExpandableListAdapter) adapter).notifyDataSetChanged();
-			}
-			if (getActivity() != null) {
-				Toast.makeText(getActivity(), getResources().getString(R.string.updated_tracked), Toast.LENGTH_SHORT).show();
+			workingTask = null;
+			if (!isCancelled()) {
+				progress.setProgress(progress.getMax());
+				if (updated) {
+					ExpandableListAdapter adapter = listView.getExpandableListAdapter();
+					((GamesListExpandableListAdapter) adapter).notifyDataSetChanged();
+				}
+				if (getActivity() != null) {
+					Toast.makeText(getActivity(), getResources().getString(R.string.updated_tracked), Toast.LENGTH_SHORT).show();
+				}
 			}
 		}
 	}
@@ -359,24 +378,29 @@ public class GamesListFragment extends RefreshableFragment {
 				((GamesListExpandableListAdapter) adapter).addAll(result);
 
 			}
-			expandListSections();
+			if (!isCancelled()) {
+				expandListSections();
+			}
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			expanded = false;
-			progress.setProgress(progress.getMax());
-			if (failed) {
-				if (getActivity() != null) {
-					Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_SHORT).show();
-				}
-			} else {
-				if (getActivity() != null) {
-					ListAdapter adapter = listView.getAdapter();
-					if (adapter.getCount() == 0) {
-						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_found), Toast.LENGTH_SHORT).show();
-					} else {
-						Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_SHORT).show();
+			workingTask = null;
+			if (!isCancelled()) {
+				expanded = false;
+				progress.setProgress(progress.getMax());
+				if (failed) {
+					if (getActivity() != null) {
+						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					if (getActivity() != null) {
+						ListAdapter adapter = listView.getAdapter();
+						if (adapter.getCount() == 0) {
+							Toast.makeText(getActivity(), getResources().getString(R.string.no_games_found), Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(getActivity(), getResources().getString(R.string.all_loaded), Toast.LENGTH_SHORT).show();
+						}
 					}
 				}
 			}
