@@ -22,6 +22,9 @@ import romanovsky.gamerd.database.GameDAO;
 import romanovsky.gamerd.giantbomb.api.Game;
 import romanovsky.gamerd.giantbomb.api.GameComparator;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
+import romanovsky.gamerd.ui.list.pager.adapters.ReleasedGamesListPageAdapter;
+import romanovsky.gamerd.ui.list.pager.adapters.TrackedGamesListPageAdapter;
+import romanovsky.gamerd.ui.list.pager.adapters.UntrackedGamesListPageAdapter;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
@@ -289,7 +292,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		return convertView;
 	}
 
-	protected void buildView(View view, final Game game, boolean extraInfo) {
+	public void buildView(View view, final Game game, boolean extraInfo) {
 		int daysToRelease = getDateDifferenceInDays(game);
 		if (game.isTracked()) {
 			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0 || !canNotify) {

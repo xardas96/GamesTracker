@@ -1,7 +1,8 @@
-package romanovsky.gamerd.ui.list;
+package romanovsky.gamerd.ui.list.pager.adapters;
 
 import romanovsky.gamerd.R;
 import romanovsky.gamerd.giantbomb.api.Game;
+import romanovsky.gamerd.ui.list.GamesListExpandableListAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.v4.view.PagerAdapter;

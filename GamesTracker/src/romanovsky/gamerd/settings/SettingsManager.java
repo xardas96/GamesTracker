@@ -48,9 +48,11 @@ public class SettingsManager {
 				List<Integer> autoExpandList = new ArrayList<Integer>();
 				if (autoExpandNode != null) {
 					String autoExpandValue = autoExpandNode.valueOf("@autoExpand");
-					String[] split = autoExpandValue.split(",");
-					for (String autoExpandSplit : split) {
-						autoExpandList.add(Integer.valueOf(autoExpandSplit));
+					if (!autoExpandValue.equals("")) {
+						String[] split = autoExpandValue.split(",");
+						for (String autoExpandSplit : split) {
+							autoExpandList.add(Integer.valueOf(autoExpandSplit));
+						}
 					}
 				}
 				settings.setAutoExpand(autoExpandList);
