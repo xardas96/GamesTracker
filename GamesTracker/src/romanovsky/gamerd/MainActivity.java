@@ -15,6 +15,7 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -104,6 +105,13 @@ public class MainActivity extends ActionBarActivity {
 			if (fragment != null) {
 				fragment.refresh(null);
 			}
+			return true;
+		case R.id.test:
+			View menuItemView = findViewById(R.id.test); // SAME ID AS MENU ID
+		    PopupMenu popupMenu = new PopupMenu(this, menuItemView); 
+		    popupMenu.inflate(R.menu.menu);
+		    // ...
+		    popupMenu.show();
 			return true;
 		default:
 			return drawerToggle.onOptionsItemSelected(item);

@@ -7,5 +7,10 @@
         android:icon="@drawable/refresh"
         android:title="@string/refresh"
         compat:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/test"
+        android:icon="@drawable/filter"
+        android:title="@string/filters"
+        compat:showAsAction="ifRoom"/>
 
 </menu>
