@@ -393,7 +393,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 	}
 
 	private void addBitmapToMemoryCache(Long key, Bitmap bitmap) {
-		if (getBitmapFromMemCache(key) == null) {
+		if (getBitmapFromMemCache(key) == null && key != null) {
 			cache.put(key, bitmap);
 		}
 	}
