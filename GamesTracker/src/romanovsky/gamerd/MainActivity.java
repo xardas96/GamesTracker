@@ -131,7 +131,6 @@ public class MainActivity extends ActionBarActivity {
 					public int compare(Platform lhs, Platform rhs) {
 						return lhs.getName().compareTo(rhs.getName());
 					}
-
 				});
 				View menuItemView = findViewById(R.id.filter);
 				PopupMenu popup = new PopupMenu(this, menuItemView);
@@ -166,7 +165,6 @@ public class MainActivity extends ActionBarActivity {
 						return true;
 					}
 				});
-
 				popup.show();
 			}
 			return true;

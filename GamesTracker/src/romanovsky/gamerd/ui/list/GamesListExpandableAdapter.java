@@ -40,7 +40,8 @@ import android.support.v4.util.LruCache;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.util.Linkify;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -374,8 +375,9 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 			TextView extraInfoTextView = (TextView) view.findViewById(R.id.descriptionTextView);
 			extraInfoTextView.setText(game.getDescription());
 			TextView siteDetailURL = (TextView) view.findViewById(R.id.linkTextView);
-			siteDetailURL.setText(game.getSiteDetailURL());
-			Linkify.addLinks(siteDetailURL, Linkify.EMAIL_ADDRESSES | Linkify.WEB_URLS);
+			String href = "<a href=\"" + game.getSiteDetailURL() + "\">" + res.getString(R.string.more_info) + "</a>";
+			siteDetailURL.setText(Html.fromHtml(href));
+			siteDetailURL.setMovementMethod(LinkMovementMethod.getInstance());
 			if (game.getExpectedReleaseYear() == 0) {
 				releaseEstimate.setText(res.getString(R.string.unknown_release));
 			} else {
