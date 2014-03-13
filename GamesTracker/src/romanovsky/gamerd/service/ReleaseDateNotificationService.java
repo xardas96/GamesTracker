@@ -53,7 +53,7 @@ public class ReleaseDateNotificationService extends Service {
 				DateTime releaseDate = game.getReleaseDate();
 				Days days = Days.daysBetween(now, releaseDate);
 				int daysDifference = days.getDays();
-				if (toNotify >= daysDifference) {
+				if (toNotify >= daysDifference && game.getExpectedReleaseYear() != 0) {
 					Bitmap largeIcon;
 					File cache = new File(getCacheDir().getAbsolutePath() + File.separator + game.getId());
 					if (cache.exists()) {
