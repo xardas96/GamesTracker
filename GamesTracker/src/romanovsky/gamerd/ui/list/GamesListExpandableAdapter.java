@@ -102,6 +102,10 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		this.canNotify = canNotify;
 	}
 
+	public void createFilter() {
+		filter = new GamesListPlatformFilter(this);
+	}
+
 	public void addAll(Collection<? extends Game> collection) {
 		for (Game game : collection) {
 			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
@@ -636,9 +640,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 
 	@Override
 	public Filter getFilter() {
-		if (filter == null) {
-			filter = new GamesListPlatformFilter(this);
-		}
 		return filter;
 	}
 

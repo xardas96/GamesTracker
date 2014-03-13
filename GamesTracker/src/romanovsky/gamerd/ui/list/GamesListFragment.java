@@ -18,6 +18,7 @@ import romanovsky.gamerd.settings.Settings;
 import romanovsky.gamerd.settings.SettingsManager;
 import romanovsky.gamerd.ui.CustomFragment;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
+import romanovsky.gamerd.ui.list.filters.ListFilterType;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -175,8 +176,24 @@ public class GamesListFragment extends CustomFragment {
 		}
 	}
 
+	private String createFilter() {
+		PlatformDAO platformDAO = new PlatformDAO(getActivity());
+		List<Platform> allPlatforms = platformDAO.getAllPlatforms();
+		StringBuilder sb = new StringBuilder();
+		for (Platform p : allPlatforms) {
+			if (p.isFiltered()) {
+				sb.append(p.getAbbreviation()).append(",");
+			}
+		}
+		if (sb.length() != 0) {
+			sb.setLength(sb.length() - 1);
+		}
+		return sb.toString();
+	}
+
 	private class GamesListInitializer extends AsyncTask<Void, List<Game>, List<Game>> {
 		private View rootView;
+		private String filter;
 
 		public GamesListInitializer(View rootView) {
 			this.rootView = rootView;
@@ -185,6 +202,7 @@ public class GamesListFragment extends CustomFragment {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected List<Game> doInBackground(Void... params) {
+			filter = createFilter();
 			try {
 				Thread.sleep(300);
 			} catch (InterruptedException e) {
@@ -205,10 +223,12 @@ public class GamesListFragment extends CustomFragment {
 				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 				if (adapter == null) {
 					adapter = new GamesListExpandableAdapter(getActivity(), list, selection, notifyDuration, canNotify);
+					((GamesListExpandableAdapter) adapter).createFilter();
 					listView.setAdapter(adapter);
 				} else {
 					((GamesListExpandableAdapter) adapter).addAll(list);
 				}
+				filter(ListFilterType.GENRES.getValue(), filter);
 				if (!isCancelled()) {
 					expandListSections();
 				}
@@ -305,6 +325,7 @@ public class GamesListFragment extends CustomFragment {
 		private boolean maxProgressSet;
 		private boolean multipleQueries;
 		private boolean lastIteration;
+		private String filter;
 
 		public InfoDownloader(View rootView, boolean untilToday) {
 			this.rootView = rootView;
@@ -325,6 +346,7 @@ public class GamesListFragment extends CustomFragment {
 		protected Void doInBackground(GiantBombGamesQuery... params) {
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
+			filter = createFilter();
 			multipleQueries = params.length > 1;
 			for (int i = 0; i < params.length; i++) {
 				lastIteration = i == params.length - 1;
@@ -387,11 +409,12 @@ public class GamesListFragment extends CustomFragment {
 			ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 			if (adapter == null && getActivity() != null) {
 				adapter = new GamesListExpandableAdapter(getActivity(), result, selection, notifyDuration, canNotify);
+				((GamesListExpandableAdapter) adapter).createFilter();
 				listView.setAdapter(adapter);
 			} else if (adapter != null) {
 				((GamesListExpandableAdapter) adapter).addAll(result);
-
 			}
+			filter(ListFilterType.GENRES.getValue(), filter);
 			if (!isCancelled()) {
 				expandListSections();
 			}

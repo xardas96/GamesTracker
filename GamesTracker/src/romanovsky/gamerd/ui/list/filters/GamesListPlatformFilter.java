@@ -48,9 +48,11 @@ public class GamesListPlatformFilter extends Filter {
 	@Override
 	protected void publishResults(CharSequence constraint, FilterResults results) {
 		Pair<List, List> pair = (Pair) results.values;
-		adapter.setGames(pair.first);
-		adapter.setOutGames(pair.second);
-		adapter.sort(new GameReleaseDateComparator());
-		adapter.notifyDataSetChanged();
+		if (pair != null) {
+			adapter.setGames(pair.first);
+			adapter.setOutGames(pair.second);
+			adapter.sort(new GameReleaseDateComparator());
+			adapter.notifyDataSetChanged();
+		}
 	}
 }
