@@ -1,7 +1,7 @@
 package romanovsky.gamerd.service;
 
-import romanovsky.gamerd.database.GameDAO;
-import romanovsky.gamerd.giantbomb.api.Game;
+import romanovsky.gamerd.database.dao.GameDAO;
+import romanovsky.gamerd.giantbomb.api.core.Game;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;

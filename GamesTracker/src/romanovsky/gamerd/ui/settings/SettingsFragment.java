@@ -7,7 +7,7 @@ import romanovsky.gamerd.R;
 import romanovsky.gamerd.async.AsyncTask;
 import romanovsky.gamerd.settings.Settings;
 import romanovsky.gamerd.settings.SettingsManager;
-import romanovsky.gamerd.ui.RefreshableFragment;
+import romanovsky.gamerd.ui.CustomFragment;
 import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,7 +24,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SettingsFragment extends RefreshableFragment {
+public class SettingsFragment extends CustomFragment {
 	private int seekBarValue;
 
 	@Override
@@ -181,5 +181,9 @@ public class SettingsFragment extends RefreshableFragment {
 
 	@Override
 	public void refresh(View view) {
+	}
+
+	@Override
+	public void filter(int filterType, String filter) {
 	}
 }

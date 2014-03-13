@@ -24,22 +24,6 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/white" />
 
-    <TextView
-        android:id="@+id/platformsTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/titleTextView"
-        android:layout_alignRight="@+id/titleTextView"
-        android:layout_below="@+id/titleTextView"
-        android:layout_marginLeft="5dp"
-        android:ellipsize="marquee"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:scrollHorizontally="true"
-        android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
     <ImageView
         android:id="@+id/coverImageView"
         android:layout_width="64dp"
@@ -64,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/platformsTextView"
+        android:layout_below="@+id/flowLayout"
         android:layout_marginRight="10dp"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -122,5 +106,15 @@
         android:layout_below="@+id/scrollView"
         android:layout_marginBottom="20dp"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <romanovsky.gamerd.ui.FlowLayout
+        android:id="@+id/flowLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/titleTextView"
+        android:layout_alignRight="@+id/titleTextView"
+        android:layout_below="@+id/titleTextView" >
+
+    </romanovsky.gamerd.ui.FlowLayout>
 
 </RelativeLayout>

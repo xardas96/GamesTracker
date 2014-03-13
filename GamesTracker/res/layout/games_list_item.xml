@@ -17,25 +17,20 @@
         android:maxLines="1"
         android:scrollHorizontally="true"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/platformsTextView"
-        android:layout_width="wrap_content"
+    
+    <romanovsky.gamerd.ui.FlowLayout
+        android:id="@+id/flowLayout"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/titleTextView"
-        android:layout_alignRight="@+id/titleTextView"
         android:layout_below="@+id/titleTextView"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:scrollHorizontally="true"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:layout_toRightOf="@+id/coverImageView" />
 
     <ImageView
         android:id="@+id/coverImageView"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentTop="false"
         android:contentDescription="@string/image"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"

@@ -1,8 +1,8 @@
 package romanovsky.gamerd.ui.list.pager.adapters;
 
 import romanovsky.gamerd.R;
-import romanovsky.gamerd.giantbomb.api.Game;
-import romanovsky.gamerd.ui.list.GamesListExpandableListAdapter;
+import romanovsky.gamerd.giantbomb.api.core.Game;
+import romanovsky.gamerd.ui.list.GamesListExpandableAdapter;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 public class ReleasedGamesListPageAdapter extends TrackedGamesListPageAdapter {
 
-	public ReleasedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListExpandableListAdapter parentAdapter, int notifyDuration) {
+	public ReleasedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListExpandableAdapter parentAdapter, int notifyDuration) {
 		super(ctx, game, selection, parentAdapter, notifyDuration);
 		pageCount = 2;
 	}

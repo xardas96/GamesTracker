@@ -1,4 +1,4 @@
-package romanovsky.gamerd.giantbomb.api;
+package romanovsky.gamerd.giantbomb.api.core;
 
 import java.util.ArrayList;
 import java.util.List;

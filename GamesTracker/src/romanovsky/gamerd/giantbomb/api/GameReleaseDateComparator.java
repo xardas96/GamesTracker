@@ -4,7 +4,9 @@ import java.util.Comparator;
 
 import org.joda.time.DateTime;
 
-public class GameComparator implements Comparator<Game> {
+import romanovsky.gamerd.giantbomb.api.core.Game;
+
+public class GameReleaseDateComparator implements Comparator<Game> {
 
 	@Override
 	public int compare(Game lhs, Game rhs) {

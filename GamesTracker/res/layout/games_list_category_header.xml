@@ -6,7 +6,6 @@
     android:layout_marginLeft="5dp"
     android:gravity="center_vertical|center_horizontal"
     android:padding="10dp"
-    android:text="test"
     android:textColor="#FFFFFF"
     android:textSize="14sp"
     android:textStyle="bold" />

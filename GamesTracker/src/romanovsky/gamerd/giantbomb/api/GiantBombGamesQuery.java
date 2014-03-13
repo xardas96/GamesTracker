@@ -8,16 +8,22 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.joda.time.DateTime;
+
+import romanovsky.gamerd.giantbomb.api.core.Game;
+import romanovsky.gamerd.giantbomb.api.core.Platform;
 
 public class GiantBombGamesQuery {
 	private static final String URL = "http://www.giantbomb.com/api/games/";
@@ -43,11 +49,13 @@ public class GiantBombGamesQuery {
 			, "site_detail_url"
 			, "api_detail_url"
 			};
+	private Set<Platform> discoveredPlatforms;
 	
 	public GiantBombGamesQuery() {
 		filters = new HashMap<String, String>();
 		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 		offset = 0;
+		discoveredPlatforms = new HashSet<Platform>();
 	}
 
 	public GiantBombGamesQuery setApiKey(String apiKey) {
@@ -81,6 +89,10 @@ public class GiantBombGamesQuery {
 
 	public int getTotalResults() {
 		return totalResults;
+	}
+	
+	public Set<Platform> getDiscoveredPlatforms() {
+		return discoveredPlatforms;
 	}
 
 	public String getResponse() throws Exception {
@@ -126,8 +138,15 @@ public class GiantBombGamesQuery {
 			List<Node> platforms = gameNode.selectNodes("platforms/platform");
 			List<String> platformsList = new ArrayList<String>();
 			for (Node platform : platforms) {
-				platformsList.add(platform.selectSingleNode("abbreviation").getText());
+				Platform platf = new Platform();
+				String platformName = platform.selectSingleNode("name").getText();
+				String platformAbbreviation = platform.selectSingleNode("abbreviation").getText();
+				platf.setName(platformName);
+				platf.setAbbreviation(platformAbbreviation);
+				discoveredPlatforms.add(platf);
+				platformsList.add(platformAbbreviation);
 			}
+			Collections.sort(platformsList);
 			game.setPlatforms(platformsList);
 			String description = gameNode.selectSingleNode("deck").getText();
 			game.setDescription(description);

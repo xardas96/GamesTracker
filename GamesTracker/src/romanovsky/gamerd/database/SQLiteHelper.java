@@ -20,9 +20,13 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_NOTIFY = "notify";
 	public static final String COLUMN_DESCRIPTION = "description";
 	public static final String COLUMN_API_DETAIL = "apiDetailUrl";
+	
+	public static final String TABLE_PLATFORMS = "platforms";
+	public static final String COLUMN_ABBREVIATION = "abbreviation";
+	public static final String COLUMN_FILTERED = "filtered";
 
 	private static final String DB_NAME = "games.db";
-	private static final int DB_VERSION = 2;
+	private static final int DB_VERSION = 3;
 	
 	private static final String DB_CREATE = "CREATE TABLE "
 			+ TABLE_GAMES + "(" 
@@ -44,6 +48,13 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 		+ TABLE_GAMES
 		+ " ADD COLUMN " 
 		+ COLUMN_API_DETAIL + " text;";	
+	private static final String DB_CREATE_PLATFORMS = "CREATE TABLE "
+			+ TABLE_PLATFORMS + "(" 
+			+ COLUMN_ID + " integer primary key autoincrement, "
+			+ COLUMN_NAME + " text not null, "
+			+ COLUMN_ABBREVIATION + " text, "
+			+ COLUMN_FILTERED + " integer"
+			+ ");";
 	
 	public SQLiteHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -52,15 +63,23 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(DB_CREATE);
+		createPlatforms(db);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		if (oldVersion < 2) {
-			Log.e("UPDATE DB", "UPDATE DB");
 			addApiDetailUrl(db);
+		}
+		if (oldVersion < 3) {
+			Log.e("UPDATE DB", "UPDATE DB");
+			createPlatforms(db);
 			Log.e("UPDATED DB", "UPDATED DB");
 		}
+	}
+	
+	private void createPlatforms(SQLiteDatabase db) {
+		db.execSQL(DB_CREATE_PLATFORMS);
 	}
 
 	private void addApiDetailUrl(SQLiteDatabase db) {

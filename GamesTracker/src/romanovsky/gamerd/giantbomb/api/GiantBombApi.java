@@ -1,5 +1,6 @@
 package romanovsky.gamerd.giantbomb.api;
 
+
 public abstract class GiantBombApi {
 	private static String apiKey;
 

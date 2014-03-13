@@ -9,8 +9,8 @@ import org.joda.time.Days;
 
 import romanovsky.gamerd.MainActivity;
 import romanovsky.gamerd.R;
-import romanovsky.gamerd.database.GameDAO;
-import romanovsky.gamerd.giantbomb.api.Game;
+import romanovsky.gamerd.database.dao.GameDAO;
+import romanovsky.gamerd.giantbomb.api.core.Game;
 import romanovsky.gamerd.settings.Settings;
 import romanovsky.gamerd.settings.SettingsManager;
 import android.app.Notification;

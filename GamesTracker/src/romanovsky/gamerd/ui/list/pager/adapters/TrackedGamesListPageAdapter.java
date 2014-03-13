@@ -1,8 +1,8 @@
 package romanovsky.gamerd.ui.list.pager.adapters;
 
 import romanovsky.gamerd.R;
-import romanovsky.gamerd.giantbomb.api.Game;
-import romanovsky.gamerd.ui.list.GamesListExpandableListAdapter;
+import romanovsky.gamerd.giantbomb.api.core.Game;
+import romanovsky.gamerd.ui.list.GamesListExpandableAdapter;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.v4.view.PagerAdapter;
@@ -18,10 +18,10 @@ public class TrackedGamesListPageAdapter extends PagerAdapter {
 	protected Game game;
 	protected int pageCount;
 	protected LayoutInflater inflater;
-	protected GamesListExpandableListAdapter parentAdapter;
+	protected GamesListExpandableAdapter parentAdapter;
 	protected int notifyDuration;
 
-	public TrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListExpandableListAdapter parentAdapter, int notifyDuration) {
+	public TrackedGamesListPageAdapter(Context ctx, Game game, int selection, GamesListExpandableAdapter parentAdapter, int notifyDuration) {
 		this.ctx = ctx;
 		this.game = game;
 		res = ctx.getResources();

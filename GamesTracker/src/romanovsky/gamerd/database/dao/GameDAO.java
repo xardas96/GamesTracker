@@ -1,10 +1,11 @@
-package romanovsky.gamerd.database;
+package romanovsky.gamerd.database.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import romanovsky.gamerd.giantbomb.api.Game;
+import romanovsky.gamerd.database.SQLiteHelper;
+import romanovsky.gamerd.giantbomb.api.core.Game;
 
 import android.content.ContentValues;
 import android.content.Context;

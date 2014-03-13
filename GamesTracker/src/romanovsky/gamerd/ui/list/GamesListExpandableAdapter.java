@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -18,10 +19,12 @@ import org.joda.time.Days;
 
 import romanovsky.gamerd.R;
 import romanovsky.gamerd.async.AsyncTask;
-import romanovsky.gamerd.database.GameDAO;
-import romanovsky.gamerd.giantbomb.api.Game;
-import romanovsky.gamerd.giantbomb.api.GameComparator;
+import romanovsky.gamerd.database.dao.GameDAO;
+import romanovsky.gamerd.giantbomb.api.GameReleaseDateComparator;
+import romanovsky.gamerd.giantbomb.api.core.Game;
+import romanovsky.gamerd.ui.FlowLayout;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
+import romanovsky.gamerd.ui.list.filters.GamesListPlatformFilter;
 import romanovsky.gamerd.ui.list.pager.adapters.ReleasedGamesListPageAdapter;
 import romanovsky.gamerd.ui.list.pager.adapters.TrackedGamesListPageAdapter;
 import romanovsky.gamerd.ui.list.pager.adapters.UntrackedGamesListPageAdapter;
@@ -49,15 +52,20 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckedTextView;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
-
+public class GamesListExpandableAdapter extends BaseExpandableListAdapter implements Filterable {
 	private String[] categories;
 	private List<Game> games;
 	private List<Game> outGames;
+	private List<Game> gamesForFilter;
+	private List<Game> outGamesForFilter;
+	private Filter filter;
 	private int selection;
 	private Context context;
 	private Resources res;
@@ -69,9 +77,11 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
 
-	public GamesListExpandableListAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify) {
+	public GamesListExpandableAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify) {
 		this.outGames = new ArrayList<Game>();
 		this.games = new ArrayList<Game>();
+		this.gamesForFilter = new ArrayList<Game>();
+		this.outGamesForFilter = new ArrayList<Game>();
 		addAll(games);
 		this.selection = selection;
 		this.context = context;
@@ -96,15 +106,16 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
 				if (!outGames.contains(game)) {
 					outGames.add(game);
+					outGamesForFilter.add(game);
 				}
 			} else {
 				if (!games.contains(game)) {
 					games.add(game);
+					gamesForFilter.add(game);
 				}
 			}
 		}
-		Collections.sort(games, new GameComparator());
-		Collections.sort(outGames, new GameComparator());
+		sort(new GameReleaseDateComparator());
 		notifyDataSetChanged();
 	}
 
@@ -292,6 +303,22 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		return convertView;
 	}
 
+	public List<Game> getGamesForFilter() {
+		return gamesForFilter;
+	}
+
+	public List<Game> getOutGamesForFilter() {
+		return outGamesForFilter;
+	}
+
+	public void setGames(List<Game> games) {
+		this.games = games;
+	}
+
+	public void setOutGames(List<Game> outGames) {
+		this.outGames = outGames;
+	}
+
 	public void buildView(View view, final Game game, boolean extraInfo) {
 		int daysToRelease = getDateDifferenceInDays(game);
 		if (game.isTracked()) {
@@ -311,11 +338,15 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		}
 		TextView title = (TextView) view.findViewById(R.id.titleTextView);
 		title.setText(game.getName());
-		TextView platforms = (TextView) view.findViewById(R.id.platformsTextView);
-		if (game.getPlatforms().isEmpty() || game.getPlatforms().get(0).equals("")) {
-			platforms.setText(res.getString(R.string.unknown_platforms));
-		} else {
-			platforms.setText(game.getPlatforms().toString());
+		if (!game.getPlatforms().isEmpty() && !game.getPlatforms().get(0).equals("")) {
+			for (String platf : game.getPlatforms()) {
+				FlowLayout fl = (FlowLayout) view.findViewById(R.id.flowLayout);
+				LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.platform_text_view, null);
+				TextView tv = (TextView) ll.findViewById(R.id.platformNameTextView);
+				tv.setText(platf);
+				fl.addView(ll);
+			}
 		}
 		TextView releaseEstimate = (TextView) view.findViewById(R.id.relDateEstimateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
@@ -390,6 +421,11 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 		relDateBuilder.append(game.getExpectedReleaseQuarter() == 0 ? "" : "Q" + game.getExpectedReleaseQuarter() + " ");
 		relDateBuilder.append(game.getExpectedReleaseYear() == 0 ? "" : game.getExpectedReleaseYear());
 		return relDateBuilder.toString();
+	}
+
+	public void sort(Comparator<Game> comparator) {
+		Collections.sort(games, comparator);
+		Collections.sort(outGames, comparator);
 	}
 
 	private void addBitmapToMemoryCache(Long key, Bitmap bitmap) {
@@ -574,7 +610,7 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 	public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			convertView = inflater.inflate(R.layout.categories_row_header, null);
+			convertView = inflater.inflate(R.layout.games_list_category_header, null);
 		}
 		if (groupPosition == 0) {
 			convertView.setBackgroundColor(res.getColor(R.color.green));
@@ -594,6 +630,14 @@ public class GamesListExpandableListAdapter extends BaseExpandableListAdapter {
 	@Override
 	public boolean isChildSelectable(int groupPosition, int childPosition) {
 		return false;
+	}
+
+	@Override
+	public Filter getFilter() {
+		if (filter == null) {
+			filter = new GamesListPlatformFilter(this);
+		}
+		return filter;
 	}
 
 }
