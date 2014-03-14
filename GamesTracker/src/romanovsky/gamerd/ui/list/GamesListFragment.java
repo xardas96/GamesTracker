@@ -346,7 +346,6 @@ public class GamesListFragment extends CustomFragment {
 		protected Void doInBackground(GiantBombGamesQuery... params) {
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
-			filter = createFilter();
 			multipleQueries = params.length > 1;
 			for (int i = 0; i < params.length; i++) {
 				lastIteration = i == params.length - 1;
@@ -414,6 +413,7 @@ public class GamesListFragment extends CustomFragment {
 			} else if (adapter != null) {
 				((GamesListExpandableAdapter) adapter).addAll(result);
 			}
+			filter = createFilter();
 			filter(ListFilterType.GENRES.getValue(), filter);
 			if (!isCancelled()) {
 				expandListSections();
