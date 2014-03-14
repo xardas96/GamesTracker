@@ -34,7 +34,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.Filterable;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -446,6 +445,9 @@ public class GamesListFragment extends CustomFragment {
 
 	@Override
 	public void filter(int filterType, String filter) {
-		((Filterable) listView.getAdapter()).getFilter().filter(filter);
+		GamesListExpandableAdapter adapter = (GamesListExpandableAdapter) listView.getExpandableListAdapter();
+		if (adapter != null) {
+			adapter.getFilter().filter(filter);
+		}
 	}
 }
