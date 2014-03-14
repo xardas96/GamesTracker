@@ -111,11 +111,16 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
 				if (!outGames.contains(game)) {
 					outGames.add(game);
+				}
+				if (!outGamesForFilter.contains(game)) {
 					outGamesForFilter.add(game);
 				}
 			} else {
 				if (!games.contains(game)) {
 					games.add(game);
+
+				}
+				if (!gamesForFilter.contains(game)) {
 					gamesForFilter.add(game);
 				}
 			}
