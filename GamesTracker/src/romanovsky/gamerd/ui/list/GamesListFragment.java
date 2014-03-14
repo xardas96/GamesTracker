@@ -270,6 +270,8 @@ public class GamesListFragment extends CustomFragment {
 
 		@Override
 		protected Void doInBackground(List<Game>... params) {
+			PlatformDAO platformDAO = new PlatformDAO(getActivity());
+			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 			List<Game> games = params[0];
 			progress.setMax(games.size());
 			for (Game game : games) {
@@ -278,6 +280,14 @@ public class GamesListFragment extends CustomFragment {
 					gameQuery.addFilter(FilterEnum.id, game.getId() + "");
 					try {
 						Game newGame = gameQuery.execute(false).get(0);
+						Set<Platform> discoveredPlatforms = gameQuery.getDiscoveredPlatforms();
+						for (Platform discoveredPlatform : discoveredPlatforms) {
+							if (!allPlatforms.contains(discoveredPlatform)) {
+								allPlatforms.add(discoveredPlatform);
+								platformDAO.addPlatform(discoveredPlatform);
+							}
+						}
+						discoveredPlatforms.clear();
 						if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
 							dao.updateGame(newGame);
 							updated = true;
