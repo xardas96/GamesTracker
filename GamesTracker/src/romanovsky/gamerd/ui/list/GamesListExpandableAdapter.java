@@ -67,6 +67,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 	private List<Game> gamesForFilter;
 	private List<Game> outGamesForFilter;
 	private Filter filter;
+	private String filterString;
 	private int selection;
 	private Context context;
 	private Resources res;
@@ -78,11 +79,13 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
 
-	public GamesListExpandableAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify) {
+	public GamesListExpandableAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify, String filterString) {
 		this.outGames = new ArrayList<Game>();
 		this.games = new ArrayList<Game>();
 		this.gamesForFilter = new ArrayList<Game>();
 		this.outGamesForFilter = new ArrayList<Game>();
+		this.filterString = filterString;
+		filter = new GamesListPlatformFilter(this);
 		addAll(games);
 		this.selection = selection;
 		this.context = context;
@@ -102,31 +105,24 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		this.canNotify = canNotify;
 	}
 
-	public void createFilter() {
-		filter = new GamesListPlatformFilter(this);
+	public void setFilter(String filterString) {
+		this.filterString = filterString;
 	}
 
 	public void addAll(Collection<? extends Game> collection) {
 		for (Game game : collection) {
 			if (game.isOutFor() <= 0 && game.getExpectedReleaseYear() != 0) {
-				if (!outGames.contains(game)) {
-					outGames.add(game);
-				}
 				if (!outGamesForFilter.contains(game)) {
 					outGamesForFilter.add(game);
 				}
 			} else {
-				if (!games.contains(game)) {
-					games.add(game);
-
-				}
 				if (!gamesForFilter.contains(game)) {
 					gamesForFilter.add(game);
 				}
 			}
 		}
 		sort(new GameReleaseDateComparator());
-		notifyDataSetChanged();
+		filter.filter(filterString);
 	}
 
 	@Override

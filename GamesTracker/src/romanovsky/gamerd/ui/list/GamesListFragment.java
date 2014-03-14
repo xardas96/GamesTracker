@@ -18,7 +18,6 @@ import romanovsky.gamerd.settings.Settings;
 import romanovsky.gamerd.settings.SettingsManager;
 import romanovsky.gamerd.ui.CustomFragment;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
-import romanovsky.gamerd.ui.list.filters.ListFilterType;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
@@ -201,7 +200,6 @@ public class GamesListFragment extends CustomFragment {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected List<Game> doInBackground(Void... params) {
-			filter = createFilter();
 			try {
 				Thread.sleep(300);
 			} catch (InterruptedException e) {
@@ -218,16 +216,16 @@ public class GamesListFragment extends CustomFragment {
 
 		@Override
 		protected void onProgressUpdate(List<Game>... values) {
+			filter = createFilter();
 			for (List<Game> list : values) {
 				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 				if (adapter == null) {
-					adapter = new GamesListExpandableAdapter(getActivity(), list, selection, notifyDuration, canNotify);
-					((GamesListExpandableAdapter) adapter).createFilter();
+					adapter = new GamesListExpandableAdapter(getActivity(), list, selection, notifyDuration, canNotify, filter);
 					listView.setAdapter(adapter);
 				} else {
+					((GamesListExpandableAdapter) adapter).setFilter(filter);
 					((GamesListExpandableAdapter) adapter).addAll(list);
 				}
-				filter(ListFilterType.GENRES.getValue(), filter);
 				if (!isCancelled()) {
 					expandListSections();
 				}
@@ -402,6 +400,7 @@ public class GamesListFragment extends CustomFragment {
 
 		@Override
 		protected void onProgressUpdate(List<Game>... values) {
+			filter = createFilter();
 			List<Game> result = new ArrayList<Game>();
 			for (List<Game> value : values) {
 				result.addAll(value);
@@ -416,14 +415,12 @@ public class GamesListFragment extends CustomFragment {
 			}
 			ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 			if (adapter == null && getActivity() != null) {
-				adapter = new GamesListExpandableAdapter(getActivity(), result, selection, notifyDuration, canNotify);
-				((GamesListExpandableAdapter) adapter).createFilter();
+				adapter = new GamesListExpandableAdapter(getActivity(), result, selection, notifyDuration, canNotify, filter);
 				listView.setAdapter(adapter);
 			} else if (adapter != null) {
+				((GamesListExpandableAdapter) adapter).setFilter(filter);
 				((GamesListExpandableAdapter) adapter).addAll(result);
 			}
-			filter = createFilter();
-			filter(ListFilterType.GENRES.getValue(), filter);
 			if (!isCancelled()) {
 				expandListSections();
 			}
