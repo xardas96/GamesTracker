@@ -31,6 +31,7 @@
         android:layout_height="64dip"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="false"
+        android:layout_centerVertical="true"
         android:contentDescription="@string/image"
         android:paddingBottom="5dip"
         android:paddingLeft="5dip"
