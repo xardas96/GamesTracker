@@ -27,20 +27,20 @@
 
     <ImageView
         android:id="@+id/coverImageView"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="64dip"
+        android:layout_height="64dip"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="false"
         android:contentDescription="@string/image"
-        android:paddingBottom="5dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:paddingTop="5dp" />
+        android:paddingBottom="5dip"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip"
+        android:paddingTop="5dip" />
 
     <ImageView
         android:id="@+id/timerImageView"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="25dip"
+        android:layout_height="25dip"
         android:layout_alignBottom="@+id/relDateEstimateTextView"
         android:layout_alignTop="@+id/relDateEstimateTextView"
         android:layout_toLeftOf="@+id/relDateEstimateTextView"
@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="10dip"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

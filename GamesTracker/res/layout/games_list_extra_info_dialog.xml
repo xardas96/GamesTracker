@@ -5,7 +5,7 @@
     android:layout_height="fill_parent"
     android:background="@drawable/games_list_item_background_track"
     android:orientation="vertical"
-    android:padding="10dp" >
+    android:padding="10dip" >
 
     <TextView
         android:id="@+id/titleTextView"
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/relDateEstimateTextView"
-        android:layout_marginLeft="5dp"
+        android:layout_marginLeft="5dip"
         android:layout_toRightOf="@+id/coverImageView"
         android:ellipsize="marquee"
         android:focusable="true"
@@ -26,16 +26,16 @@
 
     <ImageView
         android:id="@+id/coverImageView"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="64dip"
+        android:layout_height="64dip"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/image" />
 
     <ImageView
         android:id="@+id/timerImageView"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="25dip"
+        android:layout_height="25dip"
         android:layout_alignBottom="@+id/relDateEstimateTextView"
         android:layout_alignTop="@+id/relDateEstimateTextView"
         android:layout_toLeftOf="@+id/relDateEstimateTextView"
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/flowLayout"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="10dip"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
@@ -68,8 +68,8 @@
         android:layout_alignParentRight="true"
         android:layout_alignRight="@+id/relDateEstimateTextView"
         android:layout_below="@+id/fullDateTextView"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp" >
+        android:layout_marginBottom="10dip"
+        android:layout_marginTop="10dip" >
 
         <TextView
             android:id="@+id/descriptionTextView"
@@ -102,7 +102,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/scrollView"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="20dip"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

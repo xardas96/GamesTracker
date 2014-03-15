@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
+    android:layout_margin="10dip"
     android:orientation="vertical"
     tools:ignore="UselessParent" >
 
@@ -21,8 +21,8 @@
                 android:id="@+id/autoExpandTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
                 android:text="@string/auto_expand"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -30,9 +30,9 @@
                 android:id="@+id/checkBoxExpandLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginBottom="15dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
                 android:orientation="vertical" >
             </LinearLayout>
 
@@ -40,17 +40,17 @@
                 android:id="@+id/notifyCheckbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="15dp"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:layout_marginTop="15dip"
                 android:gravity="center_vertical|start"
                 android:text="@string/settings_remind" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp" >
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip" >
 
                 <TextView
                     android:id="@+id/daysLabelTextView"
@@ -63,16 +63,16 @@
                 android:id="@+id/daysSeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
+                android:layout_marginBottom="15dip"
                 android:max="30" />
 
             <Button
                 android:id="@+id/clearImageCacheButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="15dp"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:layout_marginTop="15dip"
                 android:text="@string/settings_clear_img_cache" />
         </LinearLayout>
     </ScrollView>
