@@ -534,6 +534,9 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 						pic.compress(Bitmap.CompressFormat.JPEG, 100, outStream);
 						outStream.flush();
 						outStream.close();
+						if (cover != null && cover.exists()) {
+							cover.delete();
+						}
 						Log.i("FILES", "DL");
 					} catch (Exception ex) {
 						if (cover != null && cover.exists()) {

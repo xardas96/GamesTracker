@@ -119,7 +119,12 @@ public class MainActivity extends ActionBarActivity {
 		case R.id.filter:
 			if (fragment != null) {
 				final PlatformDAO platformDAO = new PlatformDAO(this);
-				final List<Platform> allPlatforms = platformDAO.getAllPlatforms();
+				final List<Platform> allPlatforms;
+				if (item.getGroupId() == 1) {
+					allPlatforms = platformDAO.getAllPlatforms();
+				} else {
+					allPlatforms = platformDAO.getPopularAndFilteredPlatforms();
+				}
 				final List<Platform> filteredPlatforms = new ArrayList<Platform>();
 				for (Platform platform : allPlatforms) {
 					if (platform.isFiltered()) {
@@ -141,27 +146,34 @@ public class MainActivity extends ActionBarActivity {
 					popupMenuItem.setChecked(platform.isFiltered());
 				}
 				popupMenu.setGroupCheckable(0, true, false);
+				if (item.getGroupId() != 1) {
+					popupMenu.add(1, R.id.filter, 0, getResources().getString(R.string.all_platforms));
+				}
 				popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
 					@Override
 					public boolean onMenuItemClick(MenuItem item) {
-						Platform platform = allPlatforms.get(item.getItemId());
-						item.setChecked(!item.isChecked());
-						platform.setFiltered(item.isChecked());
-						platformDAO.updatePlatform(platform);
-						if (platform.isFiltered()) {
-							filteredPlatforms.add(platform);
+						if (item.getGroupId() == 0) {
+							Platform platform = allPlatforms.get(item.getItemId());
+							item.setChecked(!item.isChecked());
+							platform.setFiltered(item.isChecked());
+							platformDAO.updatePlatform(platform);
+							if (platform.isFiltered()) {
+								filteredPlatforms.add(platform);
+							} else {
+								filteredPlatforms.remove(platform);
+							}
+							StringBuilder sb = new StringBuilder();
+							for (Platform p : filteredPlatforms) {
+								sb.append(p.getAbbreviation()).append(",");
+							}
+							if (!filteredPlatforms.isEmpty()) {
+								sb.setLength(sb.length() - 1);
+							}
+							fragment.filter(ListFilterType.GENRES.getValue(), sb.toString());
 						} else {
-							filteredPlatforms.remove(platform);
+							onOptionsItemSelected(item);
 						}
-						StringBuilder sb = new StringBuilder();
-						for (Platform p : filteredPlatforms) {
-							sb.append(p.getAbbreviation()).append(",");
-						}
-						if (!filteredPlatforms.isEmpty()) {
-							sb.setLength(sb.length() - 1);
-						}
-						fragment.filter(ListFilterType.GENRES.getValue(), sb.toString());
 						return true;
 					}
 				});
