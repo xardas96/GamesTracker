@@ -1,10 +1,5 @@
-package romanovsky.gamerd.giantbomb.api;
+package romanovsky.gamerd.giantbomb.api.queries;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,98 +11,52 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
 import org.joda.time.DateTime;
 
+import romanovsky.gamerd.giantbomb.api.FilterEnum;
 import romanovsky.gamerd.giantbomb.api.core.Game;
 import romanovsky.gamerd.giantbomb.api.core.Platform;
 
-public class GiantBombGamesQuery {
-	private static final String URL = "http://www.giantbomb.com/api/games/";
-	private String apiKey;
+public class GiantBombGamesQuery extends AbstractGiantBombQuery<Game> {
 	private Map<String, String> filters;
 	private SimpleDateFormat sdf;
-	private int offset = 0;
-	private int limit = 20;
-	private int totalResults = 1;
-	private String[] fields = new String[] { 
-			"id"
-			, "date_last_updated"
-			, "expected_release_day"
-			, "date_last_updated"
-			, "original_release_date"
-			, "expected_release_month"
-			, "expected_release_quarter"
-			, "expected_release_year"
-			, "image"
-			, "name"
-			, "platforms"
-			, "deck"
-			, "site_detail_url"
-			, "api_detail_url"
-			};
 	private Set<Platform> discoveredPlatforms;
 	
 	public GiantBombGamesQuery() {
+		super("http://www.giantbomb.com/api/games/");
+		fields = new String[] { 
+				"id"
+				, "date_last_updated"
+				, "expected_release_day"
+				, "date_last_updated"
+				, "original_release_date"
+				, "expected_release_month"
+				, "expected_release_quarter"
+				, "expected_release_year"
+				, "image"
+				, "name"
+				, "platforms"
+				, "deck"
+				, "site_detail_url"
+				, "api_detail_url"
+				};
 		filters = new HashMap<String, String>();
 		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-		offset = 0;
 		discoveredPlatforms = new HashSet<Platform>();
-	}
-
-	public GiantBombGamesQuery setApiKey(String apiKey) {
-		this.apiKey = apiKey;
-		return this;
 	}
 
 	public GiantBombGamesQuery addFilter(FilterEnum field, String value) {
 		filters.put(field.name(), value);
 		return this;
 	}
-	
-	public List<Game> execute(boolean untilToday) throws Exception {
-		List<Game> games = new ArrayList<Game>();
-		Document doc = DocumentHelper.parseText(getResponse());
-		Element root = doc.getRootElement();
-		String statusValue = root.selectSingleNode("status_code").getText();
-		int status = Integer.parseInt(statusValue);
-		if (status == 1) {
-			int results = Integer.valueOf(root.selectSingleNode("number_of_page_results").getText());
-			totalResults = Integer.valueOf(root.selectSingleNode("number_of_total_results").getText());
-			games.addAll(parseResponse(root, untilToday));
-			offset += results;
-		}
-		return games;
-	}
 
-	public boolean reachedOffset() {
-		return offset >= totalResults;
-	}
-
-	public int getTotalResults() {
-		return totalResults;
-	}
-	
 	public Set<Platform> getDiscoveredPlatforms() {
 		return discoveredPlatforms;
 	}
 
-	public String getResponse() throws Exception {
-		URL url = buildQuery();
-		InputStream is = url.openStream();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		StringBuilder sb = new StringBuilder();
-		String line = "";
-		while ((line = reader.readLine()) != null) {
-			sb.append(line);
-		}
-		return sb.toString();
-	}
-
-	private List<Game> parseResponse(Element root, boolean untilToday) {
+	protected List<Game> parseResponse(Element root, boolean untilToday) {
 		List<Game> result = new ArrayList<Game>();
 		@SuppressWarnings("unchecked")
 		List<Node> games = root.selectNodes("//game");
@@ -121,7 +70,7 @@ public class GiantBombGamesQuery {
 				time = 0;
 			}
 			game.setDateLastUpdated(time);
-			String id = gameNode.selectSingleNode("id").getText();
+			final String id = gameNode.selectSingleNode("id").getText();
 			game.setId(Long.valueOf(id));
 			String apiDetailUrl = gameNode.selectSingleNode("api_detail_url").getText();
 			game.setApiDetailURL(apiDetailUrl);
@@ -183,27 +132,22 @@ public class GiantBombGamesQuery {
 		return result;
 	}
 
-	private URL buildQuery() throws MalformedURLException {
-		StringBuilder sb = new StringBuilder(URL);
-		sb.append("?api_key=").append(apiKey);
-		sb.append("&filter=");
+	@Override
+	protected void appendInfo(StringBuilder infoBuilder) {
+		infoBuilder.append("&filter=");
 		for (String field : filters.keySet()) {
 			String value = filters.get(field);
-			sb.append(field).append(":").append(value).append(",");
+			infoBuilder.append(field).append(":").append(value).append(",");
 		}
 		if (!filters.isEmpty()) {
-			sb.setLength(sb.length() - 1);
+			infoBuilder.setLength(infoBuilder.length() - 1);
 		}
-		sb.append("&offset=").append(offset);
-		sb.append("&limit=").append(limit);
-		sb.append("&field_list=");
+		infoBuilder.append("&field_list=");
 		for (String field : fields) {
-			sb.append(field).append(",");
+			infoBuilder.append(field).append(",");
 		}
 		if (fields.length != 0) {
-			sb.setLength(sb.length() - 1);
+			infoBuilder.setLength(infoBuilder.length() - 1);
 		}
-		URL url = new URL(sb.toString());
-		return url;
 	}
 }

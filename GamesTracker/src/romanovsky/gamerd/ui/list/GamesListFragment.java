@@ -11,9 +11,9 @@ import romanovsky.gamerd.database.dao.GameDAO;
 import romanovsky.gamerd.database.dao.PlatformDAO;
 import romanovsky.gamerd.giantbomb.api.FilterEnum;
 import romanovsky.gamerd.giantbomb.api.GiantBombApi;
-import romanovsky.gamerd.giantbomb.api.GiantBombGamesQuery;
 import romanovsky.gamerd.giantbomb.api.core.Game;
 import romanovsky.gamerd.giantbomb.api.core.Platform;
+import romanovsky.gamerd.giantbomb.api.queries.GiantBombGamesQuery;
 import romanovsky.gamerd.settings.Settings;
 import romanovsky.gamerd.settings.SettingsManager;
 import romanovsky.gamerd.ui.CustomFragment;
@@ -73,6 +73,9 @@ public class GamesListFragment extends CustomFragment {
 		if (view == null) {
 			view = getView();
 		}
+		if (workingTask != null) {
+			workingTask.cancel(true);
+		}
 		dao = new GameDAO(getActivity());
 		final View rootView = view;
 		Calendar calendar = Calendar.getInstance();
@@ -81,7 +84,7 @@ public class GamesListFragment extends CustomFragment {
 			workingTask = initializer;
 			initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 		} else if (selection == DrawerSelection.THIS_MONTH.getValue()) {
-			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
+			GiantBombGamesQuery monthQuery = GiantBombApi.createGamesQuery();
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 1;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
@@ -89,7 +92,7 @@ public class GamesListFragment extends CustomFragment {
 			workingTask = downloader;
 			downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, monthQuery);
 		} else if (selection == DrawerSelection.NEXT_MONTH.getValue()) {
-			GiantBombGamesQuery monthQuery = GiantBombApi.createQuery();
+			GiantBombGamesQuery monthQuery = GiantBombApi.createGamesQuery();
 			int year = calendar.get(Calendar.YEAR);
 			int month = calendar.get(Calendar.MONTH) + 2;
 			monthQuery.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + month);
@@ -101,12 +104,12 @@ public class GamesListFragment extends CustomFragment {
 			int month = calendar.get(Calendar.MONTH) + 1;
 			GiantBombGamesQuery[] queries = new GiantBombGamesQuery[MONTH_ARRAY_MAX - month];
 			for (int i = month; i < MONTH_ARRAY_MAX - 1; i++) {
-				GiantBombGamesQuery query = GiantBombApi.createQuery();
+				GiantBombGamesQuery query = GiantBombApi.createGamesQuery();
 				query.addFilter(FilterEnum.expected_release_year, "" + year).addFilter(FilterEnum.expected_release_month, "" + i);
 				queries[i - month] = query;
 			}
 			// TODO giantbomb legacy
-			GiantBombGamesQuery query = GiantBombApi.createQuery();
+			GiantBombGamesQuery query = GiantBombApi.createGamesQuery();
 			query.addFilter(FilterEnum.original_release_date, "2014-01-01 00:00:00".replace(" ", "%20"));
 			queries[MONTH_ARRAY_MAX - 1 - month] = query;
 			InfoDownloader downloader = new InfoDownloader(rootView, false);
@@ -121,7 +124,7 @@ public class GamesListFragment extends CustomFragment {
 					listView.setAdapter((GamesListExpandableAdapter) null);
 					String searchPhrase = searchBox.getText().toString();
 					searchPhrase = searchPhrase.replace(" ", "%20");
-					GiantBombGamesQuery nameQuery = GiantBombApi.createQuery();
+					GiantBombGamesQuery nameQuery = GiantBombApi.createGamesQuery();
 					nameQuery.addFilter(FilterEnum.name, searchPhrase);
 					hideKeyboard();
 					InfoDownloader downloader = new InfoDownloader(rootView, false);
@@ -274,7 +277,7 @@ public class GamesListFragment extends CustomFragment {
 			progress.setMax(games.size());
 			for (Game game : games) {
 				if (!isCancelled()) {
-					GiantBombGamesQuery gameQuery = GiantBombApi.createQuery();
+					GiantBombGamesQuery gameQuery = GiantBombApi.createGamesQuery();
 					gameQuery.addFilter(FilterEnum.id, game.getId() + "");
 					try {
 						Game newGame = gameQuery.execute(false).get(0);
@@ -351,6 +354,7 @@ public class GamesListFragment extends CustomFragment {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected Void doInBackground(GiantBombGamesQuery... params) {
+			long start = System.currentTimeMillis();
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 			multipleQueries = params.length > 1;
@@ -359,42 +363,46 @@ public class GamesListFragment extends CustomFragment {
 				GiantBombGamesQuery query = params[i];
 				List<Game> results = new ArrayList<Game>();
 				while (!query.reachedOffset() && !failed) {
-					List<Game> result;
-					try {
-						result = query.execute(untilToday);
-						Set<Platform> discoveredPlatforms = query.getDiscoveredPlatforms();
-						for (Platform discoveredPlatform : discoveredPlatforms) {
-							if (!allPlatforms.contains(discoveredPlatform)) {
-								allPlatforms.add(discoveredPlatform);
-								platformDAO.addPlatform(discoveredPlatform);
+					if (!isCancelled()) {
+						List<Game> result;
+						try {
+							result = query.execute(untilToday);
+							Set<Platform> discoveredPlatforms = query.getDiscoveredPlatforms();
+							for (Platform discoveredPlatform : discoveredPlatforms) {
+								if (!allPlatforms.contains(discoveredPlatform)) {
+									allPlatforms.add(discoveredPlatform);
+									platformDAO.addPlatform(discoveredPlatform);
+								}
 							}
+							discoveredPlatforms.clear();
+							if (!maxProgressSet && !multipleQueries) {
+								totalResults = query.getTotalResults();
+								progress.setMax(totalResults);
+								maxProgressSet = true;
+							} else if (!maxProgressSet && multipleQueries) {
+								progress.setMax(params.length);
+								maxProgressSet = true;
+							}
+							for (Game game : result) {
+								game.setTracked(dao.isTracked(game));
+							}
+							if (multipleQueries) {
+								results.addAll(result);
+							}
+							if (!multipleQueries || lastIteration) {
+								publishProgress(result);
+							}
+						} catch (Exception ex) {
+							failed = true;
 						}
-						discoveredPlatforms.clear();
-						if (!maxProgressSet && !multipleQueries) {
-							totalResults = query.getTotalResults();
-							progress.setMax(totalResults);
-							maxProgressSet = true;
-						} else if (!maxProgressSet && multipleQueries) {
-							progress.setMax(params.length);
-							maxProgressSet = true;
-						}
-						for (Game game : result) {
-							game.setTracked(dao.isTracked(game));
-						}
-						if (multipleQueries) {
-							results.addAll(result);
-						}
-						if (!multipleQueries || lastIteration) {
-							publishProgress(result);
-						}
-					} catch (Exception ex) {
-						failed = true;
+					}
+					if (multipleQueries && !failed || lastIteration && !failed) {
+						publishProgress(results);
 					}
 				}
-				if (multipleQueries && !failed || lastIteration && !failed) {
-					publishProgress(results);
-				}
 			}
+			long stop = System.currentTimeMillis();
+			System.out.println(stop - start + " ms");
 			return null;
 		}
 

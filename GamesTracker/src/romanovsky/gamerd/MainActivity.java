@@ -51,7 +51,7 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		setContentView(R.layout.main_activity);
 
 		adView = (AdView) findViewById(R.id.adView);
@@ -148,12 +148,14 @@ public class MainActivity extends ActionBarActivity {
 				popupMenu.setGroupCheckable(0, true, false);
 				if (item.getGroupId() != 1) {
 					popupMenu.add(1, R.id.filter, 0, getResources().getString(R.string.all_platforms));
+				} else {
+					popupMenu.add(0, R.id.filter, 0, getResources().getString(R.string.popular_platforms));
 				}
 				popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
 					@Override
 					public boolean onMenuItemClick(MenuItem item) {
-						if (item.getGroupId() == 0) {
+						if (item.getGroupId() == 0 && item.getItemId() != R.id.filter) {
 							Platform platform = allPlatforms.get(item.getItemId());
 							item.setChecked(!item.isChecked());
 							platform.setFiltered(item.isChecked());
