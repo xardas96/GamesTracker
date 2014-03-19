@@ -17,13 +17,14 @@
         android:maxLines="1"
         android:scrollHorizontally="true"
         android:textAppearance="?android:attr/textAppearanceLarge" />
-    
-    <romanovsky.gamerd.ui.FlowLayout
+
+    <LinearLayout
         android:id="@+id/flowLayout"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/titleTextView"
-        android:layout_toRightOf="@+id/coverImageView" />
+        android:layout_toRightOf="@+id/coverImageView"
+        android:orientation="horizontal" />
 
     <ImageView
         android:id="@+id/coverImageView"

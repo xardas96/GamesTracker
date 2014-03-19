@@ -22,12 +22,12 @@ import romanovsky.gamerd.async.AsyncTask;
 import romanovsky.gamerd.database.dao.GameDAO;
 import romanovsky.gamerd.giantbomb.api.GameReleaseDateComparator;
 import romanovsky.gamerd.giantbomb.api.core.Game;
-import romanovsky.gamerd.ui.FlowLayout;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
 import romanovsky.gamerd.ui.list.filters.GamesListPlatformFilter;
 import romanovsky.gamerd.ui.list.pager.adapters.ReleasedGamesListPageAdapter;
 import romanovsky.gamerd.ui.list.pager.adapters.TrackedGamesListPageAdapter;
 import romanovsky.gamerd.ui.list.pager.adapters.UntrackedGamesListPageAdapter;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
@@ -43,6 +43,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.LayoutInflater;
@@ -76,8 +77,10 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 	private GameDAO gameDAO;
 	private int notifyDuration;
 	private boolean canNotify;
+	private int coverViewSizePixels;
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
+	private static final int COVER_SIZE_DIP = 80;
 
 	public GamesListExpandableAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify, String filterString) {
 		this.outGames = new ArrayList<Game>();
@@ -103,6 +106,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		};
 		this.notifyDuration = notifyDuration;
 		this.canNotify = canNotify;
+		coverViewSizePixels = Math.round(COVER_SIZE_DIP * context.getResources().getDisplayMetrics().density);
 	}
 
 	public void setFilter(String filterString) {
@@ -325,6 +329,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		this.outGames = outGames;
 	}
 
+	@SuppressWarnings("deprecation")
 	public void buildView(View view, final Game game, boolean extraInfo) {
 		int daysToRelease = getDateDifferenceInDays(game);
 		if (game.isTracked()) {
@@ -345,13 +350,30 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		TextView title = (TextView) view.findViewById(R.id.titleTextView);
 		title.setText(game.getName());
 		if (!game.getPlatforms().isEmpty() && !game.getPlatforms().get(0).equals("")) {
-			for (String platf : game.getPlatforms()) {
-				FlowLayout fl = (FlowLayout) view.findViewById(R.id.flowLayout);
+			Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+			ViewGroup viewGroup = (ViewGroup) view.findViewById(R.id.flowLayout);
+			int childSize = 0;
+			for (int i = 0; i < game.getPlatforms().size(); i++) {
+				viewGroup.measure(display.getWidth(), display.getHeight());
+				if (i == 1) {
+					childSize = viewGroup.getMeasuredWidth();
+				}
 				LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.platform_text_view, null);
-				TextView tv = (TextView) ll.findViewById(R.id.platformNameTextView);
-				tv.setText(platf);
-				fl.addView(ll);
+				int occupiedSpace = (i + 2) * childSize;
+				int wholeSpace = display.getWidth() - coverViewSizePixels;
+				if (occupiedSpace > wholeSpace && !extraInfo && i != game.getPlatforms().size() - 1) {
+					TextView tv = (TextView) ll.findViewById(R.id.platformNameTextView);
+					int remainingPlatforms = game.getPlatforms().size() - i;
+					tv.setText("+ " + remainingPlatforms);
+					viewGroup.addView(ll);
+					break;
+				} else {
+					String platf = game.getPlatforms().get(i);
+					TextView tv = (TextView) ll.findViewById(R.id.platformNameTextView);
+					tv.setText(platf);
+					viewGroup.addView(ll);
+				}
 			}
 		}
 		TextView releaseEstimate = (TextView) view.findViewById(R.id.relDateEstimateTextView);

@@ -113,7 +113,6 @@
         android:layout_alignLeft="@+id/titleTextView"
         android:layout_alignRight="@+id/titleTextView"
         android:layout_below="@+id/titleTextView" >
-
     </romanovsky.gamerd.ui.FlowLayout>
 
 </RelativeLayout>
