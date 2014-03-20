@@ -121,6 +121,10 @@ public class GamesListFragment extends CustomFragment {
 			setKeyboardFocus(searchBox);
 			searchBox.setOnEditorActionListener(new OnEditorActionListener() {
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+					if (workingTask != null) {
+						workingTask.cancel(true);
+						expanded = false;
+					}
 					listView.setAdapter((GamesListExpandableAdapter) null);
 					String searchPhrase = searchBox.getText().toString();
 					searchPhrase = searchPhrase.replace(" ", "%20");
@@ -354,7 +358,6 @@ public class GamesListFragment extends CustomFragment {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected Void doInBackground(GiantBombGamesQuery... params) {
-			long start = System.currentTimeMillis();
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 			multipleQueries = params.length > 1;
@@ -367,6 +370,37 @@ public class GamesListFragment extends CustomFragment {
 						List<Game> result;
 						try {
 							result = query.execute(untilToday);
+							// ExecutorService es =
+							// Executors.newFixedThreadPool(result.size());
+							//
+							// for(final Game game : result) {
+							//
+							// Runnable r = new Runnable() {
+							// @Override
+							// public void run() {
+							// try {
+							// game.setPlatforms(GiantBombApi.createGameQuery(game).execute(false));
+							// } catch (Exception e) {
+							// // TODO Auto-generated catch block
+							// e.printStackTrace();
+							// }
+							//
+							// }
+							// };
+							// // int kupa = 0;
+							// // FutureTask<Integer> myFutureTask = new
+							// FutureTask( r, kupa){
+							// // protected void done(){
+							// // System.out.println("Done....");
+							// // listView.invalidateViews();
+							// // }
+							// // };
+							// es.submit(r);
+							//
+							// }
+							//
+							// es.shutdown();
+
 							Set<Platform> discoveredPlatforms = query.getDiscoveredPlatforms();
 							for (Platform discoveredPlatform : discoveredPlatforms) {
 								if (!allPlatforms.contains(discoveredPlatform)) {
@@ -383,53 +417,53 @@ public class GamesListFragment extends CustomFragment {
 								progress.setMax(params.length);
 								maxProgressSet = true;
 							}
-							for (Game game : result) {
-								game.setTracked(dao.isTracked(game));
-							}
-							if (multipleQueries) {
-								results.addAll(result);
-							}
-							if (!multipleQueries || lastIteration) {
-								publishProgress(result);
+							if (!isCancelled()) {
+								for (Game game : result) {
+									game.setTracked(dao.isTracked(game));
+								}
+								if (multipleQueries && !isCancelled()) {
+									results.addAll(result);
+								}
+								if ((!multipleQueries || lastIteration) && !isCancelled()) {
+									publishProgress(result);
+								}
 							}
 						} catch (Exception ex) {
 							failed = true;
 						}
 					}
-					if (multipleQueries && !failed || lastIteration && !failed) {
+					if ((multipleQueries && !failed || lastIteration && !failed) && !isCancelled()) {
 						publishProgress(results);
 					}
 				}
 			}
-			long stop = System.currentTimeMillis();
-			System.out.println(stop - start + " ms");
 			return null;
 		}
 
 		@Override
 		protected void onProgressUpdate(List<Game>... values) {
-			filter = createFilter();
-			List<Game> result = new ArrayList<Game>();
-			for (List<Game> value : values) {
-				result.addAll(value);
-			}
-			if (multipleQueries) {
-				if (lastIteration) {
-					progress.setMax(progress.getMax() + 1);
-				}
-				progress.incrementProgressBy(1);
-			} else {
-				progress.incrementProgressBy(result.size());
-			}
-			ExpandableListAdapter adapter = listView.getExpandableListAdapter();
-			if (adapter == null && getActivity() != null) {
-				adapter = new GamesListExpandableAdapter(getActivity(), result, selection, notifyDuration, canNotify, filter);
-				listView.setAdapter(adapter);
-			} else if (adapter != null) {
-				((GamesListExpandableAdapter) adapter).setFilter(filter);
-				((GamesListExpandableAdapter) adapter).addAll(result);
-			}
 			if (!isCancelled()) {
+				filter = createFilter();
+				List<Game> result = new ArrayList<Game>();
+				for (List<Game> value : values) {
+					result.addAll(value);
+				}
+				if (multipleQueries) {
+					if (lastIteration) {
+						progress.setMax(progress.getMax() + 1);
+					}
+					progress.incrementProgressBy(1);
+				} else {
+					progress.incrementProgressBy(result.size());
+				}
+				ExpandableListAdapter adapter = listView.getExpandableListAdapter();
+				if (adapter == null && getActivity() != null) {
+					adapter = new GamesListExpandableAdapter(getActivity(), result, selection, notifyDuration, canNotify, filter);
+					listView.setAdapter(adapter);
+				} else if (adapter != null) {
+					((GamesListExpandableAdapter) adapter).setFilter(filter);
+					((GamesListExpandableAdapter) adapter).addAll(result);
+				}
 				expandListSections();
 			}
 		}
