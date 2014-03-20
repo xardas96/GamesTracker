@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/platformsLayout"
+        android:layout_below="@+id/genresLayout"
         android:layout_marginRight="10dip"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -116,7 +116,7 @@
 
     <romanovsky.gamerd.ui.FlowLayout
         android:id="@+id/genresLayout"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/platformsLayout"
         android:layout_below="@+id/platformsLayout" />
