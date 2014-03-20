@@ -365,74 +365,73 @@ public class GamesListFragment extends CustomFragment {
 				lastIteration = i == params.length - 1;
 				GiantBombGamesQuery query = params[i];
 				List<Game> results = new ArrayList<Game>();
-				while (!query.reachedOffset() && !failed) {
-					if (!isCancelled()) {
-						List<Game> result;
-						try {
-							result = query.execute(untilToday);
-							// ExecutorService es =
-							// Executors.newFixedThreadPool(result.size());
-							//
-							// for(final Game game : result) {
-							//
-							// Runnable r = new Runnable() {
-							// @Override
-							// public void run() {
-							// try {
-							// game.setPlatforms(GiantBombApi.createGameQuery(game).execute(false));
-							// } catch (Exception e) {
-							// // TODO Auto-generated catch block
-							// e.printStackTrace();
-							// }
-							//
-							// }
-							// };
-							// // int kupa = 0;
-							// // FutureTask<Integer> myFutureTask = new
-							// FutureTask( r, kupa){
-							// // protected void done(){
-							// // System.out.println("Done....");
-							// // listView.invalidateViews();
-							// // }
-							// // };
-							// es.submit(r);
-							//
-							// }
-							//
-							// es.shutdown();
+				while (!query.reachedOffset() && !failed && !isCancelled()) {
+					List<Game> result;
+					try {
+						result = query.execute(untilToday);
 
-							Set<Platform> discoveredPlatforms = query.getDiscoveredPlatforms();
-							for (Platform discoveredPlatform : discoveredPlatforms) {
-								if (!allPlatforms.contains(discoveredPlatform)) {
-									allPlatforms.add(discoveredPlatform);
-									platformDAO.addPlatform(discoveredPlatform);
-								}
+						// ExecutorService es =
+						// Executors.newFixedThreadPool(result.size());
+						//
+						// for(final Game game : result) {
+						//
+						// Runnable r = new Runnable() {
+						// @Override
+						// public void run() {
+						// try {
+						// game.setPlatforms(GiantBombApi.createGameQuery(game).execute(false));
+						// } catch (Exception e) {
+						// // TODO Auto-generated catch block
+						// e.printStackTrace();
+						// }
+						//
+						// }
+						// };
+						// // int kupa = 0;
+						// // FutureTask<Integer> myFutureTask = new
+						// FutureTask( r, kupa){
+						// // protected void done(){
+						// // System.out.println("Done....");
+						// // listView.invalidateViews();
+						// // }
+						// // };
+						// es.submit(r);
+						//
+						// }
+						//
+						// es.shutdown();
+
+						Set<Platform> discoveredPlatforms = query.getDiscoveredPlatforms();
+						for (Platform discoveredPlatform : discoveredPlatforms) {
+							if (!allPlatforms.contains(discoveredPlatform)) {
+								allPlatforms.add(discoveredPlatform);
+								platformDAO.addPlatform(discoveredPlatform);
 							}
-							discoveredPlatforms.clear();
-							if (!maxProgressSet && !multipleQueries) {
-								totalResults = query.getTotalResults();
-								progress.setMax(totalResults);
-								maxProgressSet = true;
-							} else if (!maxProgressSet && multipleQueries) {
-								progress.setMax(params.length);
-								maxProgressSet = true;
-							}
-							if (!isCancelled()) {
-								for (Game game : result) {
-									game.setTracked(dao.isTracked(game));
-								}
-								if (multipleQueries && !isCancelled()) {
-									results.addAll(result);
-								}
-								if ((!multipleQueries || lastIteration) && !isCancelled()) {
-									publishProgress(result);
-								}
-							}
-						} catch (Exception ex) {
-							failed = true;
 						}
+						discoveredPlatforms.clear();
+						if (!maxProgressSet && !multipleQueries) {
+							totalResults = query.getTotalResults();
+							progress.setMax(totalResults);
+							maxProgressSet = true;
+						} else if (!maxProgressSet && multipleQueries) {
+							progress.setMax(params.length);
+							maxProgressSet = true;
+						}
+						for (Game game : result) {
+							game.setTracked(dao.isTracked(game));
+						}
+						if (!isCancelled()) {
+							if (multipleQueries) {
+								results.addAll(result);
+							}
+							if (!multipleQueries || lastIteration) {
+								publishProgress(result);
+							}
+						}
+					} catch (Exception ex) {
+						failed = true;
 					}
-					if ((multipleQueries && !failed || lastIteration && !failed) && !isCancelled()) {
+					if (multipleQueries && !failed || lastIteration && !failed) {
 						publishProgress(results);
 					}
 				}
@@ -449,7 +448,7 @@ public class GamesListFragment extends CustomFragment {
 					result.addAll(value);
 				}
 				if (multipleQueries) {
-					if (lastIteration) {
+					if (progress.getProgress() == progress.getMax() - 1) {
 						progress.setMax(progress.getMax() + 1);
 					}
 					progress.incrementProgressBy(1);
