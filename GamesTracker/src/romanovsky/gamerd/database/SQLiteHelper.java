@@ -20,13 +20,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_NOTIFY = "notify";
 	public static final String COLUMN_DESCRIPTION = "description";
 	public static final String COLUMN_API_DETAIL = "apiDetailUrl";
+	public static final String COLUMN_GENRES = "genres";
 	
 	public static final String TABLE_PLATFORMS = "platforms";
 	public static final String COLUMN_ABBREVIATION = "abbreviation";
 	public static final String COLUMN_FILTERED = "filtered";
 
 	private static final String DB_NAME = "games.db";
-	private static final int DB_VERSION = 3;
+	private static final int DB_VERSION = 4;
 	
 	private static final String DB_CREATE = "CREATE TABLE "
 			+ TABLE_GAMES + "(" 
@@ -42,12 +43,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_SITE_DETAIL_URL + " text, "
 			+ COLUMN_NOTIFY + " integer, "
 			+ COLUMN_DESCRIPTION + " text,"
-			+ COLUMN_API_DETAIL + " text"
+			+ COLUMN_API_DETAIL + " text,"
+			+ COLUMN_GENRES + "text"
 			+ ");";
 	private static final String DB_UPDATE_API_DETAIL = "ALTER TABLE " 
 		+ TABLE_GAMES
 		+ " ADD COLUMN " 
 		+ COLUMN_API_DETAIL + " text;";	
+	
 	private static final String DB_CREATE_PLATFORMS = "CREATE TABLE "
 			+ TABLE_PLATFORMS + "(" 
 			+ COLUMN_ID + " integer primary key autoincrement, "
@@ -56,6 +59,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_FILTERED + " integer"
 			+ ");";
 	
+	private static final String DB_UPDATE_GENRES = "ALTER TABLE "
+			+ TABLE_GAMES
+			+ " ADD COLUMN " 
+			+ COLUMN_GENRES + " text;";	
+			
 	public SQLiteHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
 	}
@@ -72,12 +80,20 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			addApiDetailUrl(db);
 		}
 		if (oldVersion < 3) {
-			Log.e("UPDATE DB", "UPDATE DB");
 			createPlatforms(db);
+		}
+		if (oldVersion < 4) {
+			Log.e("UPDATE DB", "UPDATE DB");
+			addGenres(db);
 			Log.e("UPDATED DB", "UPDATED DB");
 		}
 	}
-	
+
+	private void addGenres(SQLiteDatabase db) {
+		db.execSQL(DB_UPDATE_GENRES);
+		forceUpdate(db);
+	}
+
 	private void createPlatforms(SQLiteDatabase db) {
 		db.execSQL(DB_CREATE_PLATFORMS);
 	}

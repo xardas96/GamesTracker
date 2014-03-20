@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import romanovsky.gamerd.R;
 import romanovsky.gamerd.async.AsyncTask;
@@ -13,6 +15,7 @@ import romanovsky.gamerd.giantbomb.api.FilterEnum;
 import romanovsky.gamerd.giantbomb.api.GiantBombApi;
 import romanovsky.gamerd.giantbomb.api.core.Game;
 import romanovsky.gamerd.giantbomb.api.core.Platform;
+import romanovsky.gamerd.giantbomb.api.queries.GiantBombGameQuery;
 import romanovsky.gamerd.giantbomb.api.queries.GiantBombGamesQuery;
 import romanovsky.gamerd.settings.Settings;
 import romanovsky.gamerd.settings.SettingsManager;
@@ -294,6 +297,10 @@ public class GamesListFragment extends CustomFragment {
 						}
 						discoveredPlatforms.clear();
 						if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
+							GiantBombGameQuery singleGameQuery = GiantBombApi.createGameQuery(newGame);
+							List<String> genres = singleGameQuery.execute(false);
+							newGame.setGenres(genres);
+							game.setGenres(genres);
 							dao.updateGame(newGame);
 							updated = true;
 							Log.i("updated", newGame.getName());
@@ -370,36 +377,21 @@ public class GamesListFragment extends CustomFragment {
 					try {
 						result = query.execute(untilToday);
 
-						// ExecutorService es =
-						// Executors.newFixedThreadPool(result.size());
-						//
-						// for(final Game game : result) {
-						//
-						// Runnable r = new Runnable() {
-						// @Override
-						// public void run() {
-						// try {
-						// game.setPlatforms(GiantBombApi.createGameQuery(game).execute(false));
-						// } catch (Exception e) {
-						// // TODO Auto-generated catch block
-						// e.printStackTrace();
-						// }
-						//
-						// }
-						// };
-						// // int kupa = 0;
-						// // FutureTask<Integer> myFutureTask = new
-						// FutureTask( r, kupa){
-						// // protected void done(){
-						// // System.out.println("Done....");
-						// // listView.invalidateViews();
-						// // }
-						// // };
-						// es.submit(r);
-						//
-						// }
-						//
-						// es.shutdown();
+						ExecutorService es = Executors.newFixedThreadPool(result.size());
+						for (final Game game : result) {
+							Runnable r = new Runnable() {
+								@Override
+								public void run() {
+									try {
+										game.setGenres(GiantBombApi.createGameQuery(game).execute(false));
+									} catch (Exception e) {
+										Log.e(getClass().getSimpleName(), e.getMessage());
+									}
+								}
+							};
+							es.submit(r);
+						}
+						es.shutdown();
 
 						Set<Platform> discoveredPlatforms = query.getDiscoveredPlatforms();
 						for (Platform discoveredPlatform : discoveredPlatforms) {

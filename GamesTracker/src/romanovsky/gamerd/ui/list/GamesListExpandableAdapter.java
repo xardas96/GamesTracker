@@ -351,7 +351,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		title.setText(game.getName());
 		if (!game.getPlatforms().isEmpty() && !game.getPlatforms().get(0).equals("")) {
 			Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
-			ViewGroup viewGroup = (ViewGroup) view.findViewById(R.id.flowLayout);
+			ViewGroup viewGroup = (ViewGroup) view.findViewById(R.id.platformsLayout);
 			int childSize = 0;
 			for (int i = 0; i < game.getPlatforms().size(); i++) {
 				viewGroup.measure(display.getWidth(), display.getHeight());
@@ -374,6 +374,16 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 					tv.setText(platf);
 					viewGroup.addView(ll);
 				}
+			}
+		}
+		if (!game.getGenres().isEmpty() && !game.getGenres().get(0).equals("")) {
+			ViewGroup viewGroup = (ViewGroup) view.findViewById(R.id.genresLayout);
+			for (String genre : game.getGenres()) {
+				LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.genre_text_view, null);
+				TextView tv = (TextView) ll.findViewById(R.id.genreTextView);
+				tv.setText(genre);
+				viewGroup.addView(ll);
 			}
 		}
 		TextView releaseEstimate = (TextView) view.findViewById(R.id.relDateEstimateTextView);

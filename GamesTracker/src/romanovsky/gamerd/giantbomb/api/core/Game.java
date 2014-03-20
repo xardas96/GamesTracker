@@ -24,9 +24,11 @@ public class Game implements Parcelable {
 	private String description;
 	private String apiDetailURL;
 	private boolean tracked;
+	private List<String> genres;
 
 	public Game() {
 		platforms = new ArrayList<String>();
+		genres = new ArrayList<String>();
 	}
 
 	public Game(Parcel in) {
@@ -45,6 +47,7 @@ public class Game implements Parcelable {
 		description = in.readString();
 		tracked = in.readInt() == 1;
 		apiDetailURL = in.readString();
+		in.readStringList(genres);
 	}
 
 	public String getName() {
@@ -163,6 +166,14 @@ public class Game implements Parcelable {
 	public void setApiDetailURL(String apiDetailURL) {
 		this.apiDetailURL = apiDetailURL;
 	}
+	
+	public List<String> getGenres() {
+		return genres;
+	}
+	
+	public void setGenres(List<String> genres) {
+		this.genres = genres;
+	}
 
 	public int isOutFor() {
 		DateTime now = new DateTime();
@@ -212,6 +223,7 @@ public class Game implements Parcelable {
 		dest.writeString(description);
 		dest.writeInt(tracked ? 1 : 0);
 		dest.writeString(apiDetailURL);
+		dest.writeStringList(genres);
 	}
 
 	@SuppressWarnings("rawtypes")

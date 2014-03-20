@@ -9,11 +9,9 @@ import org.dom4j.Node;
 import romanovsky.gamerd.giantbomb.api.core.Game;
 
 public class GiantBombGameQuery extends AbstractGiantBombQuery<String> {
-	private Game game;
 	
 	public GiantBombGameQuery(Game game) {
 		super("http://www.giantbomb.com/api/game/" + game.getId() + "/");
-		this.game = game;
 		fields = new String[] {
 				"genres"
 		}; 
@@ -32,13 +30,13 @@ public class GiantBombGameQuery extends AbstractGiantBombQuery<String> {
 
 	@Override
 	protected List<String> parseResponse(Element root, boolean untilToday) {
-		List<String> t = new ArrayList<String>();
+		List<String> responseGenres = new ArrayList<String>();
 		Node genresNode = root.selectSingleNode("//genres");
+		@SuppressWarnings("unchecked")
 		List<Node> genresNodes = genresNode.selectNodes("genre");
-		for(Node gNode : genresNodes) {
-			t.add(gNode.selectSingleNode("name").getText());
+		for (Node genreNode : genresNodes) {
+			responseGenres.add(genreNode.selectSingleNode("name").getText());
 		}
-		// TODO Auto-generated method stub
-		return t;
+		return responseGenres;
 	}
 }

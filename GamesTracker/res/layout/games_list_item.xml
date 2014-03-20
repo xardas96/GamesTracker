@@ -19,7 +19,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <LinearLayout
-        android:id="@+id/flowLayout"
+        android:id="@+id/platformsLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/titleTextView"
@@ -58,5 +58,13 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="10dip"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <LinearLayout
+        android:id="@+id/genresLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/platformsLayout"
+        android:layout_toRightOf="@+id/coverImageView"
+        android:orientation="horizontal" />
 
 </RelativeLayout>

@@ -29,6 +29,7 @@ public class GameDAO {
 			, SQLiteHelper.COLUMN_NOTIFY
 			, SQLiteHelper.COLUMN_DESCRIPTION
 			, SQLiteHelper.COLUMN_API_DETAIL
+			, SQLiteHelper.COLUMN_GENRES
 	};
 	private static final int LIMIT = 20;
 	private int offset = 0;
@@ -69,6 +70,14 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		values.put(SQLiteHelper.COLUMN_API_DETAIL, game.getApiDetailURL());
+		StringBuilder genresBuilder = new StringBuilder();
+		for (String platform : game.getGenres()) {
+			genresBuilder.append(platform).append(",");
+		}
+		if (genresBuilder.length() > 0) {
+			genresBuilder.setLength(genresBuilder.length() - 1);
+		}
+		values.put(SQLiteHelper.COLUMN_GENRES, genresBuilder.toString());
 		database.insert(SQLiteHelper.TABLE_GAMES, null, values);
 		game.setTracked(true);
 		close();
@@ -106,6 +115,14 @@ public class GameDAO {
 		values.put(SQLiteHelper.COLUMN_NOTIFY, game.isNotify() ? 1 : 0);
 		values.put(SQLiteHelper.COLUMN_DESCRIPTION, game.getDescription());
 		values.put(SQLiteHelper.COLUMN_API_DETAIL, game.getApiDetailURL());
+		StringBuilder genresBuilder = new StringBuilder();
+		for (String platform : game.getGenres()) {
+			genresBuilder.append(platform).append(",");
+		}
+		if (genresBuilder.length() > 0) {
+			genresBuilder.setLength(genresBuilder.length() - 1);
+		}
+		values.put(SQLiteHelper.COLUMN_GENRES, genresBuilder.toString());
 		database.update(SQLiteHelper.TABLE_GAMES, values, SQLiteHelper.COLUMN_ID + " = " + id, null);
 		close();
 	}
@@ -187,6 +204,12 @@ public class GameDAO {
 		game.setNotify(cursor.getInt(10) == 1);
 		game.setDescription(cursor.getString(11));
 		game.setApiDetailURL(cursor.getString(12));
+		String genres = cursor.getString(13);
+		if(genres!=null) {
+		split = genres.split(",");
+		List<String> genresList = Arrays.asList(split);
+		game.setGenres(genresList);
+		}
 		return game;
 	}
 }

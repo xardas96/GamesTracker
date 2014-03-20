@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/flowLayout"
+        android:layout_below="@+id/platformsLayout"
         android:layout_marginRight="10dip"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -107,12 +107,18 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <romanovsky.gamerd.ui.FlowLayout
-        android:id="@+id/flowLayout"
+        android:id="@+id/platformsLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/titleTextView"
         android:layout_alignRight="@+id/titleTextView"
-        android:layout_below="@+id/titleTextView" >
-    </romanovsky.gamerd.ui.FlowLayout>
+        android:layout_below="@+id/titleTextView" />
+
+    <romanovsky.gamerd.ui.FlowLayout
+        android:id="@+id/genresLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/platformsLayout"
+        android:layout_below="@+id/platformsLayout" />
 
 </RelativeLayout>
