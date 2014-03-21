@@ -46,6 +46,7 @@ public class GamesListFragment extends CustomFragment {
 	private GameDAO dao;
 	private int selection;
 	private ProgressBar progress;
+	private ProgressBar extraProgress;
 	private ExpandableListView listView;
 	private int notifyDuration;
 	private boolean canNotify;
@@ -65,6 +66,7 @@ public class GamesListFragment extends CustomFragment {
 		notifyDuration = settings.getDuration();
 		expandSections = settings.getAutoExpand();
 		progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
+		extraProgress = (ProgressBar) rootView.findViewById(R.id.extraProgressBar);
 		selection = getArguments().getInt("selection");
 		listView = (ExpandableListView) rootView.findViewById(R.id.gamesListView);
 		refresh(rootView);
@@ -271,6 +273,7 @@ public class GamesListFragment extends CustomFragment {
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 			progress.setProgress(0);
+			extraProgress.setVisibility(View.VISIBLE);
 			if (getActivity() != null) {
 				Toast.makeText(getActivity(), getResources().getString(R.string.updating_tracked), Toast.LENGTH_SHORT).show();
 			}
@@ -326,6 +329,7 @@ public class GamesListFragment extends CustomFragment {
 			workingTask = null;
 			if (!isCancelled()) {
 				progress.setProgress(progress.getMax());
+				extraProgress.setVisibility(View.GONE);
 				if (updated) {
 					ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 					((GamesListExpandableAdapter) adapter).notifyDataSetChanged();
@@ -357,6 +361,7 @@ public class GamesListFragment extends CustomFragment {
 		protected void onPreExecute() {
 			progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
 			progress.setProgress(0);
+			extraProgress.setVisibility(View.VISIBLE);
 			if (getActivity() != null) {
 				Toast.makeText(getActivity(), getResources().getString(R.string.loading_games), Toast.LENGTH_SHORT).show();
 			}
@@ -465,6 +470,7 @@ public class GamesListFragment extends CustomFragment {
 			if (!isCancelled()) {
 				expanded = false;
 				progress.setProgress(progress.getMax());
+				extraProgress.setVisibility(View.GONE);
 				if (failed) {
 					if (getActivity() != null) {
 						Toast.makeText(getActivity(), getResources().getString(R.string.no_games_error), Toast.LENGTH_SHORT).show();

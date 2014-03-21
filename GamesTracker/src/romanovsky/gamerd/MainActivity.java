@@ -109,6 +109,7 @@ public class MainActivity extends ActionBarActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		checkConnection();
 		switch (item.getItemId()) {
 		case R.id.refresh:
 			if (fragment != null) {
