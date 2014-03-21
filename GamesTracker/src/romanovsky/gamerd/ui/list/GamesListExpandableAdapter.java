@@ -600,7 +600,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				if (this == bitmapWorkerTask && img != null) {
 					img.setImageBitmap(output);
 				}
-				img.setImageBitmap(cache.get(game.getId()));
 			}
 		}
 	}
