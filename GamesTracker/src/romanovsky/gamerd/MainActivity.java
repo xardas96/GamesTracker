@@ -143,7 +143,7 @@ public class MainActivity extends ActionBarActivity {
 						return lhs.getName().compareTo(rhs.getName());
 					}
 				});
-				View menuItemView = findViewById(R.id.filterPlatform);
+				View menuItemView = findViewById(R.id.filter);
 				PopupMenu popup = new PopupMenu(this, menuItemView);
 				Menu popupMenu = popup.getMenu();
 				for (int i = 0; i < allPlatforms.size(); i++) {
@@ -213,7 +213,7 @@ public class MainActivity extends ActionBarActivity {
 						return lhs.getName().compareTo(rhs.getName());
 					}
 				});
-				View menuItemView = findViewById(R.id.filterGenre);
+				View menuItemView = findViewById(R.id.filter);
 				PopupMenu popup = new PopupMenu(this, menuItemView);
 				Menu popupMenu = popup.getMenu();
 				for (int i = 0; i < allGenres.size(); i++) {
