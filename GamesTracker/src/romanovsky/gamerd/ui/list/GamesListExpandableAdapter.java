@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -78,9 +79,11 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 	private int notifyDuration;
 	private boolean canNotify;
 	private int coverViewSizePixels;
+	private int timerViewSizePixels;
 	private static final int SMALL_DELAY = 200;
 	private static final int LONG_DELAY = 1500;
 	private static final int COVER_SIZE_DIP = 80;
+	private static final int TIMER_SIZE_DIP = 20;
 
 	public GamesListExpandableAdapter(Context context, List<Game> games, int selection, int notifyDuration, boolean canNotify, String filterString) {
 		this.outGames = new ArrayList<Game>();
@@ -107,6 +110,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		this.notifyDuration = notifyDuration;
 		this.canNotify = canNotify;
 		coverViewSizePixels = Math.round(COVER_SIZE_DIP * context.getResources().getDisplayMetrics().density);
+		timerViewSizePixels = Math.round(TIMER_SIZE_DIP * context.getResources().getDisplayMetrics().density);
 	}
 
 	public void setFilter(String filterString) {
@@ -376,16 +380,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				}
 			}
 		}
-		if (!game.getGenres().isEmpty() && !game.getGenres().get(0).equals("")) {
-			ViewGroup viewGroup = (ViewGroup) view.findViewById(R.id.genresLayout);
-			for (String genre : game.getGenres()) {
-				LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.genre_text_view, null);
-				TextView tv = (TextView) ll.findViewById(R.id.genreTextView);
-				tv.setText(genre);
-				viewGroup.addView(ll);
-			}
-		}
 		TextView releaseEstimate = (TextView) view.findViewById(R.id.relDateEstimateTextView);
 		if (selection == DrawerSelection.TRACKED.getValue()) {
 			if (daysToRelease <= 0 && game.getExpectedReleaseYear() != 0) {
@@ -408,6 +402,34 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				releaseEstimate.setText(buildReleaseDate(game));
 			}
 		}
+		if (!game.getGenres().isEmpty() && !game.getGenres().get(0).equals("")) {
+			Paint textPaint = releaseEstimate.getPaint();
+			int dateTextWidth = (int) textPaint.measureText(releaseEstimate.getText().toString());
+			Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+			ViewGroup viewGroup = (ViewGroup) view.findViewById(R.id.genresLayout);
+			for (int i = 0; i < game.getGenres().size(); i++) {
+				viewGroup.measure(display.getWidth(), display.getHeight());
+				String genre = game.getGenres().get(i);
+				String nextGenre = i == game.getGenres().size() - 1 ? "" : game.getGenres().get(i + 1);
+				LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.genre_text_view, null);
+				int wholeSpace = display.getWidth() - coverViewSizePixels - dateTextWidth - timerViewSizePixels;
+				TextView tv = (TextView) ll.findViewById(R.id.genreTextView);
+				Paint tvPaint = tv.getPaint();
+				int nextGenreWidth = (int) tvPaint.measureText(genre);
+				int nextNextGenreWidth = (int) tvPaint.measureText(nextGenre);
+				int occupiedSpace = viewGroup.getMeasuredWidth() + nextGenreWidth + nextNextGenreWidth;
+				if (occupiedSpace > wholeSpace && !extraInfo) {
+					int remainingPlatforms = game.getGenres().size() - i;
+					tv.setText("+ " + remainingPlatforms);
+					viewGroup.addView(ll);
+					break;
+				} else {
+					tv.setText(genre);
+					viewGroup.addView(ll);
+				}
+			}
+		}
 		if (extraInfo) {
 			TextView extraInfoTextView = (TextView) view.findViewById(R.id.descriptionTextView);
 			extraInfoTextView.setText(game.getDescription());
@@ -423,7 +445,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				releaseDate.setVisibility(View.VISIBLE);
 				releaseDate.setText(buildReleaseDate(game));
 			}
-
 		}
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
 		loadBitmap(game.getIconURL(), cover, game);
@@ -468,7 +489,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 	}
 
 	private void addBitmapToMemoryCache(Long key, Bitmap bitmap) {
-		if (getBitmapFromMemCache(key) == null && key != null) {
+		if (getBitmapFromMemCache(key) == null && key != null && bitmap !=null) {
 			cache.put(key, bitmap);
 		}
 	}
