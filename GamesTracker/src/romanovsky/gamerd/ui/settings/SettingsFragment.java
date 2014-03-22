@@ -184,6 +184,6 @@ public class SettingsFragment extends CustomFragment {
 	}
 
 	@Override
-	public void filter(int filterType, String filter) {
+	public void filter(String filter) {
 	}
 }

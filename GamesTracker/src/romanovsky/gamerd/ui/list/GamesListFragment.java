@@ -2,6 +2,7 @@ package romanovsky.gamerd.ui.list;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -10,10 +11,12 @@ import java.util.concurrent.Executors;
 import romanovsky.gamerd.R;
 import romanovsky.gamerd.async.AsyncTask;
 import romanovsky.gamerd.database.dao.GameDAO;
+import romanovsky.gamerd.database.dao.GenreDAO;
 import romanovsky.gamerd.database.dao.PlatformDAO;
 import romanovsky.gamerd.giantbomb.api.FilterEnum;
 import romanovsky.gamerd.giantbomb.api.GiantBombApi;
 import romanovsky.gamerd.giantbomb.api.core.Game;
+import romanovsky.gamerd.giantbomb.api.core.Genre;
 import romanovsky.gamerd.giantbomb.api.core.Platform;
 import romanovsky.gamerd.giantbomb.api.queries.GiantBombGameQuery;
 import romanovsky.gamerd.giantbomb.api.queries.GiantBombGamesQuery;
@@ -190,12 +193,34 @@ public class GamesListFragment extends CustomFragment {
 		PlatformDAO platformDAO = new PlatformDAO(getActivity());
 		List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 		StringBuilder sb = new StringBuilder();
+		sb.append("PLATFORMS:");
+		boolean filtered = false;
 		for (Platform p : allPlatforms) {
 			if (p.isFiltered()) {
+				if (!filtered) {
+					filtered = true;
+				}
 				sb.append(p.getAbbreviation()).append(",");
 			}
 		}
-		if (sb.length() != 0) {
+		if (filtered) {
+			sb.setLength(sb.length() - 1);
+		}
+		sb.append(";GENRES:");
+		filtered = false;
+		GenreDAO genreDAO = new GenreDAO(getActivity());
+		genreDAO.open();
+		List<Genre> allGenres = genreDAO.getAllGenres();
+		genreDAO.close();
+		for (Genre g : allGenres) {
+			if (g.isFiltered()) {
+				if (!filtered) {
+					filtered = true;
+				}
+				sb.append(g.getName()).append(",");
+			}
+		}
+		if (filtered) {
 			sb.setLength(sb.length() - 1);
 		}
 		return sb.toString();
@@ -283,6 +308,10 @@ public class GamesListFragment extends CustomFragment {
 		protected Void doInBackground(List<Game>... params) {
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
+			GenreDAO genreDAO = new GenreDAO(getActivity());
+			genreDAO.open();
+			Set<Genre> discoveredGenres = new HashSet<Genre>();
+			List<Genre> allGenres = genreDAO.getAllGenres();
 			List<Game> games = params[0];
 			progress.setMax(games.size());
 			for (Game game : games) {
@@ -301,9 +330,14 @@ public class GamesListFragment extends CustomFragment {
 						discoveredPlatforms.clear();
 						if (newGame.getDateLastUpdated() > game.getDateLastUpdated()) {
 							GiantBombGameQuery singleGameQuery = GiantBombApi.createGameQuery(newGame);
-							List<String> genres = singleGameQuery.execute(false);
-							newGame.setGenres(genres);
-							game.setGenres(genres);
+							List<Genre> genres = singleGameQuery.execute(false);
+							List<String> genreNames = new ArrayList<String>();
+							for (Genre genre : genres) {
+								discoveredGenres.add(genre);
+								genreNames.add(genre.getName());
+							}
+							newGame.setGenres(genreNames);
+							game.setGenres(genreNames);
 							dao.updateGame(newGame);
 							updated = true;
 							Log.i("updated", newGame.getName());
@@ -316,6 +350,13 @@ public class GamesListFragment extends CustomFragment {
 					publishProgress((Void) null);
 				}
 			}
+			for (Genre discoveredGenre : discoveredGenres) {
+				if (!allGenres.contains(discoveredGenre)) {
+					allGenres.add(discoveredGenre);
+					genreDAO.addGenre(discoveredGenre);
+				}
+			}
+			genreDAO.close();
 			return null;
 		}
 
@@ -372,6 +413,10 @@ public class GamesListFragment extends CustomFragment {
 		protected Void doInBackground(GiantBombGamesQuery... params) {
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
+			final GenreDAO genreDAO = new GenreDAO(getActivity());
+			genreDAO.open();
+			final Set<Genre> discoveredGenres = new HashSet<Genre>();
+			final List<Genre> allGenres = genreDAO.getAllGenres();
 			multipleQueries = params.length > 1;
 			for (int i = 0; i < params.length; i++) {
 				lastIteration = i == params.length - 1;
@@ -381,14 +426,19 @@ public class GamesListFragment extends CustomFragment {
 					List<Game> result;
 					try {
 						result = query.execute(untilToday);
-
 						ExecutorService es = Executors.newFixedThreadPool(result.size());
 						for (final Game game : result) {
 							Runnable r = new Runnable() {
 								@Override
 								public void run() {
 									try {
-										game.setGenres(GiantBombApi.createGameQuery(game).execute(false));
+										List<Genre> genres = GiantBombApi.createGameQuery(game).execute(false);
+										List<String> genreNames = new ArrayList<String>();
+										for (Genre genre : genres) {
+											discoveredGenres.add(genre);
+											genreNames.add(genre.getName());
+										}
+										game.setGenres(genreNames);
 									} catch (Exception e) {
 										Log.e(getClass().getSimpleName(), e.getMessage());
 									}
@@ -433,6 +483,13 @@ public class GamesListFragment extends CustomFragment {
 					}
 				}
 			}
+			for (Genre discoveredGenre : discoveredGenres) {
+				if (!allGenres.contains(discoveredGenre)) {
+					allGenres.add(discoveredGenre);
+					genreDAO.addGenre(discoveredGenre);
+				}
+			}
+			genreDAO.close();
 			return null;
 		}
 
@@ -490,7 +547,7 @@ public class GamesListFragment extends CustomFragment {
 	}
 
 	@Override
-	public void filter(int filterType, String filter) {
+	public void filter(String filter) {
 		GamesListExpandableAdapter adapter = (GamesListExpandableAdapter) listView.getExpandableListAdapter();
 		if (adapter != null) {
 			adapter.getFilter().filter(filter);

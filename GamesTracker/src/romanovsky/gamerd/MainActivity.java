@@ -5,14 +5,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import romanovsky.gamerd.database.dao.GenreDAO;
 import romanovsky.gamerd.database.dao.PlatformDAO;
 import romanovsky.gamerd.giantbomb.api.GiantBombApi;
+import romanovsky.gamerd.giantbomb.api.core.Genre;
 import romanovsky.gamerd.giantbomb.api.core.Platform;
 import romanovsky.gamerd.ui.CustomFragment;
 import romanovsky.gamerd.ui.drawer.DrawerListArrayAdapter;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
 import romanovsky.gamerd.ui.list.GamesListFragment;
-import romanovsky.gamerd.ui.list.filters.ListFilterType;
 import romanovsky.gamerd.ui.settings.SettingsFragment;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -47,6 +48,8 @@ public class MainActivity extends ActionBarActivity {
 	private AdView adView;
 	private boolean adLoaded;
 	private int selectedOption = -1;
+	private List<Platform> filteredPlatforms;
+	private List<Genre> filteredGenres;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,9 @@ public class MainActivity extends ActionBarActivity {
 		adView = (AdView) findViewById(R.id.adView);
 		checkConnection();
 		GiantBombApi.setApiKey("ca8b79e01baa4e10a46ca36c648182bfe9e60c3b");
+
+		filteredPlatforms = new ArrayList<Platform>();
+		filteredGenres = new ArrayList<Genre>();
 
 		title = drawerTitle = getTitle();
 		drawerListTitles = getResources().getStringArray(R.array.side_menu);
@@ -116,7 +122,7 @@ public class MainActivity extends ActionBarActivity {
 				fragment.refresh(null);
 			}
 			return true;
-		case R.id.filter:
+		case R.id.filterPlatform:
 			if (fragment != null) {
 				final PlatformDAO platformDAO = new PlatformDAO(this);
 				final List<Platform> allPlatforms;
@@ -125,7 +131,7 @@ public class MainActivity extends ActionBarActivity {
 				} else {
 					allPlatforms = platformDAO.getPopularAndFilteredPlatforms();
 				}
-				final List<Platform> filteredPlatforms = new ArrayList<Platform>();
+				filteredPlatforms.clear();
 				for (Platform platform : allPlatforms) {
 					if (platform.isFiltered()) {
 						filteredPlatforms.add(platform);
@@ -137,7 +143,7 @@ public class MainActivity extends ActionBarActivity {
 						return lhs.getName().compareTo(rhs.getName());
 					}
 				});
-				View menuItemView = findViewById(R.id.filter);
+				View menuItemView = findViewById(R.id.filterPlatform);
 				PopupMenu popup = new PopupMenu(this, menuItemView);
 				Menu popupMenu = popup.getMenu();
 				for (int i = 0; i < allPlatforms.size(); i++) {
@@ -147,15 +153,15 @@ public class MainActivity extends ActionBarActivity {
 				}
 				popupMenu.setGroupCheckable(0, true, false);
 				if (item.getGroupId() != 1) {
-					popupMenu.add(1, R.id.filter, 0, getResources().getString(R.string.all_platforms));
+					popupMenu.add(1, R.id.filterPlatform, 0, getResources().getString(R.string.all_platforms));
 				} else {
-					popupMenu.add(0, R.id.filter, 0, getResources().getString(R.string.popular_platforms));
+					popupMenu.add(0, R.id.filterPlatform, 0, getResources().getString(R.string.popular_platforms));
 				}
 				popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
 					@Override
 					public boolean onMenuItemClick(MenuItem item) {
-						if (item.getGroupId() == 0 && item.getItemId() != R.id.filter) {
+						if (item.getGroupId() == 0 && item.getItemId() != R.id.filterPlatform) {
 							Platform platform = allPlatforms.get(item.getItemId());
 							item.setChecked(!item.isChecked());
 							platform.setFiltered(item.isChecked());
@@ -166,16 +172,87 @@ public class MainActivity extends ActionBarActivity {
 								filteredPlatforms.remove(platform);
 							}
 							StringBuilder sb = new StringBuilder();
+							sb.append("PLATFORMS:");
 							for (Platform p : filteredPlatforms) {
 								sb.append(p.getAbbreviation()).append(",");
 							}
 							if (!filteredPlatforms.isEmpty()) {
 								sb.setLength(sb.length() - 1);
 							}
-							fragment.filter(ListFilterType.GENRES.getValue(), sb.toString());
+							sb.append(";GENRES:");
+							for (Genre g : filteredGenres) {
+								sb.append(g.getName()).append(",");
+							}
+							if (!filteredGenres.isEmpty()) {
+								sb.setLength(sb.length() - 1);
+							}
+							fragment.filter(sb.toString());
 						} else {
 							onOptionsItemSelected(item);
 						}
+						return true;
+					}
+				});
+				popup.show();
+			}
+			return true;
+		case R.id.filterGenre:
+			if (fragment != null) {
+				final GenreDAO genreDAO = new GenreDAO(this);
+				genreDAO.open();
+				final List<Genre> allGenres = genreDAO.getAllGenres();
+				filteredGenres.clear();
+				for (Genre genre : allGenres) {
+					if (genre.isFiltered()) {
+						filteredGenres.add(genre);
+					}
+				}
+				Collections.sort(allGenres, new Comparator<Genre>() {
+					@Override
+					public int compare(Genre lhs, Genre rhs) {
+						return lhs.getName().compareTo(rhs.getName());
+					}
+				});
+				View menuItemView = findViewById(R.id.filterGenre);
+				PopupMenu popup = new PopupMenu(this, menuItemView);
+				Menu popupMenu = popup.getMenu();
+				for (int i = 0; i < allGenres.size(); i++) {
+					Genre genre = allGenres.get(i);
+					MenuItem popupMenuItem = popupMenu.add(0, i, 0, genre.getName());
+					popupMenuItem.setChecked(genre.isFiltered());
+				}
+				popupMenu.setGroupCheckable(0, true, false);
+				popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+					@Override
+					public boolean onMenuItemClick(MenuItem item) {
+						Genre genre = allGenres.get(item.getItemId());
+						item.setChecked(!item.isChecked());
+						genre.setFiltered(item.isChecked());
+						genreDAO.open();
+						genreDAO.updateGenre(genre);
+						genreDAO.close();
+						if (genre.isFiltered()) {
+							filteredGenres.add(genre);
+						} else {
+							filteredGenres.remove(genre);
+						}
+						StringBuilder sb = new StringBuilder();
+						sb.append("PLATFORMS:");
+						for (Platform p : filteredPlatforms) {
+							sb.append(p.getAbbreviation()).append(",");
+						}
+						if (!filteredPlatforms.isEmpty()) {
+							sb.setLength(sb.length() - 1);
+						}
+						sb.append(";GENRES:");
+						for (Genre g : filteredGenres) {
+							sb.append(g.getName()).append(",");
+						}
+						if (!filteredGenres.isEmpty()) {
+							sb.setLength(sb.length() - 1);
+						}
+						fragment.filter(sb.toString());
 						return true;
 					}
 				});

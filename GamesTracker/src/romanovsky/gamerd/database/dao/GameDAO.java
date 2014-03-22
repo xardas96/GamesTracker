@@ -6,15 +6,11 @@ import java.util.List;
 
 import romanovsky.gamerd.database.SQLiteHelper;
 import romanovsky.gamerd.giantbomb.api.core.Game;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
-public class GameDAO {
-	private SQLiteDatabase database;
-	private SQLiteHelper dbHelper;
+public class GameDAO extends AbstractDAO {
 	private String[] allColumns = {
 			SQLiteHelper.COLUMN_ID
 			, SQLiteHelper.COLUMN_NAME
@@ -36,15 +32,7 @@ public class GameDAO {
 	private boolean next = true;
 
 	public GameDAO(Context context) {
-		dbHelper = new SQLiteHelper(context);
-	}
-
-	private void open() {
-		database = dbHelper.getWritableDatabase();
-	}
-
-	private void close() {
-		dbHelper.close();
+		super(context);
 	}
 
 	public void addGame(Game game) {

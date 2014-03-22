@@ -7,6 +7,6 @@ public abstract class CustomFragment extends Fragment {
 
 	public abstract void refresh(View view);
 
-	public abstract void filter(int filterType, String filter);
+	public abstract void filter(String filter);
 
 }

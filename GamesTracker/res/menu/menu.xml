@@ -8,9 +8,14 @@
         android:title="@string/refresh"
         compat:showAsAction="ifRoom"/>
     <item
-        android:id="@+id/filter"
+        android:id="@+id/filterPlatform"
         android:icon="@drawable/filter"
-        android:title="@string/filters"
+        android:title="@string/platform_filter"
+        compat:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/filterGenre"
+        android:icon="@drawable/filter"
+        android:title="@string/genre_filter"
         compat:showAsAction="ifRoom"/>
 
 </menu>

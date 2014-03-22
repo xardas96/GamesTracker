@@ -48,7 +48,8 @@
     <string name="refresh">Refresh</string>
     <string name="auto_expand">Auto expand list sections:</string>
     <string name="nothing_tracked">It appears that you aren\'t tracking any game. \nStart tracking games by selecting one of the options from the drawer to the left!</string>
-    <string name="filters">Filters</string>
+    <string name="platform_filter">Platform filter</string>
+    <string name="genre_filter">Genre filter</string>
     <string name="more_info">More info&#8230;</string>
     <string name="all_platforms">All platforms&#8230;</string>
     <string name="popular_platforms">Popular platforms&#8230;</string>

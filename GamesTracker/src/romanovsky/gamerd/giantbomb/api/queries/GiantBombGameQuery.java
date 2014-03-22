@@ -7,8 +7,9 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 
 import romanovsky.gamerd.giantbomb.api.core.Game;
+import romanovsky.gamerd.giantbomb.api.core.Genre;
 
-public class GiantBombGameQuery extends AbstractGiantBombQuery<String> {
+public class GiantBombGameQuery extends AbstractGiantBombQuery<Genre> {
 	
 	public GiantBombGameQuery(Game game) {
 		super("http://www.giantbomb.com/api/game/" + game.getId() + "/");
@@ -29,13 +30,18 @@ public class GiantBombGameQuery extends AbstractGiantBombQuery<String> {
 	}
 
 	@Override
-	protected List<String> parseResponse(Element root, boolean untilToday) {
-		List<String> responseGenres = new ArrayList<String>();
+	protected List<Genre> parseResponse(Element root, boolean untilToday) {
+		List<Genre> responseGenres = new ArrayList<Genre>();
 		Node genresNode = root.selectSingleNode("//genres");
-		@SuppressWarnings("unchecked")
-		List<Node> genresNodes = genresNode.selectNodes("genre");
-		for (Node genreNode : genresNodes) {
-			responseGenres.add(genreNode.selectSingleNode("name").getText());
+		if (genresNode != null) {
+			@SuppressWarnings("unchecked")
+			List<Node> genresNodes = genresNode.selectNodes("genre");
+			for (Node genreNode : genresNodes) {
+				Genre genre = new Genre();
+				String genreName = genreNode.selectSingleNode("name").getText();
+				genre.setName(genreName);
+				responseGenres.add(genre);
+			}
 		}
 		return responseGenres;
 	}

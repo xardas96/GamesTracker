@@ -8,26 +8,29 @@ import romanovsky.gamerd.giantbomb.api.core.Platform;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
-public class PlatformDAO {
-	private SQLiteDatabase database;
-	private SQLiteHelper dbHelper;
-
-	private String[] allColumns = { SQLiteHelper.COLUMN_ID, SQLiteHelper.COLUMN_NAME, SQLiteHelper.COLUMN_ABBREVIATION, SQLiteHelper.COLUMN_FILTERED };
-
-	private String[] popularPlatforms = { "Linux", "Mac", "Nintendo 3DS", "PC", "PlayStation 3", "PlayStation 4", "PlayStation Vita", "Wii U", "Xbox 360", "Xbox One" };
+public class PlatformDAO extends AbstractDAO{
+	private String[] allColumns = { 
+			SQLiteHelper.COLUMN_ID
+			, SQLiteHelper.COLUMN_NAME
+			, SQLiteHelper.COLUMN_ABBREVIATION
+			, SQLiteHelper.COLUMN_FILTERED
+			};
+	private String[] popularPlatforms = {
+			"Linux"
+			, "Mac"
+			, "Nintendo 3DS"
+			, "PC"
+			, "PlayStation 3"
+			, "PlayStation 4"
+			, "PlayStation Vita"
+			, "Wii U"
+			, "Xbox 360"
+			, "Xbox One"
+			};
 
 	public PlatformDAO(Context context) {
-		dbHelper = new SQLiteHelper(context);
-	}
-
-	private void open() {
-		database = dbHelper.getWritableDatabase();
-	}
-
-	private void close() {
-		dbHelper.close();
+		super(context);
 	}
 
 	public void addPlatform(Platform platform) {

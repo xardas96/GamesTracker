@@ -23,7 +23,7 @@ import romanovsky.gamerd.database.dao.GameDAO;
 import romanovsky.gamerd.giantbomb.api.GameReleaseDateComparator;
 import romanovsky.gamerd.giantbomb.api.core.Game;
 import romanovsky.gamerd.ui.drawer.DrawerSelection;
-import romanovsky.gamerd.ui.list.filters.GamesListPlatformFilter;
+import romanovsky.gamerd.ui.list.filters.GamesListFilter;
 import romanovsky.gamerd.ui.list.pager.adapters.ReleasedGamesListPageAdapter;
 import romanovsky.gamerd.ui.list.pager.adapters.TrackedGamesListPageAdapter;
 import romanovsky.gamerd.ui.list.pager.adapters.UntrackedGamesListPageAdapter;
@@ -88,7 +88,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 		this.gamesForFilter = new ArrayList<Game>();
 		this.outGamesForFilter = new ArrayList<Game>();
 		this.filterString = filterString;
-		filter = new GamesListPlatformFilter(this);
+		filter = new GamesListFilter(this);
 		addAll(games);
 		this.selection = selection;
 		this.context = context;

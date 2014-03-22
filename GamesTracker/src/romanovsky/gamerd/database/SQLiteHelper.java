@@ -25,9 +25,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String TABLE_PLATFORMS = "platforms";
 	public static final String COLUMN_ABBREVIATION = "abbreviation";
 	public static final String COLUMN_FILTERED = "filtered";
+	
+	public static final String TABLE_GENRES = "genres";
 
 	private static final String DB_NAME = "games.db";
-	private static final int DB_VERSION = 4;
+	private static final int DB_VERSION = 5;
 	
 	private static final String DB_CREATE = "CREATE TABLE "
 			+ TABLE_GAMES + "(" 
@@ -46,6 +48,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_API_DETAIL + " text,"
 			+ COLUMN_GENRES + "text"
 			+ ");";
+	
 	private static final String DB_UPDATE_API_DETAIL = "ALTER TABLE " 
 		+ TABLE_GAMES
 		+ " ADD COLUMN " 
@@ -62,7 +65,15 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	private static final String DB_UPDATE_GENRES = "ALTER TABLE "
 			+ TABLE_GAMES
 			+ " ADD COLUMN " 
-			+ COLUMN_GENRES + " text;";	
+			+ COLUMN_GENRES + " text;";
+	
+	private static final String DB_CREATE_GENRES = "CREATE TABLE "
+			+ TABLE_GENRES + "(" 
+			+ COLUMN_ID + " integer primary key autoincrement, "
+			+ COLUMN_NAME + " text not null, "
+			+ COLUMN_ABBREVIATION + " text, "
+			+ COLUMN_FILTERED + " integer"
+			+ ");";
 			
 	public SQLiteHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -83,10 +94,18 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			createPlatforms(db);
 		}
 		if (oldVersion < 4) {
-			Log.e("UPDATE DB", "UPDATE DB");
 			addGenres(db);
+		}
+		if(oldVersion < 5) {
+			Log.e("UPDATE DB", "UPDATE DB");
+			createGenres(db);
 			Log.e("UPDATED DB", "UPDATED DB");
 		}
+	} 
+	
+	private void createGenres(SQLiteDatabase db) {
+		db.execSQL(DB_CREATE_GENRES);
+		forceUpdate(db);
 	}
 
 	private void addGenres(SQLiteDatabase db) {
