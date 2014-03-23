@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -415,7 +417,7 @@ public class GamesListFragment extends CustomFragment {
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 			final GenreDAO genreDAO = new GenreDAO(getActivity());
 			genreDAO.open();
-			final Set<Genre> discoveredGenres = new HashSet<Genre>();
+			final Map<Genre, Void> discoveredGenres = new ConcurrentHashMap<Genre, Void>();
 			final List<Genre> allGenres = genreDAO.getAllGenres();
 			multipleQueries = params.length > 1;
 			for (int i = 0; i < params.length; i++) {
@@ -435,7 +437,7 @@ public class GamesListFragment extends CustomFragment {
 										List<Genre> genres = GiantBombApi.createGameQuery(game).execute(false);
 										List<String> genreNames = new ArrayList<String>();
 										for (Genre genre : genres) {
-											discoveredGenres.add(genre);
+											discoveredGenres.put(genre, null);
 											genreNames.add(genre.getName());
 										}
 										game.setGenres(genreNames);
@@ -483,7 +485,7 @@ public class GamesListFragment extends CustomFragment {
 					}
 				}
 			}
-			for (Genre discoveredGenre : discoveredGenres) {
+			for (Genre discoveredGenre : discoveredGenres.keySet()) {
 				if (!allGenres.contains(discoveredGenre)) {
 					allGenres.add(discoveredGenre);
 					genreDAO.addGenre(discoveredGenre);
