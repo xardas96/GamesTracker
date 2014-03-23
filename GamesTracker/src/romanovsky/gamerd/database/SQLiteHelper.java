@@ -29,7 +29,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public static final String TABLE_GENRES = "genres";
 
 	private static final String DB_NAME = "games.db";
-	private static final int DB_VERSION = 5;
+	private static final int DB_VERSION = 6;
 	
 	private static final String DB_CREATE = "CREATE TABLE "
 			+ TABLE_GAMES + "(" 
@@ -46,7 +46,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			+ COLUMN_NOTIFY + " integer, "
 			+ COLUMN_DESCRIPTION + " text,"
 			+ COLUMN_API_DETAIL + " text,"
-			+ COLUMN_GENRES + "text"
+			+ COLUMN_GENRES + " text"
 			+ ");";
 	
 	private static final String DB_UPDATE_API_DETAIL = "ALTER TABLE " 
@@ -97,11 +97,22 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 			addGenres(db);
 		}
 		if(oldVersion < 5) {
-			Log.e("UPDATE DB", "UPDATE DB");
 			createGenres(db);
+		}
+		if (oldVersion < 6) {
+			Log.e("UPDATE DB", "UPDATE DB");
+			try {
+				addGenres(db);
+			} catch (Exception e) {
+				Log.e("COLUMN GENRES ALREADY ADDED", e.getMessage());
+			}
 			Log.e("UPDATED DB", "UPDATED DB");
 		}
 	} 
+	
+	@Override
+	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	}
 	
 	private void createGenres(SQLiteDatabase db) {
 		db.execSQL(DB_CREATE_GENRES);
