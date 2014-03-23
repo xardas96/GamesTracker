@@ -417,7 +417,7 @@ public class GamesListFragment extends CustomFragment {
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 			final GenreDAO genreDAO = new GenreDAO(getActivity());
 			genreDAO.open();
-			final Map<Genre, Void> discoveredGenres = new ConcurrentHashMap<Genre, Void>();
+			final Map<Genre, Genre> discoveredGenres = new ConcurrentHashMap<Genre, Genre>();
 			final List<Genre> allGenres = genreDAO.getAllGenres();
 			multipleQueries = params.length > 1;
 			for (int i = 0; i < params.length; i++) {
@@ -437,7 +437,7 @@ public class GamesListFragment extends CustomFragment {
 										List<Genre> genres = GiantBombApi.createGameQuery(game).execute(false);
 										List<String> genreNames = new ArrayList<String>();
 										for (Genre genre : genres) {
-											discoveredGenres.put(genre, null);
+											discoveredGenres.put(genre, genre);
 											genreNames.add(genre.getName());
 										}
 										game.setGenres(genreNames);
