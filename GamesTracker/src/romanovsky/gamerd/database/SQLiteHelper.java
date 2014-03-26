@@ -83,6 +83,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(DB_CREATE);
 		createPlatforms(db);
+		createGenres(db);
 	}
 
 	@Override
