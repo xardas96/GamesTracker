@@ -152,10 +152,12 @@ public class MainActivity extends ActionBarActivity {
 					popupMenuItem.setChecked(platform.isFiltered());
 				}
 				popupMenu.setGroupCheckable(0, true, false);
-				if (item.getGroupId() != 1) {
-					popupMenu.add(1, R.id.filterPlatform, 0, getResources().getString(R.string.all_platforms));
-				} else {
-					popupMenu.add(0, R.id.filterPlatform, 0, getResources().getString(R.string.popular_platforms));
+				if (!allPlatforms.isEmpty()) {
+					if (item.getGroupId() != 1) {
+						popupMenu.add(1, R.id.filterPlatform, 0, getResources().getString(R.string.all_platforms));
+					} else {
+						popupMenu.add(0, R.id.filterPlatform, 0, getResources().getString(R.string.popular_platforms));
+					}
 				}
 				popup.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
