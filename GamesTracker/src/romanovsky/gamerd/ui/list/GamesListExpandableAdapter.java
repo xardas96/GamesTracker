@@ -389,7 +389,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 			if (game.getExpectedReleaseYear() == 0) {
 				releaseEstimate.setText(res.getString(R.string.unknown_release));
 			} else {
-				if (Math.abs(daysToRelease) <= 30) {
+				if (Math.abs(daysToRelease) <= 30 && game.getExpectedReleaseDay() != 0) {
 					releaseEstimate.setText(getDateDifferenceInDays(daysToRelease));
 				} else {
 					releaseEstimate.setText(buildReleaseDate(game));
@@ -489,7 +489,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 	}
 
 	private void addBitmapToMemoryCache(Long key, Bitmap bitmap) {
-		if (getBitmapFromMemCache(key) == null && key != null && bitmap !=null) {
+		if (getBitmapFromMemCache(key) == null && key != null && bitmap != null) {
 			cache.put(key, bitmap);
 		}
 	}
