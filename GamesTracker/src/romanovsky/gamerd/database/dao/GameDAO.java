@@ -173,6 +173,14 @@ public class GameDAO extends AbstractDAO {
 		close();
 		return game;
 	}
+	
+	public void forceUpdate() {
+		open();
+		ContentValues values = new ContentValues();
+		values.put(SQLiteHelper.COLUMN_DATE_LAST_UPDATED, 0);
+		database.update(SQLiteHelper.TABLE_GAMES, values, null, null);
+		close();
+	}
 
 	private Game parseGame(Cursor cursor) {
 		Game game = new Game();

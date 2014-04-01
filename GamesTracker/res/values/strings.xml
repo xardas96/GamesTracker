@@ -53,5 +53,6 @@
     <string name="more_info">More info&#8230;</string>
     <string name="all_platforms">All platforms&#8230;</string>
     <string name="popular_platforms">Popular platforms&#8230;</string>
+    <string name="force_refresh">Force refresh</string>
 
 </resources>

@@ -288,7 +288,7 @@ public class GamesListFragment extends CustomFragment {
 
 	}
 
-	private class TrackedGamesUpdater extends AsyncTask<List<Game>, Void, Void> {
+	private class TrackedGamesUpdater extends AsyncTask<List<Game>, Void, List<Game>> {
 		private View rootView;
 		private boolean updated;
 
@@ -307,7 +307,7 @@ public class GamesListFragment extends CustomFragment {
 		}
 
 		@Override
-		protected Void doInBackground(List<Game>... params) {
+		protected List<Game> doInBackground(List<Game>... params) {
 			PlatformDAO platformDAO = new PlatformDAO(getActivity());
 			List<Platform> allPlatforms = platformDAO.getAllPlatforms();
 			GenreDAO genreDAO = new GenreDAO(getActivity());
@@ -339,12 +339,12 @@ public class GamesListFragment extends CustomFragment {
 								genreNames.add(genre.getName());
 							}
 							newGame.setGenres(genreNames);
-							game.setGenres(genreNames);
-							dao.updateGame(newGame);
+							rewriteGame(game, newGame);
+							dao.updateGame(game);
 							updated = true;
-							Log.i("updated", newGame.getName());
+							Log.i("updated", game.getName());
 						} else {
-							Log.i("not updated", newGame.getName());
+							Log.i("not updated", game.getName());
 						}
 					} catch (Exception e) {
 						Log.e("not updated", e.getMessage(), e);
@@ -359,7 +359,22 @@ public class GamesListFragment extends CustomFragment {
 				}
 			}
 			genreDAO.close();
-			return null;
+			return games;
+		}
+
+		private void rewriteGame(Game game, Game newGame) {
+			game.setApiDetailURL(newGame.getApiDetailURL());
+			game.setDateLastUpdated(newGame.getDateLastUpdated());
+			game.setDescription(newGame.getDescription());
+			game.setExpectedReleaseDay(newGame.getExpectedReleaseDay());
+			game.setExpectedReleaseMonth(newGame.getExpectedReleaseMonth());
+			game.setExpectedReleaseQuarter(newGame.getExpectedReleaseQuarter());
+			game.setExpectedReleaseYear(newGame.getExpectedReleaseYear());
+			game.setGenres(newGame.getGenres());
+			game.setIconURL(newGame.getIconURL());
+			game.setName(newGame.getName());
+			game.setPlatforms(newGame.getPlatforms());
+			game.setSiteDetailURL(newGame.getSiteDetailURL());
 		}
 
 		@Override
@@ -368,13 +383,16 @@ public class GamesListFragment extends CustomFragment {
 		}
 
 		@Override
-		protected void onPostExecute(Void result) {
+		protected void onPostExecute(List<Game> games) {
 			workingTask = null;
 			if (!isCancelled()) {
 				progress.setProgress(progress.getMax());
 				extraProgress.setVisibility(View.GONE);
 				if (updated) {
 					ExpandableListAdapter adapter = listView.getExpandableListAdapter();
+					((GamesListExpandableAdapter) adapter).getGamesForFilter().clear();
+					((GamesListExpandableAdapter) adapter).getOutGamesForFilter().clear();
+					((GamesListExpandableAdapter) adapter).addAll(games);
 					((GamesListExpandableAdapter) adapter).notifyDataSetChanged();
 				}
 				if (getActivity() != null) {

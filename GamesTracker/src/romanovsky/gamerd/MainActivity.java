@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import romanovsky.gamerd.database.dao.GameDAO;
 import romanovsky.gamerd.database.dao.GenreDAO;
 import romanovsky.gamerd.database.dao.PlatformDAO;
 import romanovsky.gamerd.giantbomb.api.GiantBombApi;
@@ -259,6 +260,13 @@ public class MainActivity extends ActionBarActivity {
 					}
 				});
 				popup.show();
+			}
+			return true;
+		case R.id.forceRefresh:
+			if (fragment != null) {
+				GameDAO gameDAO = new GameDAO(this);
+				gameDAO.forceUpdate();
+				fragment.refresh(null);
 			}
 			return true;
 		default:
