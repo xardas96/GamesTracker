@@ -264,8 +264,10 @@ public class MainActivity extends ActionBarActivity {
 			return true;
 		case R.id.forceRefresh:
 			if (fragment != null) {
-				GameDAO gameDAO = new GameDAO(this);
-				gameDAO.forceUpdate();
+				if (selectedOption == DrawerSelection.TRACKED.getValue()) {
+					GameDAO gameDAO = new GameDAO(this);
+					gameDAO.forceUpdate();
+				}
 				fragment.refresh(null);
 			}
 			return true;
