@@ -375,6 +375,9 @@ public class GamesListFragment extends CustomFragment {
 			game.setName(newGame.getName());
 			game.setPlatforms(newGame.getPlatforms());
 			game.setSiteDetailURL(newGame.getSiteDetailURL());
+			if (game.isNotify() && newGame.isOutFor() >= 0) {
+				game.setNotify(false);
+			}
 		}
 
 		@Override
