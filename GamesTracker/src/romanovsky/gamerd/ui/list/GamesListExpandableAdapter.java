@@ -346,9 +346,9 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 			view.setBackgroundResource(R.drawable.games_list_item_background_track);
 		}
 		ImageView timer = (ImageView) view.findViewById(R.id.timerImageView);
-		if (game.isNotify()) {
+		if (game.isNotify() && canNotify) {
 			timer.setVisibility(View.VISIBLE);
-		} else if (!game.isNotify() || !game.isTracked()) {
+		} else if (!canNotify || !game.isNotify() || !game.isTracked()) {
 			timer.setVisibility(View.GONE);
 		}
 		TextView title = (TextView) view.findViewById(R.id.titleTextView);
