@@ -147,7 +147,7 @@ public class Game implements Parcelable {
 	}
 
 	public DateTime getReleaseDate() {
-		DateTime release = new DateTime(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 30 : expectedReleaseDay, 0, 0);
+		DateTime release = new DateTime(expectedReleaseYear, expectedReleaseMonth == 0 ? 12 : expectedReleaseMonth, expectedReleaseDay == 0 ? 30 : expectedReleaseDay, expectedReleaseMonth == 0 ? 12 : 0, expectedReleaseDay == 0 ? 30 : 0);
 		return release;
 	}
 
@@ -166,11 +166,11 @@ public class Game implements Parcelable {
 	public void setApiDetailURL(String apiDetailURL) {
 		this.apiDetailURL = apiDetailURL;
 	}
-	
+
 	public List<String> getGenres() {
 		return genres;
 	}
-	
+
 	public void setGenres(List<String> genres) {
 		this.genres = genres;
 	}
