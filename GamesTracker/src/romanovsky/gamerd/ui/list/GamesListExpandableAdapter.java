@@ -175,6 +175,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 								public void run() {
 									if (selection == DrawerSelection.TRACKED.getValue()) {
 										outGames.remove(game);
+										outGamesForFilter.remove(game);
 									}
 									viewPager.postDelayed(new Runnable() {
 
@@ -205,6 +206,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 								public void run() {
 									if (selection == DrawerSelection.TRACKED.getValue()) {
 										games.remove(game);
+										gamesForFilter.remove(game);
 									}
 									viewPager.postDelayed(new Runnable() {
 
