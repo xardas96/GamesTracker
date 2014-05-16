@@ -44,7 +44,8 @@
     <string name="settings_clearing_cache">Clearing image cache</string>
     <string name="settings_cache_cleared">Cache cleared</string>
     <string name="updating_tracked">Updating tracked games&#8230;</string>
-    <string name="updated_tracked">All tracked games updated!</string>
+    <string name="updated_tracked_one">%d tracked game updated!</string>
+    <string name="updated_tracked_many">%d tracked games updated!</string>
     <string name="refresh">Refresh</string>
     <string name="auto_expand">Auto expand list sections:</string>
     <string name="nothing_tracked">It appears that you aren\'t tracking any game. \nStart tracking games by selecting one of the options from the drawer to the left!</string>

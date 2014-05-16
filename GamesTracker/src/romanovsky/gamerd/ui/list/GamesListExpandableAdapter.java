@@ -30,6 +30,8 @@ import romanovsky.gamerd.ui.list.pager.adapters.UntrackedGamesListPageAdapter;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -254,6 +256,14 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				moreInfoDialog.setView(moreInfoView);
 				moreInfoDialog.setCancelable(true);
 				moreInfoDialog.setCanceledOnTouchOutside(true);
+				moreInfoDialog.setOnDismissListener(new OnDismissListener() {
+
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						notifyDataSetChanged();
+
+					}
+				});
 				moreInfoView.setOnClickListener(new OnClickListener() {
 
 					@Override
@@ -275,7 +285,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 							public void onClick(View v) {
 								game.setNotify(!game.isNotify());
 								gameDAO.updateGame(game);
-								notifyDataSetChanged();
 								moreInfoDialog.dismiss();
 							}
 						});
@@ -288,7 +297,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 						public void onClick(View v) {
 							gameDAO.deleteGame(game);
 							games.remove(game);
-							notifyDataSetChanged();
 							moreInfoDialog.dismiss();
 						}
 					});
@@ -300,7 +308,6 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 						@Override
 						public void onClick(View v) {
 							gameDAO.addGame(game);
-							notifyDataSetChanged();
 							moreInfoDialog.dismiss();
 						}
 					});
@@ -447,6 +454,13 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				releaseDate.setVisibility(View.VISIBLE);
 				releaseDate.setText(buildReleaseDate(game));
 			}
+			if (game.isUpdated()) {
+				game.setUpdated(false);
+			}
+		}
+		if (game.isUpdated()) {
+			ImageView updated = (ImageView) view.findViewById(R.id.updatedView);
+			updated.setVisibility(View.VISIBLE);
 		}
 		ImageView cover = (ImageView) view.findViewById(R.id.coverImageView);
 		loadBitmap(game.getIconURL(), cover, game);

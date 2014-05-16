@@ -290,7 +290,7 @@ public class GamesListFragment extends CustomFragment {
 
 	private class TrackedGamesUpdater extends AsyncTask<List<Game>, Void, List<Game>> {
 		private View rootView;
-		private boolean updated;
+		private int updated;
 
 		public TrackedGamesUpdater(View rootView) {
 			this.rootView = rootView;
@@ -341,13 +341,14 @@ public class GamesListFragment extends CustomFragment {
 							newGame.setGenres(genreNames);
 							rewriteGame(game, newGame);
 							dao.updateGame(game);
-							updated = true;
+							updated++;
+							game.setUpdated(true);
 							Log.i("updated", game.getName());
 						} else {
 							Log.i("not updated", game.getName());
 						}
 					} catch (Exception e) {
-						Log.e("not updated", e.getMessage(), e);
+						Log.e("not updated", e.getMessage());
 					}
 					publishProgress((Void) null);
 				}
@@ -391,7 +392,7 @@ public class GamesListFragment extends CustomFragment {
 			if (!isCancelled()) {
 				progress.setProgress(progress.getMax());
 				extraProgress.setVisibility(View.GONE);
-				if (updated) {
+				if (updated > 0) {
 					ExpandableListAdapter adapter = listView.getExpandableListAdapter();
 					((GamesListExpandableAdapter) adapter).getGamesForFilter().clear();
 					((GamesListExpandableAdapter) adapter).getOutGamesForFilter().clear();
@@ -399,7 +400,13 @@ public class GamesListFragment extends CustomFragment {
 					((GamesListExpandableAdapter) adapter).notifyDataSetChanged();
 				}
 				if (getActivity() != null) {
-					Toast.makeText(getActivity(), getResources().getString(R.string.updated_tracked), Toast.LENGTH_SHORT).show();
+					String msg;
+					if (updated == 1) {
+						msg = String.format(getResources().getString(R.string.updated_tracked_one), updated);
+					} else {
+						msg = String.format(getResources().getString(R.string.updated_tracked_many), updated);
+					}
+					Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
 				}
 			}
 		}
