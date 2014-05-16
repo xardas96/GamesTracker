@@ -6,26 +6,26 @@
         android:id="@+id/forceRefresh"
         android:icon="@drawable/force_refresh"
         android:title="@string/force_refresh"
-        compat:showAsAction="ifRoom"/>
+        compat:showAsAction="always"/>
     <item
         android:id="@+id/refresh"
         android:icon="@drawable/refresh"
         android:title="@string/refresh"
-        compat:showAsAction="ifRoom"/>
+        compat:showAsAction="always"/>
     <item
         android:id="@+id/filter"
         android:icon="@drawable/filter"
         android:title="@string/platform_filter"
-        compat:showAsAction="ifRoom">
+        compat:showAsAction="always">
         <menu>
             <item
                 android:id="@+id/filterPlatform"
                 android:title="@string/platform_filter"
-                compat:showAsAction="ifRoom"/>
+                compat:showAsAction="always"/>
             <item
                 android:id="@+id/filterGenre"
                 android:title="@string/genre_filter"
-                compat:showAsAction="ifRoom"/>
+                compat:showAsAction="always"/>
         </menu>
     </item>
 
