@@ -46,13 +46,13 @@
 
         <ImageView
             android:id="@+id/updatedView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="bottom|right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:contentDescription="@string/image"
-            android:scaleType="matrix"
             android:src="@drawable/updated"
             android:visibility="gone" />
+
     </FrameLayout>
 
     <TextView
