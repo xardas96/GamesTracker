@@ -55,6 +55,6 @@
     <string name="all_platforms">All platforms&#8230;</string>
     <string name="popular_platforms">Popular platforms&#8230;</string>
     <string name="force_refresh">Force refresh</string>
-    <string name="auto_update_on_startup">Auto update on statup</string>
+    <string name="auto_update_on_startup">Auto update games on statup</string>
 
 </resources>
