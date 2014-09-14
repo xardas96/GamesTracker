@@ -106,7 +106,7 @@
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <romanovsky.gamerd.ui.FlowLayout
+    <romanovsky.gamerdplus.ui.FlowLayout
         android:id="@+id/platformsLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
         android:layout_alignRight="@+id/titleTextView"
         android:layout_below="@+id/titleTextView" />
 
-    <romanovsky.gamerd.ui.FlowLayout
+    <romanovsky.gamerdplus.ui.FlowLayout
         android:id="@+id/genresLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
