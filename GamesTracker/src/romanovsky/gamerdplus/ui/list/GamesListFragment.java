@@ -54,6 +54,7 @@ public class GamesListFragment extends CustomFragment {
 	private ProgressBar extraProgress;
 	private ExpandableListView listView;
 	private int notifyDuration;
+	private boolean autoUpdate;
 	private boolean canNotify;
 	private List<Integer> expandSections;
 	private boolean expanded;
@@ -67,6 +68,7 @@ public class GamesListFragment extends CustomFragment {
 		final View rootView = inflater.inflate(R.layout.games_fragment, container, false);
 		SettingsManager manager = new SettingsManager(getActivity());
 		Settings settings = manager.loadSettings();
+		autoUpdate = settings.isAutoUpdate();
 		canNotify = settings.isNotify();
 		notifyDuration = settings.getDuration();
 		expandSections = settings.getAutoExpand();
@@ -279,10 +281,13 @@ public class GamesListFragment extends CustomFragment {
 			if (result.isEmpty()) {
 				TextView nothingTracked = (TextView) rootView.findViewById(R.id.nothingTrackedTextView);
 				nothingTracked.setVisibility(View.VISIBLE);
-			} else {
+			} else if (autoUpdate) {
 				TrackedGamesUpdater updater = new TrackedGamesUpdater(rootView);
 				workingTask = updater;
 				updater.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new ArrayList<Game>(result));
+			} else {
+				progress = (ProgressBar) rootView.findViewById(R.id.progressBar);
+				progress.setProgress(progress.getMax());
 			}
 		}
 

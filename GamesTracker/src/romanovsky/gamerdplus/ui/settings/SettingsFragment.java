@@ -61,6 +61,17 @@ public class SettingsFragment extends CustomFragment {
 
 		@Override
 		protected void onPostExecute(final Settings result) {
+			final CheckBox autoUpdateCheckBox = (CheckBox)rootView.findViewById(R.id.autoUpdateOnStartupCheckBox);
+			autoUpdateCheckBox.setChecked(result.isAutoUpdate());
+			autoUpdateCheckBox.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					result.setAutoUpdate(autoUpdateCheckBox.isChecked());
+					manager.saveSettings(result);
+				}
+			});
+			
 			final List<Integer> autoExpand = result.getAutoExpand();
 			LinearLayout autoExpandLinearLayout = (LinearLayout) rootView.findViewById(R.id.checkBoxExpandLayout);
 			String[] categories = getResources().getStringArray(R.array.list_categories);

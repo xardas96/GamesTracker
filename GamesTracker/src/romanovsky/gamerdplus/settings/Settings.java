@@ -5,11 +5,13 @@ import java.util.List;
 
 public class Settings {
 
+	private boolean autoUpdate;
 	private boolean notify;
 	private int duration;
 	private List<Integer> autoExpand;
 
 	public Settings() {
+		autoUpdate = false;
 		notify = true;
 		duration = 7;
 		autoExpand = new ArrayList<Integer>();
@@ -39,5 +41,13 @@ public class Settings {
 
 	public void setAutoExpand(List<Integer> autoExpand) {
 		this.autoExpand = autoExpand;
+	}
+
+	public void setAutoUpdate(boolean autoUpdate) {
+		this.autoUpdate = autoUpdate;
+	}
+
+	public boolean isAutoUpdate() {
+		return autoUpdate;
 	}
 }

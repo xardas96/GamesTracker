@@ -17,12 +17,21 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
+            <CheckBox
+                android:id="@+id/autoUpdateOnStartupCheckBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:text="@string/auto_update_on_startup" />
+
             <TextView
                 android:id="@+id/autoExpandTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dip"
                 android:layout_marginRight="10dip"
+                android:layout_marginTop="15dip"
                 android:text="@string/auto_expand"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 

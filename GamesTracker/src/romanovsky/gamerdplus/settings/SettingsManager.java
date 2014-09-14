@@ -35,6 +35,11 @@ public class SettingsManager {
 			try {
 				Document settingsDocument = reader.read(settingsFile);
 				Element root = settingsDocument.getRootElement();
+				Node autoUpdateNode = root.selectSingleNode("autoUpdate");
+				if (autoUpdateNode != null) {
+					boolean autoUpdate = Boolean.valueOf(autoUpdateNode.getText());
+					settings.setAutoUpdate(autoUpdate);
+				}
 				Node notifyNode = root.selectSingleNode("notify");
 				if (notifyNode != null) {
 					boolean notify = Boolean.valueOf(notifyNode.valueOf("@notify"));
@@ -67,6 +72,8 @@ public class SettingsManager {
 		File settingsFile = new File(context.getCacheDir() + File.separator + SETTINGS);
 		Document settingsDocument = DocumentHelper.createDocument();
 		Element root = settingsDocument.addElement("root");
+		Element autoUpdateElement = root.addElement("autoUpdate");
+		autoUpdateElement.setText(String.valueOf(settings.isAutoUpdate()));
 		Element notifyElement = root.addElement("notify");
 		notifyElement.addAttribute("notify", String.valueOf(settings.isNotify()));
 		notifyElement.addAttribute("duration", String.valueOf(settings.getDuration()));
