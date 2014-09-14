@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -36,18 +37,16 @@
         </activity>
 
         <service
-     		android:name=".service.ReleaseDateNotificationService"
+            android:name=".service.ReleaseDateNotificationService"
             android:process=":release_date_check" >
         </service>
 
-        <receiver 
-            android:name=".service.SystemBootReceiver" >
+        <receiver android:name=".service.SystemBootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".service.DatabaseUpdateReceiver" />
+        <receiver android:name=".service.DatabaseUpdateReceiver" />
 
         <activity
             android:name="com.google.android.gms.ads.AdActivity"

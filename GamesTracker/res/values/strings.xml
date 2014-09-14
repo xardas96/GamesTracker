@@ -56,5 +56,11 @@
     <string name="popular_platforms">Popular platforms&#8230;</string>
     <string name="force_refresh">Force refresh</string>
     <string name="auto_update_on_startup">Auto update games on statup</string>
+    <string name="backup_db">Backup games database</string>
+    <string name="restore_db">Restore games database from backup</string>
+    <string name="db_backuped">Database backuped successfully</string>
+    <string name="db_restored">Database restored successfully</string>
+    <string name="db_backup_error">Error backingup the database</string>
+    <string name="db_restore_error">Error restoring the database</string>
 
 </resources>

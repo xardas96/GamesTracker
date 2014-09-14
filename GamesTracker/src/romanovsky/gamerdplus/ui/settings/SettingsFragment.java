@@ -1,15 +1,21 @@
 package romanovsky.gamerdplus.ui.settings;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import romanovsky.gamerdplus.R;
 import romanovsky.gamerdplus.async.AsyncTask;
+import romanovsky.gamerdplus.database.SQLiteHelper;
 import romanovsky.gamerdplus.settings.Settings;
 import romanovsky.gamerdplus.settings.SettingsManager;
 import romanovsky.gamerdplus.ui.CustomFragment;
 import android.graphics.PorterDuff.Mode;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,8 +36,7 @@ public class SettingsFragment extends CustomFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		final View rootView = inflater.inflate(R.layout.settings_fragment, container, false);
-		Initializer initializer = new Initializer(rootView);
-		initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
+		refresh(rootView);
 		return rootView;
 	}
 
@@ -61,17 +66,17 @@ public class SettingsFragment extends CustomFragment {
 
 		@Override
 		protected void onPostExecute(final Settings result) {
-			final CheckBox autoUpdateCheckBox = (CheckBox)rootView.findViewById(R.id.autoUpdateOnStartupCheckBox);
+			final CheckBox autoUpdateCheckBox = (CheckBox) rootView.findViewById(R.id.autoUpdateOnStartupCheckBox);
 			autoUpdateCheckBox.setChecked(result.isAutoUpdate());
 			autoUpdateCheckBox.setOnClickListener(new OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					result.setAutoUpdate(autoUpdateCheckBox.isChecked());
 					manager.saveSettings(result);
 				}
 			});
-			
+
 			final List<Integer> autoExpand = result.getAutoExpand();
 			LinearLayout autoExpandLinearLayout = (LinearLayout) rootView.findViewById(R.id.checkBoxExpandLayout);
 			String[] categories = getResources().getStringArray(R.array.list_categories);
@@ -153,6 +158,61 @@ public class SettingsFragment extends CustomFragment {
 					deleter.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 				}
 			});
+
+			Button backupDbButton = (Button) rootView.findViewById(R.id.backupDbButton);
+			final Button restoreDbButton = (Button) rootView.findViewById(R.id.restoreDbButton);
+			backupDbButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					try {
+						copyFileWithSameName(SQLiteHelper.DB_PATH, Environment.getExternalStorageDirectory() + SQLiteHelper.BACKUP_PATH, SQLiteHelper.DB_NAME);
+						restoreDbButton.setEnabled(true);
+						Toast.makeText(getActivity(), getResources().getString(R.string.db_backuped), Toast.LENGTH_SHORT).show();
+					} catch (IOException e) {
+						Toast.makeText(getActivity(), getResources().getString(R.string.db_backup_error), Toast.LENGTH_SHORT).show();
+					}
+				}
+			});
+
+			File existingBackup = new File(Environment.getExternalStorageDirectory() + SQLiteHelper.BACKUP_PATH + SQLiteHelper.DB_NAME);
+			restoreDbButton.setEnabled(existingBackup.exists());
+			restoreDbButton.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					try {
+						copyFileWithSameName(Environment.getExternalStorageDirectory() + SQLiteHelper.BACKUP_PATH, SQLiteHelper.DB_PATH, SQLiteHelper.DB_NAME);
+						Toast.makeText(getActivity(), getResources().getString(R.string.db_restored), Toast.LENGTH_SHORT).show();
+					} catch (IOException e) {
+						Toast.makeText(getActivity(), getResources().getString(R.string.db_restore_error), Toast.LENGTH_SHORT).show();
+					}
+				}
+			});
+		}
+	}
+
+	private void copyFileWithSameName(String sourceDir, String destDir, String fileName) throws IOException {
+		boolean success = true;
+		File file = new File(destDir);
+		if (file.exists()) {
+			success = true;
+		} else {
+			success = file.mkdir();
+		}
+		if (success) {
+			File sourceFile = new File(sourceDir + fileName);
+			FileInputStream fis = new FileInputStream(sourceFile);
+			File destFile = new File(destDir + fileName);
+			OutputStream output = new FileOutputStream(destFile);
+			byte[] buffer = new byte[1024];
+			int length;
+			while ((length = fis.read(buffer)) > 0) {
+				output.write(buffer, 0, length);
+			}
+			output.flush();
+			output.close();
+			fis.close();
 		}
 	}
 
@@ -176,7 +236,6 @@ public class SettingsFragment extends CustomFragment {
 						image.delete();
 					}
 					cacheFile.delete();
-					publishProgress((Void) null);
 				}
 			}
 			return null;
@@ -192,6 +251,8 @@ public class SettingsFragment extends CustomFragment {
 
 	@Override
 	public void refresh(View view) {
+		Initializer initializer = new Initializer(view);
+		initializer.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void) null);
 	}
 
 	@Override

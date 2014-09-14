@@ -79,10 +79,34 @@
                 android:id="@+id/clearImageCacheButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dip"
                 android:layout_marginLeft="10dip"
                 android:layout_marginRight="10dip"
                 android:layout_marginTop="15dip"
                 android:text="@string/settings_clear_img_cache" />
+
+            <LinearLayout
+                android:id="@+id/dbLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="15dp" >
+
+                <Button
+                    android:id="@+id/backupDbButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.1"
+                    android:text="@string/backup_db" />
+
+                <Button
+                    android:id="@+id/restoreDbButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.1"
+                    android:text="@string/restore_db" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

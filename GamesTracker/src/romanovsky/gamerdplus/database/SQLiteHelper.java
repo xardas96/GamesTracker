@@ -1,5 +1,6 @@
 package romanovsky.gamerdplus.database;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -28,7 +29,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 	
 	public static final String TABLE_GENRES = "genres";
 
-	private static final String DB_NAME = "games.db";
+	public static final String DB_NAME = "games.db";
+	@SuppressLint("SdCardPath")
+	public static final String DB_PATH = "/data/data/romanovsky.gamerdplus/databases/";
+	public static final String BACKUP_PATH = "/GameRD+_Backup/";
+	
 	private static final int DB_VERSION = 6;
 	
 	private static final String DB_CREATE = "CREATE TABLE "
