@@ -51,6 +51,9 @@ public class MainActivity extends ActionBarActivity {
 	private int selectedOption = -1;
 	private List<Platform> filteredPlatforms;
 	private List<Genre> filteredGenres;
+	
+	private static final String PUBLIC_KEY = "ca8b79e01baa4e10a46ca36c648182bfe9e60c3b";
+	private static final String MY_KEY = "cd726ab046e72f7aee8fc91c7fc1ea77d638be8a";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +62,8 @@ public class MainActivity extends ActionBarActivity {
 
 		adView = (AdView) findViewById(R.id.adView);
 		checkConnection();
-		GiantBombApi.setApiKey("ca8b79e01baa4e10a46ca36c648182bfe9e60c3b");
+//		GiantBombApi.setApiKey(PUBLIC_KEY);
+		GiantBombApi.setApiKey(MY_KEY);
 
 		filteredPlatforms = new ArrayList<Platform>();
 		filteredGenres = new ArrayList<Genre>();

@@ -378,7 +378,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				if (occupiedSpace > wholeSpace && !extraInfo && i != game.getPlatforms().size() - 1) {
 					TextView tv = (TextView) ll.findViewById(R.id.platformNameTextView);
 					int remainingPlatforms = game.getPlatforms().size() - i;
-					tv.setText("+ " + remainingPlatforms);
+					tv.setText("& " + remainingPlatforms);
 					viewGroup.addView(ll);
 					break;
 				} else {
@@ -429,8 +429,8 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 				int nextNextGenreWidth = (int) tvPaint.measureText(nextGenre);
 				int occupiedSpace = viewGroup.getMeasuredWidth() + nextGenreWidth + nextNextGenreWidth;
 				if (occupiedSpace > wholeSpace && !extraInfo) {
-					int remainingPlatforms = game.getGenres().size() - i;
-					tv.setText("+ " + remainingPlatforms);
+					int remainingGenres = game.getGenres().size() - i;
+					tv.setText("& " + remainingGenres);
 					viewGroup.addView(ll);
 					break;
 				} else {
