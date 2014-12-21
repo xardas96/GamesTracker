@@ -202,7 +202,7 @@ public class GamesListExpandableAdapter extends BaseExpandableListAdapter implem
 									}, SMALL_DELAY);
 								}
 							}, LONG_DELAY);
-						} else if (position == 2) {
+						} else if (canNotify && position == 2 || !canNotify && position == 1) {
 							gameDAO.deleteGame(game);
 							viewPager.postDelayed(new Runnable() {
 								public void run() {
